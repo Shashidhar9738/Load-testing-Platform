@@ -37,6 +37,10 @@
         "git commit": true,
         "git push": true,
         "git reset": true,
-        "git checkout": true
+        "git checkout": true,
+        "/^python -c \"\nfrom werkzeug\\.security import generate_password_hash\nimport sqlite3, secrets\n\n# Generate a new secure password\nnew_password = secrets\\.token_urlsafe\\(12\\)\nprint\\(f'New password: \\{new_password\\}'\\)\n\n# Hash it\nhashed = generate_password_hash\\(new_password\\)\n\n# Update database\ndb = sqlite3\\.connect\\('lt_platform\\.db'\\)\ndb\\.execute\\('UPDATE users SET password=\\? WHERE username=\\?', \\(hashed, 'gauravjain'\\)\\)\ndb\\.commit\\(\\)\ndb\\.close\\(\\)\n\nprint\\('Password updated for gauravjain'\\)\n\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
     }
 }
