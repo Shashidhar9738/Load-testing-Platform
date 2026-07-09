@@ -1,0 +1,80 @@
+2026-07-01 16:28:11,824 INFO o.a.j.u.JMeterUtils: Setting Locale to en_EN
+2026-07-01 16:28:11,894 INFO o.a.j.JMeter: Loading user properties from: C:\Users\shashidhar.yadala\Videos\Load Testing Platform\apache-jmeter-5.6.3\bin\user.properties
+2026-07-01 16:28:11,899 INFO o.a.j.JMeter: Loading system properties from: C:\Users\shashidhar.yadala\Videos\Load Testing Platform\apache-jmeter-5.6.3\bin\system.properties
+2026-07-01 16:28:11,902 INFO o.a.j.JMeter: Setting JMeter property: test.duration=3600
+2026-07-01 16:28:11,902 INFO o.a.j.JMeter: Setting JMeter property: jmeter.save.saveservice.url=true
+2026-07-01 16:28:11,902 INFO o.a.j.JMeter: Setting JMeter property: jmeter.save.saveservice.latency=true
+2026-07-01 16:28:11,903 INFO o.a.j.JMeter: Setting JMeter property: jmeter.save.saveservice.connect_time=true
+2026-07-01 16:28:11,903 INFO o.a.j.JMeter: Setting JMeter property: jmeter.save.saveservice.response_data.on_error=true
+2026-07-01 16:28:11,903 INFO o.a.j.JMeter: Setting JMeter property: jmeter.save.saveservice.assertion_results_failure_message=true
+2026-07-01 16:28:11,904 INFO o.a.j.JMeter: Setting JMeter property: jmeter.save.saveservice.bytes=true
+2026-07-01 16:28:11,904 INFO o.a.j.JMeter: Setting JMeter property: jmeter.save.saveservice.sent_bytes=true
+2026-07-01 16:28:11,904 INFO o.a.j.JMeter: Setting JMeter property: p2p.threads=6
+2026-07-01 16:28:11,904 INFO o.a.j.JMeter: Setting JMeter property: p2p.rampup=30
+2026-07-01 16:28:11,934 INFO o.a.j.JMeter: Copyright (c) 1998-2024 The Apache Software Foundation
+2026-07-01 16:28:11,935 INFO o.a.j.JMeter: Version 5.6.3
+2026-07-01 16:28:11,935 INFO o.a.j.JMeter: java.version=11.0.17
+2026-07-01 16:28:11,936 INFO o.a.j.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM
+2026-07-01 16:28:11,936 INFO o.a.j.JMeter: os.name=Windows 11
+2026-07-01 16:28:11,936 INFO o.a.j.JMeter: os.arch=amd64
+2026-07-01 16:28:11,936 INFO o.a.j.JMeter: os.version=10.0
+2026-07-01 16:28:11,937 INFO o.a.j.JMeter: file.encoding=Cp1252
+2026-07-01 16:28:11,937 INFO o.a.j.JMeter: java.awt.headless=true
+2026-07-01 16:28:11,937 INFO o.a.j.JMeter: Max memory     =1073741824
+2026-07-01 16:28:11,937 INFO o.a.j.JMeter: Available Processors =12
+2026-07-01 16:28:12,005 INFO o.a.j.JMeter: Default Locale=English (EN)
+2026-07-01 16:28:12,006 INFO o.a.j.JMeter: JMeter  Locale=English (EN)
+2026-07-01 16:28:12,006 INFO o.a.j.JMeter: JMeterHome=C:\Users\shashidhar.yadala\Videos\Load Testing Platform\apache-jmeter-5.6.3
+2026-07-01 16:28:12,007 INFO o.a.j.JMeter: user.dir  =C:\Users\shashidhar.yadala\Videos\Load Testing Platform
+2026-07-01 16:28:12,009 INFO o.a.j.JMeter: PWD       =C:\Users\shashidhar.yadala\Videos\Load Testing Platform
+2026-07-01 16:28:17,278 INFO o.a.j.JMeter: IP: 192.168.29.67 Name: COMV-10686 FullName: COMV-10686
+2026-07-01 16:28:17,363 INFO o.a.j.s.FileServer: Default base='C:\Users\shashidhar.yadala\Videos\Load Testing Platform'
+2026-07-01 16:28:17,370 INFO o.a.j.s.FileServer: Set new base='C:\Users\SHASHI~1.YAD\AppData\Local\Temp\lt_jmeter_zal_1rnd'
+2026-07-01 16:28:18,016 INFO o.a.j.s.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2
+2026-07-01 16:28:18,106 INFO o.a.j.s.SaveService: Using SaveService properties version 5.0
+2026-07-01 16:28:18,121 INFO o.a.j.s.SaveService: Using SaveService properties file encoding UTF-8
+2026-07-01 16:28:18,134 INFO o.a.j.s.SaveService: Loading file: C:\Users\SHASHI~1.YAD\AppData\Local\Temp\lt_jmeter_zal_1rnd\BTC_USSD_LoadTesting_30TPS_1hr.jmx
+2026-07-01 16:28:18,429 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/html is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-07-01 16:28:18,430 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xhtml+xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-07-01 16:28:18,430 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-07-01 16:28:18,431 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2026-07-01 16:28:18,431 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/vnd.wap.wml is org.apache.jmeter.protocol.http.parser.RegexpHTMLParser
+2026-07-01 16:28:18,432 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/css is org.apache.jmeter.protocol.http.parser.CssParser
+2026-07-01 16:28:20,273 INFO o.a.j.JMeter: Creating summariser <summary>
+2026-07-01 16:28:20,346 INFO o.a.j.e.StandardJMeterEngine: Running the test!
+2026-07-01 16:28:20,350 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-07-01 16:28:20,350 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2026-07-01 16:28:20,406 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
+2026-07-01 16:28:20,407 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'
+2026-07-01 16:28:21,925 INFO o.a.j.JMeter: Running test (1782903501925)
+2026-07-01 16:28:21,979 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 1 : TG - Balance Enquiry (Balance Enquiry)
+2026-07-01 16:28:21,980 INFO o.a.j.e.StandardJMeterEngine: Starting 4 threads for group TG - Balance Enquiry (Balance Enquiry).
+2026-07-01 16:28:21,981 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2026-07-01 16:28:21,981 INFO o.a.j.t.ThreadGroup: Starting thread group... number=1 threads=4 ramp-up=30 delayedStart=false
+2026-07-01 16:28:22,044 INFO o.a.j.t.ThreadGroup: Started thread group number 1
+2026-07-01 16:28:22,044 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 2 : TG - SAving circle deposit (SAving circle deposit)
+2026-07-01 16:28:22,045 INFO o.a.j.e.StandardJMeterEngine: Starting 2 threads for group TG - SAving circle deposit (SAving circle deposit).
+2026-07-01 16:28:22,046 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2026-07-01 16:28:22,047 INFO o.a.j.t.ThreadGroup: Starting thread group... number=2 threads=2 ramp-up=30 delayedStart=false
+2026-07-01 16:28:22,081 INFO o.a.j.t.ThreadGroup: Started thread group number 2
+2026-07-01 16:28:22,082 INFO o.a.j.e.StandardJMeterEngine: All thread groups have been started
+2026-07-01 16:28:22,130 INFO o.a.j.s.SampleResult: Note: Sample TimeStamps are START times
+2026-07-01 16:28:22,132 INFO o.a.j.s.SampleResult: sampleresult.default.encoding is set to UTF-8
+2026-07-01 16:28:22,132 INFO o.a.j.s.SampleResult: sampleresult.useNanoTime=true
+2026-07-01 16:28:22,132 INFO o.a.j.s.SampleResult: sampleresult.nanoThreadSleep=5000
+2026-07-01 16:28:22,135 INFO o.a.j.t.JMeterThread: Thread started: TG - Balance Enquiry (Balance Enquiry) 1-1
+2026-07-01 16:28:22,136 INFO o.a.j.t.JMeterThread: Thread started: TG - SAving circle deposit (SAving circle deposit) 2-1
+2026-07-01 16:28:22,143 INFO o.a.j.s.FileServer: Stored: C:\Users\shashidhar.yadala\Videos\Load Testing Platform\clients\BTC\testdata\Balance Enquiry.csv Alias: C:\Users\shashidhar.yadala\Videos\Load Testing Platform\clients\BTC\testdata\Balance Enquiry.csv@2034411604
+2026-07-01 16:28:22,222 INFO o.a.j.s.FileServer: Stored: C:\Users\shashidhar.yadala\Videos\Load Testing Platform\clients\BTC\testdata\SAving circle deposit.csv Alias: C:\Users\shashidhar.yadala\Videos\Load Testing Platform\clients\BTC\testdata\SAving circle deposit.csv@1848900782
+2026-07-01 16:28:25,734 INFO o.a.j.p.h.s.HTTPHCAbstractImpl: Local host = COMV-10686
+2026-07-01 16:28:25,770 INFO o.a.j.p.h.s.HTTPHC4Impl: HTTP request retry count = 0
+2026-07-01 16:28:26,620 INFO o.a.j.p.h.s.h.LazyLayeredConnectionSocketFactory: Setting up HTTPS TrustAll Socket Factory
+2026-07-01 16:28:26,649 INFO o.a.j.u.JsseSSLManager: Using default SSL protocol: TLS
+2026-07-01 16:28:26,650 INFO o.a.j.u.JsseSSLManager: SSL session context: per-thread
+2026-07-01 16:28:27,370 INFO o.a.j.u.SSLManager: JmeterKeyStore Location:  type JKS
+2026-07-01 16:28:27,395 INFO o.a.j.u.SSLManager: KeyStore created OK
+2026-07-01 16:28:27,396 WARN o.a.j.u.SSLManager: Keystore file not found, loading empty keystore
+2026-07-01 16:28:29,618 INFO o.a.j.t.JMeterThread: Thread started: TG - Balance Enquiry (Balance Enquiry) 1-2
+2026-07-01 16:28:37,113 INFO o.a.j.t.JMeterThread: Thread started: TG - Balance Enquiry (Balance Enquiry) 1-3
+2026-07-01 16:28:37,129 INFO o.a.j.t.JMeterThread: Thread started: TG - SAving circle deposit (SAving circle deposit) 2-2
+2026-07-01 16:28:44,596 INFO o.a.j.t.JMeterThread: Thread started: TG - Balance Enquiry (Balance Enquiry) 1-4

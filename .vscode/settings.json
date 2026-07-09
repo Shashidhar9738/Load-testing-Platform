@@ -1,0 +1,42 @@
+{
+    "claudeCode.useTerminal": true,
+    "files.associations": {
+        "*.jmx": "xml"
+    },
+    "chat.tools.terminal.autoApprove": {
+        "/^Set-Location \"c:\\\\Users\\\\shashidhar\\.yadala\\\\Videos\\\\Load Testing Platform\"; \\.\\\\START\\.bat$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location \"c:\\\\Users\\\\shashidhar\\.yadala\\\\Videos\\\\Load Testing Platform\"; where\\.exe python; \\$LASTEXITCODE; where\\.exe py; \\$LASTEXITCODE$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location \"c:\\\\Users\\\\shashidhar\\.yadala\\\\Videos\\\\Load Testing Platform\"; cmd /c \"echo on & call START\\.bat\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location \"c:\\\\Users\\\\shashidhar\\.yadala\\\\Videos\\\\Load Testing Platform\"; python -m py_compile \\.\\\\app\\.py \\.\\\\scripts\\\\comprehensive_e2e_test\\.py$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd \"c:\\\\Users\\\\shashidhar\\.yadala\\\\Videos\\\\Load Testing Platform\" ; python scripts/sample_client_setup\\.py$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd \"c:\\\\Users\\\\shashidhar\\.yadala\\\\Videos\\\\Load Testing Platform\" ; python app\\.py$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd \"c:\\\\Users\\\\shashidhar\\.yadala\\\\Videos\\\\Load Testing Platform\" ; python -m py_compile app\\.py 2>&1 \\| head -20$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "Get-Process": true,
+        "git add": true,
+        "git commit": true,
+        "git push": true,
+        "git reset": true,
+        "git checkout": true
+    }
+}
