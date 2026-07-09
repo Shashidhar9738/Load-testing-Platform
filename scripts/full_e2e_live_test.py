@@ -141,7 +141,7 @@ def run():
         rr.check('GET /login', r['ok'] and r['status'] == 200, str(r['status']))
 
         # Admin login journey
-        r = admin.post_form('/login', {'username': 'gauravjain', 'password': '0987654321'})
+        r = admin.post_form('/login', {'username': 'admin', 'password': 'admin'})
         rr.check('POST /login (admin)', r['status'] in (200, 302), str(r['status']))
 
         r = admin.get('/admin')

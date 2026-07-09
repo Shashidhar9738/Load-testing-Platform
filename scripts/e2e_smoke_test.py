@@ -52,7 +52,7 @@ def login(client, username, password):
 
 
 def run_admin_checks(client, result):
-    ok, _ = login(client, 'gauravjain', '0987654321')
+    ok, _ = login(client, 'admin', 'admin')
     result.check('Admin login with default credentials', ok)
 
     r = client.get('/admin')

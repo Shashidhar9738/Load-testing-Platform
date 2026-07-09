@@ -2,9 +2,9 @@
 
 Platform: Centralized Load Testing Platform (Multi-client)
 Version: v4.0 (implementation-aligned)
-Last Updated: 2026-06-29
+Last Updated: 2026-07-09
 Default URL: http://localhost:5000
-Default Admin: gauravjain / 0987654321
+Default Admin: admin / admin
 Default Viewer: viewer / viewer@123
 
 ## Initial Setup

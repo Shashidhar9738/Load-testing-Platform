@@ -25,7 +25,7 @@ Default credentials:
 
 | Username   | Password    | Role   |
 |------------|-------------|--------|
-| gauravjain | 0987654321  | Admin  |
+| admin      | admin       | Admin  |
 | viewer     | viewer@123  | Viewer |
 
 > Change these immediately after first login via **Users** tab.
@@ -34,7 +34,7 @@ Default credentials:
 
 If a user (including `viewer`) cannot log in because the password was changed from the default:
 
-1. Log in as **admin** (`gauravjain` or any admin account).
+1. Log in as **admin** (`admin` or any admin account).
 2. Go to the **Users** tab.
 3. Click the edit icon next to the user.
 4. Enter and confirm a new password, then save.
@@ -50,7 +50,7 @@ import sqlite3, getpass
 pw = getpass.getpass('New admin password: ')
 h  = generate_password_hash(pw)
 db = sqlite3.connect('lt_platform.db')
-db.execute(\"UPDATE users SET password=? WHERE username='gauravjain'\", (h,))
+db.execute("UPDATE users SET password=? WHERE username='admin'", (h,))
 db.commit(); db.close()
 print('Password updated.')
 "

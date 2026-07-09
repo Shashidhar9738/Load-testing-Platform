@@ -22,8 +22,8 @@ import urllib.request
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_URL = 'http://127.0.0.1:5000'
-ADMIN_USER = 'gauravjain'
-ADMIN_PASS = '0987654321'
+ADMIN_USER = 'admin'
+ADMIN_PASS = 'admin'
 SAMPLE_CODE = 'SAMPLE'
 SAMPLE_JTL  = 'SAMPLE_Mock_Health_Check_Result.jtl'
 SAMPLE_JMX  = 'SAMPLE_Mock_Health_Check_1TPS_1min.jmx'

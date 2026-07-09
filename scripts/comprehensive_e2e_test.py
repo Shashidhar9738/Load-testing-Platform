@@ -34,8 +34,8 @@ if os.path.exists(_setup_path):
 
 from app import app, init_db, get_db
 
-ADMIN_USER = 'gauravjain'
-ADMIN_PASS = '0987654321'
+ADMIN_USER = 'admin'
+ADMIN_PASS = 'admin'
 SAMPLE_JTL  = 'SAMPLE_Mock_Health_Check_Result.jtl'
 SAMPLE_JMX  = 'SAMPLE_Mock_Health_Check_1TPS_1min.jmx'
 SAMPLE_CSV  = 'sample_health_users.csv'
