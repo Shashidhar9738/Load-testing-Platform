@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BTC Load Testing Portal — Sign In</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #080c14;
+  --surface: #0d1421;
+  --surface2: #131d2e;
+  --border: #1e2d45;
+  --accent: #00d4ff;
+  --accent2: #00ff9d;
+  --text: #e2eaf5;
+  --muted: #64748b;
+  --danger: #ef4444;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 30%, rgba(0,212,255,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 70%, rgba(124,58,237,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 90%, rgba(0,255,157,0.04) 0%, transparent 55%);
+  pointer-events: none;
+}
+/* Animated grid */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(30,45,69,0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,45,69,0.4) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.wrap {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 420px;
+  padding: 20px;
+}
+
+/* Top branding */
+.brand {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.brand-icon {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
+  margin: 0 auto 16px;
+  box-shadow: 0 0 30px rgba(0,212,255,0.3);
+  animation: glow 3s infinite alternate;
+}
+@keyframes glow {
+  from { box-shadow: 0 0 20px rgba(0,212,255,0.2); }
+  to   { box-shadow: 0 0 40px rgba(0,212,255,0.5); }
+}
+.brand h1 {
+  font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+  background: linear-gradient(90deg, #ffffff 0%, #00d4ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.brand p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+/* Card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+}
+.card-title {
+  font-size: 18px; font-weight: 700;
+  margin-bottom: 6px;
+}
+.card-sub {
+  font-size: 13px; color: var(--muted);
+  margin-bottom: 28px;
+}
+
+/* Alert */
+.alert {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #fca5a5;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Fields */
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--muted);
+  margin-bottom: 7px;
+}
+.field-wrap {
+  position: relative;
+}
+.field-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  font-size: 16px; pointer-events: none;
+}
+.field input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px 12px 40px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+}
+.field input::placeholder { color: var(--muted); }
+
+/* Submit */
+.btn-submit {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, #00d4ff 0%, #0088ff 100%);
+  border: none; border-radius: 10px;
+  color: #000; font-size: 14px; font-weight: 800;
+  letter-spacing: 0.3px; cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-top: 8px;
+}
+.btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-submit:active { transform: translateY(0); }
+
+/* Forgot password link */
+.forgot-link {
+  display: block; text-align: right;
+  font-size: 12px; color: var(--accent);
+  margin-top: 10px; cursor: pointer;
+  opacity: 0.8; text-decoration: none;
+}
+.forgot-link:hover { opacity: 1; text-decoration: underline; }
+
+/* Footer hint */
+.hint {
+  text-align: center; margin-top: 24px;
+  font-size: 11px; color: var(--muted);
+}
+.hint strong { color: rgba(0,212,255,0.6); }
+
+/* Forgot password modal */
+.fp-overlay {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+.fp-overlay.open { display: flex; }
+.fp-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 32px; max-width: 400px; width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.fp-box h3 { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+.fp-box p  { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+.admin-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 12px;
+}
+.admin-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg,#00d4ff,#7c3aed);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.admin-info .admin-name  { font-size: 13px; font-weight: 700; }
+.admin-info .admin-user  { font-size: 11px; color: var(--muted); }
+.fp-close {
+  width: 100%; margin-top: 20px; padding: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-size: 13px;
+  font-weight: 700; cursor: pointer; transition: background .15s;
+}
+.fp-close:hover { background: var(--border); }
+
+/* Register overlay */
+.reg-overlay {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+.reg-overlay.open { display: flex; }
+.reg-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 32px; max-width: 420px; width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.reg-box h3 { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+.reg-box p  { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
+.reg-alert-ok  { background:rgba(0,255,157,.1);border:1px solid rgba(0,255,157,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:#86efac;margin-bottom:14px;display:none; }
+.reg-alert-err { background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:#fca5a5;margin-bottom:14px;display:none; }
+.reg-field { margin-bottom:14px; }
+.reg-field label { display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px; }
+.reg-field input { width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s; }
+.reg-field input:focus { border-color:var(--accent); }
+.reg-btn { width:100%;padding:12px;background:linear-gradient(135deg,#00d4ff,#0088ff);border:none;border-radius:10px;color:#000;font-size:14px;font-weight:800;cursor:pointer;margin-top:4px;transition:opacity .2s; }
+.reg-btn:hover { opacity:.9; }
+.reg-btn:disabled { opacity:.5;cursor:not-allowed; }
+.reg-close-link { display:block;text-align:center;margin-top:14px;font-size:12px;color:var(--muted);cursor:pointer; }
+.reg-close-link:hover { color:var(--text); }
+
+/* Role pills */
+.roles {
+  display: flex; gap: 8px; margin-top: 16px;
+}
+.role-pill {
+  flex: 1; text-align: center;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px;
+  font-size: 11px;
+}
+.role-pill .r-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+.role-pill .r-label { color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.role-pill .r-name  { color: var(--accent); font-size: 12px; font-weight: 700; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-icon">⚡</div>
+    <h1>Load Testing Platform</h1>
+    <p>Centralized Performance Testing Repository</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Sign In</div>
+    <div class="card-sub">Enter your credentials to access the portal</div>
+
+    {% if error %}
+    <div class="alert">⚠ {{ error }}</div>
+    {% endif %}
+
+    <form method="post" autocomplete="off">
+      <div class="field">
+        <label>Username</label>
+        <div class="field-wrap">
+          <span class="field-icon">👤</span>
+          <input type="text" name="username" placeholder="Enter username" autofocus required>
+        </div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="field-wrap">
+          <span class="field-icon">🔒</span>
+          <input type="password" name="password" placeholder="Enter password" required>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit">Sign In  →</button>
+      <a class="forgot-link" onclick="openForgot()">Forgot password?</a>
+    </form>
+    <div style="border-top:1px solid var(--border);margin-top:24px;padding-top:20px;text-align:center;">
+      <span style="font-size:13px;color:var(--muted);">Don't have an account?</span>
+      <a onclick="openRegister()" style="font-size:13px;color:var(--accent);cursor:pointer;margin-left:6px;font-weight:700;">Request Access →</a>
+    </div>
+  </div>
+
+  <div class="hint">
+    <strong>Platform v4.0</strong> &nbsp;|&nbsp; JMeter 5.5 &nbsp;|&nbsp;
+    {% if clients_count > 1 %}<strong style="color:rgba(0,212,255,.7)">{{ clients_count }} clients</strong>{% else %}<strong style="color:rgba(0,212,255,.7)">1 client</strong>{% endif %}
+  </div>
+</div>
+
+<!-- Request Access Modal -->
+<div class="reg-overlay" id="reg-overlay">
+  <div class="reg-box">
+    <h3>🚀 Request Access</h3>
+    <p>Submit your details and an admin will review and activate your account.</p>
+    <div class="reg-alert-ok" id="reg-ok"></div>
+    <div class="reg-alert-err" id="reg-err"></div>
+    <div id="reg-form">
+      <div class="reg-field"><label>Full Name</label><input type="text" id="reg-name" placeholder="Your full name" autocomplete="off"></div>
+      <div class="reg-field"><label>Username</label><input type="text" id="reg-user" placeholder="Choose a username" autocomplete="off"></div>
+      <div class="reg-field"><label>Email (optional)</label><input type="email" id="reg-email" placeholder="your@email.com" autocomplete="off"></div>
+      <div class="reg-field"><label>Password</label><input type="password" id="reg-pass" placeholder="Min 6 characters" autocomplete="new-password"></div>
+      <button class="reg-btn" id="reg-submit-btn" onclick="submitRegister()">Submit Request</button>
+    </div>
+    <a class="reg-close-link" onclick="closeRegister()">Cancel</a>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="fp-overlay" id="fp-overlay">
+  <div class="fp-box">
+    <h3>🔑 Forgot Password?</h3>
+    <p>Contact one of the administrators below to reset your password. They can set a new password for your account from the <strong>Users</strong> panel.</p>
+    <div id="fp-admins"><div style="color:var(--muted);font-size:13px;">Loading…</div></div>
+    <button class="fp-close" onclick="closeForgot()">Close</button>
+  </div>
+</div>
+
+<script>
+function openRegister(){
+  document.getElementById('reg-overlay').classList.add('open');
+  document.getElementById('reg-ok').style.display='none';
+  document.getElementById('reg-err').style.display='none';
+  document.getElementById('reg-form').style.display='block';
+}
+function closeRegister(){
+  document.getElementById('reg-overlay').classList.remove('open');
+}
+async function submitRegister(){
+  const name=document.getElementById('reg-name').value.trim();
+  const user=document.getElementById('reg-user').value.trim().toLowerCase();
+  const email=document.getElementById('reg-email').value.trim();
+  const pass=document.getElementById('reg-pass').value;
+  const okEl=document.getElementById('reg-ok');
+  const errEl=document.getElementById('reg-err');
+  okEl.style.display='none'; errEl.style.display='none';
+  if(!name||!user||!pass){errEl.textContent='Name, username and password are required.';errEl.style.display='block';return;}
+  if(pass.length<6){errEl.textContent='Password must be at least 6 characters.';errEl.style.display='block';return;}
+  const btn=document.getElementById('reg-submit-btn');
+  btn.disabled=true; btn.textContent='Submitting…';
+  try{
+    const r=await fetch('/api/register-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,username:user,email,password:pass})});
+    const d=await r.json();
+    if(r.ok){
+      okEl.textContent='✅ '+d.message;
+      okEl.style.display='block';
+      document.getElementById('reg-form').style.display='none';
+    } else {
+      errEl.textContent='⚠ '+(d.error||'Submission failed. Try again.');
+      errEl.style.display='block';
+      btn.disabled=false; btn.textContent='Submit Request';
+    }
+  }catch(ex){
+    errEl.textContent='⚠ Network error. Please try again.';
+    errEl.style.display='block';
+    btn.disabled=false; btn.textContent='Submit Request';
+  }
+}
+document.getElementById('reg-overlay').addEventListener('click',function(e){if(e.target===this)closeRegister();});
+
+function openForgot(){
+  document.getElementById('fp-overlay').classList.add('open');
+  fetch('/api/admins').then(r=>r.json()).then(d=>{
+    const box = document.getElementById('fp-admins');
+    if(!d.admins||!d.admins.length){
+      box.innerHTML='<div style="color:var(--muted);font-size:13px;">No admins found. Contact your system administrator.</div>';
+      return;
+    }
+    box.innerHTML = d.admins.map(a=>`
+      <div class="admin-card">
+        <div class="admin-avatar">${(a.name||a.username).charAt(0).toUpperCase()}</div>
+        <div class="admin-info">
+          <div class="admin-name">${a.name||a.username}</div>
+          <div class="admin-user">@${a.username}</div>
+        </div>
+      </div>`).join('');
+  }).catch(()=>{
+    document.getElementById('fp-admins').innerHTML='<div style="color:var(--muted);font-size:13px;">Could not load admin list.</div>';
+  });
+}
+function closeForgot(){
+  document.getElementById('fp-overlay').classList.remove('open');
+}
+document.getElementById('fp-overlay').addEventListener('click',function(e){
+  if(e.target===this) closeForgot();
+});
+</script>
+</body>
+</html>

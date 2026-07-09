@@ -1,0 +1,312 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Load Test Report — BTC_USSD_LoadTesting_Results_P2P.jtl</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:#0d1117;--surface:#161b22;--surface2:#1c2230;--border:#30363d;
+    --accent:#58a6ff;--green:#3fb950;--warn:#d29922;--danger:#f85149;
+    --text:#e6edf3;--muted:#8b949e;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;line-height:1.6}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
+  header h1{font-size:20px;font-weight:700;letter-spacing:-.3px}
+  header h1 span{color:var(--accent)}
+  .badge{background:var(--accent);color:#000;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+  .meta{color:var(--muted);font-size:12px;margin-top:4px}
+  main{max-width:1400px;margin:0 auto;padding:28px 24px}
+  .kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:28px}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px}
+  .kpi-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+  .kpi-val{font-size:26px;font-weight:700;line-height:1}
+  .kpi-sub{font-size:11px;color:var(--muted);margin-top:5px}
+  .kpi.ok .kpi-val{color:var(--green)}.kpi.warn .kpi-val{color:var(--warn)}.kpi.info .kpi-val{color:var(--accent)}.kpi.danger .kpi-val{color:var(--danger)}
+  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:28px}
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+  .chart-card.full{grid-column:1/-1}
+  .chart-title{font-size:13px;font-weight:600;margin-bottom:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .chart-wrap{position:relative;height:220px}.chart-wrap.tall{height:280px}
+  .section-title{font-size:16px;font-weight:700;margin-bottom:14px}
+  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:28px}
+  table{width:100%;border-collapse:collapse}
+  thead th{background:var(--surface2);color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+  thead th:first-child{text-align:left}
+  tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:var(--surface2)}
+  tbody td{padding:11px 14px;text-align:right;font-variant-numeric:tabular-nums}
+  tbody td:first-child{text-align:left;font-weight:600;max-width:280px}
+  .label-short{font-size:12px;color:var(--muted);display:block;font-weight:400}
+  .pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+  .pill-ok{background:rgba(63,185,80,.15);color:var(--green)}
+  .pill-warn{background:rgba(210,153,34,.15);color:var(--warn)}
+  .pill-danger{background:rgba(248,81,73,.15);color:var(--danger)}
+  .bar-bg{background:var(--surface2);border-radius:4px;height:6px;min-width:80px}
+  .bar-fill{height:6px;border-radius:4px;background:var(--accent)}
+  .bar-fill.slow{background:var(--warn)}.bar-fill.very-slow{background:var(--danger)}
+  .errors-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:28px}
+  .error-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+  .error-card h3{font-size:13px;font-weight:700;color:var(--danger);margin-bottom:12px}
+  .error-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .error-row:last-child{border-bottom:none}
+  .error-label{color:var(--text);max-width:70%}
+  .error-code{font-weight:700;padding:2px 8px;border-radius:6px;font-size:11px}
+  .code-2xx{background:rgba(63,185,80,.2);color:var(--green)}
+  .code-3xx{background:rgba(88,166,255,.2);color:var(--accent)}
+  .code-4xx{background:rgba(210,153,34,.2);color:var(--warn)}
+  .code-5xx{background:rgba(248,81,73,.2);color:var(--danger)}
+  footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;border-top:1px solid var(--border);margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Load Test &mdash; <span>BTC_USSD_LoadTesting_Results_P2P</span></h1>
+    <div class="meta">Run: 2026-06-15 12:57:57 &nbsp;|&nbsp; Duration: 0 days 00:03:08 &nbsp;|&nbsp; Generated: 2026-06-15 18:52:29</div>
+  </div>
+  <span class="badge">COMPLETED</span>
+</header>
+
+<main>
+  <div class="kpi-row">
+    <div class="kpi info">
+      <div class="kpi-label">Total Requests</div>
+      <div class="kpi-val" id="kpi-total">335</div>
+      <div class="kpi-sub">Across 18 transactions</div>
+    </div>
+    <div class="kpi info">
+      <div class="kpi-label">Throughput</div>
+      <div class="kpi-val">1.78</div>
+      <div class="kpi-sub">Requests / second</div>
+    </div>
+    <div class="kpi info">
+      <div class="kpi-label">Test Duration</div>
+      <div class="kpi-val">0 days 00:03:08</div>
+      <div class="kpi-sub">188 seconds</div>
+    </div>
+    <div class="kpi info">
+      <div class="kpi-label">Peak Threads</div>
+      <div class="kpi-val">1</div>
+      <div class="kpi-sub">Concurrent users</div>
+    </div>
+    <div class="kpi danger">
+      <div class="kpi-label">Success Rate</div>
+      <div class="kpi-val">82.09%</div>
+      <div class="kpi-sub">275 passed</div>
+    </div>
+    <div class="kpi danger">
+      <div class="kpi-label">Total Errors</div>
+      <div class="kpi-val">60</div>
+      <div class="kpi-sub">17.9104% error rate</div>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    
+    <div class="chart-card full">
+      <div class="chart-title">🔄 Throughput Over Time (req/s — 10s buckets)</div>
+      <div class="chart-wrap tall"><canvas id="tpsChart"></canvas></div>
+    </div>
+    
+    <div class="chart-card">
+      <div class="chart-title">⏱ Avg Response Time by Transaction (ms)</div>
+      <div class="chart-wrap"><canvas id="rtBarChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📊 Response Time Percentiles (ms)</div>
+      <div class="chart-wrap"><canvas id="percChart"></canvas></div>
+    </div>
+    
+    <div class="chart-card full">
+      <div class="chart-title">📈 Response Time Over Time — All Transactions (avg ms, 10s buckets)</div>
+      <div class="chart-wrap tall"><canvas id="rtLineChart"></canvas></div>
+    </div>
+    
+  </div>
+
+  <div class="section-title">Transaction Summary</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Transaction</th>
+          <th>Samples</th>
+          <th>Avg (ms)</th>
+          <th>Median (ms)</th>
+          <th>P90 (ms)</th>
+          <th>P95 (ms)</th>
+          <th>P99 (ms)</th>
+          <th>Min (ms)</th>
+          <th>Max (ms)</th>
+          <th>TPS</th>
+          <th>Errors</th>
+          <th>Error %</th>
+          <th>Response Bar</th>
+        </tr>
+      </thead>
+      <tbody id="statsBody"></tbody>
+    </table>
+  </div>
+
+  
+  <div class="section-title">Response Code Distribution</div>
+  <div class="errors-grid">
+    <div class="error-card">
+      <h3>⚠ Response Codes</h3>
+      
+      <div class="error-row">
+        <span class="error-label">HTTP 200</span>
+        <span>
+          <span class="error-code code-2xx">200</span>
+          &nbsp;<strong>332</strong>
+        </span>
+      </div>
+      
+      <div class="error-row">
+        <span class="error-label">HTTP Non HTTP response code: java.net.SocketException</span>
+        <span>
+          <span class="error-code code-5xx">Non HTTP response code: java.net.SocketException</span>
+          &nbsp;<strong>2</strong>
+        </span>
+      </div>
+      
+    </div>
+    <div class="error-card">
+      <h3>📊 Percentile Summary (Overall)</h3>
+      <div class="error-row"><span class="error-label">50th Percentile (Median)</span><span><strong>704.0 ms</strong></span></div>
+      <div class="error-row"><span class="error-label">90th Percentile</span><span><strong>3544.0 ms</strong></span></div>
+      <div class="error-row"><span class="error-label">95th Percentile</span><span><strong>4598.5 ms</strong></span></div>
+      <div class="error-row"><span class="error-label">99th Percentile</span><span><strong>4993.36 ms</strong></span></div>
+      <div class="error-row"><span class="error-label">Std Deviation</span><span><strong>1266.95 ms</strong></span></div>
+    </div>
+  </div>
+  
+
+</main>
+
+<footer>Generated from BTC_USSD_LoadTesting_Results_P2P.jtl &nbsp;|&nbsp; JMeter Load Test Report &nbsp;|&nbsp; 2026-06-15 18:52:29</footer>
+
+<script>
+const S = {"total": 335, "passed": 275, "failed": 60, "error_rate": 17.9104, "throughput": 1.78, "avg_rt": 1121.46, "min_rt": 0.0, "max_rt": 5899.0, "p50": 704.0, "p90": 3544.0, "p95": 4598.5, "p99": 4993.36, "std_dev": 1266.95, "avg_bytes": 1757.52, "start_time": "2026-06-15 12:57:57", "end_time": "2026-06-15 13:01:06", "test_duration": "0 days 00:03:08", "label_stats": [{"label": "P2P 001 - Dial *1239# - Open USSD session", "samples": 48, "failures": 4, "error_rate": 8.33, "avg": 737.06, "median": 684.0, "min": 602.0, "max": 1721.0, "p90": 840.3, "p95": 1089.55, "p99": 1497.28, "std_dev": 190.57, "tps": 0.25}, {"label": "P2P 002 - Step 2 - Input: 1359", "samples": 44, "failures": 0, "error_rate": 0.0, "avg": 1030.68, "median": 1009.5, "min": 921.0, "max": 1280.0, "p90": 1110.7, "p95": 1131.85, "p99": 1232.7, "std_dev": 72.46, "tps": 0.23}, {"label": "P2P 003 - Step 3 - Input: 3", "samples": 44, "failures": 0, "error_rate": 0.0, "avg": 355.43, "median": 325.0, "min": 320.0, "max": 1390.0, "p90": 355.5, "p95": 362.4, "p99": 959.14, "std_dev": 160.25, "tps": 0.23}, {"label": "P2P 004 - Step 4 - Input: 1", "samples": 44, "failures": 0, "error_rate": 0.0, "avg": 380.93, "median": 326.0, "min": 320.0, "max": 1315.0, "p90": 399.0, "p95": 763.5, "p99": 1106.45, "std_dev": 178.7, "tps": 0.23}, {"label": "P2P 005 - Step 5 - Input: 73000231", "samples": 4, "failures": 0, "error_rate": 0.0, "avg": 324.25, "median": 324.0, "min": 323.0, "max": 326.0, "p90": 325.4, "p95": 325.7, "p99": 325.94, "std_dev": 1.26, "tps": 0.02}, {"label": "P2P 005 - Step 5 - Input: 73000246", "samples": 4, "failures": 0, "error_rate": 0.0, "avg": 353.5, "median": 352.0, "min": 326.0, "max": 384.0, "p90": 375.3, "p95": 379.65, "p99": 383.13, "std_dev": 23.87, "tps": 0.02}, {"label": "P2P 005 - Step 5 - Input: 73001038", "samples": 4, "failures": 0, "error_rate": 0.0, "avg": 348.0, "median": 347.0, "min": 323.0, "max": 375.0, "p90": 373.5, "p95": 374.25, "p99": 374.85, "std_dev": 28.37, "tps": 0.02}, {"label": "P2P 005 - Step 5 - Input: 73002056", "samples": 4, "failures": 0, "error_rate": 0.0, "avg": 340.25, "median": 334.0, "min": 323.0, "max": 370.0, "p90": 362.5, "p95": 366.25, "p99": 369.25, "std_dev": 22.38, "tps": 0.02}, {"label": "P2P 005 - Step 5 - Input: 73007022", "samples": 4, "failures": 0, "error_rate": 0.0, "avg": 343.0, "median": 334.0, "min": 322.0, "max": 382.0, "p90": 368.5, "p95": 375.25, "p99": 380.65, "std_dev": 26.72, "tps": 0.02}, {"label": "P2P 005 - Step 5 - Input: 73013312", "samples": 4, "failures": 0, "error_rate": 0.0, "avg": 323.25, "median": 323.5, "min": 321.0, "max": 325.0, "p90": 325.0, "p95": 325.0, "p99": 325.0, "std_dev": 2.06, "tps": 0.02}, {"label": "P2P 005 - Step 5 - Input: 75887915", "samples": 4, "failures": 0, "error_rate": 0.0, "avg": 349.25, "median": 332.5, "min": 321.0, "max": 411.0, "p90": 390.6, "p95": 400.8, "p99": 408.96, "std_dev": 42.4, "tps": 0.02}, {"label": "P2P 005 - Step 5 - Input: 75887954", "samples": 4, "failures": 0, "error_rate": 0.0, "avg": 336.75, "median": 335.0, "min": 322.0, "max": 355.0, "p90": 352.3, "p95": 353.65, "p99": 354.73, "std_dev": 16.32, "tps": 0.02}, {"label": "P2P 005 - Step 5 - Input: 76866730", "samples": 4, "failures": 0, "error_rate": 0.0, "avg": 470.25, "median": 340.5, "min": 322.0, "max": 878.0, "p90": 716.9, "p95": 797.45, "p99": 861.89, "std_dev": 271.97, "tps": 0.02}, {"label": "P2P 005 - Step 5 - Input: 76866732", "samples": 4, "failures": 0, "error_rate": 0.0, "avg": 338.5, "median": 339.0, "min": 324.0, "max": 352.0, "p90": 352.0, "p95": 352.0, "p99": 352.0, "std_dev": 15.61, "tps": 0.02}, {"label": "P2P 005 - Step 5 - Input: 76866735", "samples": 4, "failures": 0, "error_rate": 0.0, "avg": 342.75, "median": 332.5, "min": 326.0, "max": 380.0, "p90": 367.7, "p95": 373.85, "p99": 378.77, "std_dev": 25.58, "tps": 0.02}, {"label": "P2P 006 - Step 6 - Input: 10", "samples": 44, "failures": 26, "error_rate": 59.09, "avg": 854.2, "median": 851.5, "min": 409.0, "max": 1799.0, "p90": 960.1, "p95": 1151.35, "p99": 1587.44, "std_dev": 215.49, "tps": 0.23}, {"label": "P2P 007 - Step 7 - Input: 1 confirm The transactions", "samples": 18, "failures": 0, "error_rate": 0.0, "avg": 1202.78, "median": 1193.5, "min": 1073.0, "max": 1483.0, "p90": 1320.3, "p95": 1357.2, "p99": 1457.84, "std_dev": 98.8, "tps": 0.1}, {"label": "TC - P2P", "samples": 49, "failures": 30, "error_rate": 61.22, "avg": 3833.57, "median": 3984.0, "min": 0.0, "max": 5899.0, "p90": 4963.0, "p95": 5018.6, "p99": 5876.44, "std_dev": 1307.83, "tps": 0.26}], "rc_dist": {"200": 332, "Non HTTP response code: java.net.SocketException": 2}, "tps_over_time": [{"time_offset": 0, "tps": 1.5}, {"time_offset": 10, "tps": 1.8}, {"time_offset": 20, "tps": 2.0}, {"time_offset": 30, "tps": 1.9}, {"time_offset": 40, "tps": 1.9}, {"time_offset": 50, "tps": 1.7}, {"time_offset": 60, "tps": 1.6}, {"time_offset": 70, "tps": 1.9}, {"time_offset": 80, "tps": 1.9}, {"time_offset": 90, "tps": 1.6}, {"time_offset": 100, "tps": 1.9}, {"time_offset": 110, "tps": 1.8}, {"time_offset": 120, "tps": 1.5}, {"time_offset": 130, "tps": 1.9}, {"time_offset": 140, "tps": 1.7}, {"time_offset": 150, "tps": 1.7}, {"time_offset": 160, "tps": 1.8}, {"time_offset": 170, "tps": 1.9}, {"time_offset": 180, "tps": 1.5}], "rt_data": {"P2P 001 - Dial *1239# - Open USSD session": [{"time_offset": 0, "avg_ms": 1229.5}, {"time_offset": 10, "avg_ms": 830.7}, {"time_offset": 20, "avg_ms": 654.7}, {"time_offset": 30, "avg_ms": 619.0}, {"time_offset": 40, "avg_ms": 698.3}, {"time_offset": 50, "avg_ms": 689.0}, {"time_offset": 60, "avg_ms": 668.0}, {"time_offset": 70, "avg_ms": 763.5}, {"time_offset": 80, "avg_ms": 678.8}, {"time_offset": 90, "avg_ms": 741.5}, {"time_offset": 100, "avg_ms": 672.5}, {"time_offset": 110, "avg_ms": 649.3}, {"time_offset": 120, "avg_ms": 778.5}, {"time_offset": 130, "avg_ms": 768.7}, {"time_offset": 140, "avg_ms": 720.5}, {"time_offset": 150, "avg_ms": 877.0}, {"time_offset": 160, "avg_ms": 667.0}, {"time_offset": 170, "avg_ms": 686.7}, {"time_offset": 180, "avg_ms": 690.5}], "P2P 002 - Step 2 - Input: 1359": [{"time_offset": 0, "avg_ms": 1033.5}, {"time_offset": 10, "avg_ms": 1034.0}, {"time_offset": 20, "avg_ms": 975.5}, {"time_offset": 30, "avg_ms": 960.3}, {"time_offset": 40, "avg_ms": 1004.0}, {"time_offset": 50, "avg_ms": 1048.5}, {"time_offset": 60, "avg_ms": 1022.3}, {"time_offset": 70, "avg_ms": 1017.0}, {"time_offset": 80, "avg_ms": 971.0}, {"time_offset": 90, "avg_ms": 1040.7}, {"time_offset": 100, "avg_ms": 1057.0}, {"time_offset": 110, "avg_ms": 1013.7}, {"time_offset": 120, "avg_ms": 1130.0}, {"time_offset": 130, "avg_ms": 1097.0}, {"time_offset": 140, "avg_ms": 1059.5}, {"time_offset": 150, "avg_ms": 1037.5}, {"time_offset": 160, "avg_ms": 1071.3}, {"time_offset": 170, "avg_ms": 955.0}, {"time_offset": 180, "avg_ms": 1076.0}], "P2P 003 - Step 3 - Input: 3": [{"time_offset": 0, "avg_ms": 325.5}, {"time_offset": 10, "avg_ms": 331.3}, {"time_offset": 20, "avg_ms": 324.0}, {"time_offset": 30, "avg_ms": 324.0}, {"time_offset": 40, "avg_ms": 326.0}, {"time_offset": 50, "avg_ms": 322.5}, {"time_offset": 60, "avg_ms": 874.5}, {"time_offset": 70, "avg_ms": 330.3}, {"time_offset": 80, "avg_ms": 357.5}, {"time_offset": 90, "avg_ms": 327.5}, {"time_offset": 100, "avg_ms": 323.0}, {"time_offset": 110, "avg_ms": 324.0}, {"time_offset": 120, "avg_ms": 337.0}, {"time_offset": 130, "avg_ms": 337.0}, {"time_offset": 140, "avg_ms": 349.5}, {"time_offset": 150, "avg_ms": 343.0}, {"time_offset": 160, "avg_ms": 320.7}, {"time_offset": 170, "avg_ms": 322.0}, {"time_offset": 180, "avg_ms": 337.0}], "P2P 004 - Step 4 - Input: 1": [{"time_offset": 0, "avg_ms": 579.0}, {"time_offset": 10, "avg_ms": 584.0}, {"time_offset": 20, "avg_ms": 355.3}, {"time_offset": 30, "avg_ms": 323.3}, {"time_offset": 40, "avg_ms": 327.0}, {"time_offset": 50, "avg_ms": 324.0}, {"time_offset": 60, "avg_ms": 324.5}, {"time_offset": 70, "avg_ms": 328.3}, {"time_offset": 80, "avg_ms": 334.5}, {"time_offset": 90, "avg_ms": 371.0}, {"time_offset": 100, "avg_ms": 323.0}, {"time_offset": 110, "avg_ms": 325.5}, {"time_offset": 120, "avg_ms": 329.0}, {"time_offset": 130, "avg_ms": 351.7}, {"time_offset": 140, "avg_ms": 378.0}, {"time_offset": 150, "avg_ms": 339.5}, {"time_offset": 160, "avg_ms": 321.0}, {"time_offset": 170, "avg_ms": 329.5}, {"time_offset": 180, "avg_ms": 831.0}], "P2P 005 - Step 5 - Input: 73000231": [{"time_offset": 20, "avg_ms": 324.0}, {"time_offset": 70, "avg_ms": 326.0}, {"time_offset": 110, "avg_ms": 324.0}, {"time_offset": 160, "avg_ms": 323.0}], "P2P 005 - Step 5 - Input: 73000246": [{"time_offset": 40, "avg_ms": 384.0}, {"time_offset": 90, "avg_ms": 326.0}, {"time_offset": 140, "avg_ms": 355.0}, {"time_offset": 180, "avg_ms": 349.0}], "P2P 005 - Step 5 - Input: 73001038": [{"time_offset": 0, "avg_ms": 370.0}, {"time_offset": 40, "avg_ms": 323.0}, {"time_offset": 90, "avg_ms": 324.0}, {"time_offset": 140, "avg_ms": 375.0}], "P2P 005 - Step 5 - Input: 73002056": [{"time_offset": 0, "avg_ms": 345.0}, {"time_offset": 50, "avg_ms": 323.0}, {"time_offset": 100, "avg_ms": 323.0}, {"time_offset": 140, "avg_ms": 370.0}], "P2P 005 - Step 5 - Input: 73007022": [{"time_offset": 20, "avg_ms": 322.0}, {"time_offset": 70, "avg_ms": 382.0}, {"time_offset": 120, "avg_ms": 337.0}, {"time_offset": 170, "avg_ms": 331.0}], "P2P 005 - Step 5 - Input: 73013312": [{"time_offset": 20, "avg_ms": 325.0}, {"time_offset": 60, "avg_ms": 321.0}, {"time_offset": 110, "avg_ms": 325.0}, {"time_offset": 160, "avg_ms": 322.0}], "P2P 005 - Step 5 - Input: 75887915": [{"time_offset": 30, "avg_ms": 322.0}, {"time_offset": 80, "avg_ms": 411.0}, {"time_offset": 130, "avg_ms": 343.0}, {"time_offset": 170, "avg_ms": 321.0}], "P2P 005 - Step 5 - Input: 75887954": [{"time_offset": 30, "avg_ms": 322.0}, {"time_offset": 70, "avg_ms": 324.0}, {"time_offset": 120, "avg_ms": 355.0}, {"time_offset": 170, "avg_ms": 346.0}], "P2P 005 - Step 5 - Input: 76866730": [{"time_offset": 10, "avg_ms": 341.0}, {"time_offset": 50, "avg_ms": 322.0}, {"time_offset": 100, "avg_ms": 340.0}, {"time_offset": 150, "avg_ms": 878.0}], "P2P 005 - Step 5 - Input: 76866732": [{"time_offset": 30, "avg_ms": 324.0}, {"time_offset": 80, "avg_ms": 326.0}, {"time_offset": 130, "avg_ms": 352.0}, {"time_offset": 180, "avg_ms": 352.0}], "P2P 005 - Step 5 - Input: 76866735": [{"time_offset": 10, "avg_ms": 339.0}, {"time_offset": 60, "avg_ms": 326.0}, {"time_offset": 100, "avg_ms": 380.0}, {"time_offset": 150, "avg_ms": 326.0}], "P2P 006 - Step 6 - Input: 10": [{"time_offset": 0, "avg_ms": 1065.0}, {"time_offset": 10, "avg_ms": 826.0}, {"time_offset": 20, "avg_ms": 722.3}, {"time_offset": 30, "avg_ms": 814.0}, {"time_offset": 40, "avg_ms": 822.7}, {"time_offset": 50, "avg_ms": 854.0}, {"time_offset": 60, "avg_ms": 811.5}, {"time_offset": 70, "avg_ms": 769.0}, {"time_offset": 80, "avg_ms": 1034.5}, {"time_offset": 90, "avg_ms": 863.0}, {"time_offset": 100, "avg_ms": 851.7}, {"time_offset": 110, "avg_ms": 753.0}, {"time_offset": 120, "avg_ms": 1344.0}, {"time_offset": 130, "avg_ms": 915.5}, {"time_offset": 140, "avg_ms": 862.3}, {"time_offset": 150, "avg_ms": 846.0}, {"time_offset": 160, "avg_ms": 699.0}, {"time_offset": 170, "avg_ms": 855.3}, {"time_offset": 180, "avg_ms": 642.0}], "P2P 007 - Step 7 - Input: 1 confirm The transactions": [{"time_offset": 20, "avg_ms": 1094.0}, {"time_offset": 30, "avg_ms": 1225.0}, {"time_offset": 40, "avg_ms": 1194.5}, {"time_offset": 50, "avg_ms": 1174.0}, {"time_offset": 60, "avg_ms": 1185.0}, {"time_offset": 70, "avg_ms": 1167.0}, {"time_offset": 80, "avg_ms": 1245.0}, {"time_offset": 90, "avg_ms": 1199.0}, {"time_offset": 100, "avg_ms": 1483.0}, {"time_offset": 110, "avg_ms": 1204.0}, {"time_offset": 120, "avg_ms": 1314.0}, {"time_offset": 130, "avg_ms": 1127.0}, {"time_offset": 140, "avg_ms": 1147.0}, {"time_offset": 150, "avg_ms": 1080.0}, {"time_offset": 160, "avg_ms": 1335.0}, {"time_offset": 170, "avg_ms": 1073.0}, {"time_offset": 180, "avg_ms": 1209.0}], "TC - P2P": [{"time_offset": 0, "avg_ms": 3060.0}, {"time_offset": 10, "avg_ms": 4222.7}, {"time_offset": 20, "avg_ms": 3749.3}, {"time_offset": 30, "avg_ms": 3952.5}, {"time_offset": 40, "avg_ms": 2994.3}, {"time_offset": 50, "avg_ms": 4256.3}, {"time_offset": 60, "avg_ms": 3972.5}, {"time_offset": 70, "avg_ms": 4284.5}, {"time_offset": 80, "avg_ms": 3252.5}, {"time_offset": 90, "avg_ms": 4254.5}, {"time_offset": 100, "avg_ms": 4314.0}, {"time_offset": 110, "avg_ms": 4149.7}, {"time_offset": 120, "avg_ms": 4505.5}, {"time_offset": 130, "avg_ms": 3169.3}, {"time_offset": 140, "avg_ms": 4295.0}, {"time_offset": 150, "avg_ms": 4723.7}, {"time_offset": 160, "avg_ms": 3429.5}, {"time_offset": 170, "avg_ms": 4645.7}, {"time_offset": 180, "avg_ms": 1953.0}]}, "hist_data": [{"range": "<100ms", "count": 1}, {"range": "100-200ms", "count": 0}, {"range": "200-500ms", "count": 130}, {"range": "500ms-1s", "count": 107}, {"range": "1s-2s", "count": 53}, {"range": "2s-3s", "count": 0}, {"range": "3s-5s", "count": 40}, {"range": ">5s", "count": 4}], "summary": {"total_samples": 335, "total_errors": 60, "error_pct": 17.9104, "total_tps": 1.78, "duration_s": 188, "peak_threads": 1, "start_time": "2026-06-15 12:57:57", "end_time": "2026-06-15 13:01:06"}, "peak_threads": 1};
+const COLORS = ['#58a6ff','#3fb950','#f0883e','#a371f7','#d29922','#39d353','#f85149','#79c0ff','#56d364'];
+const GRID   = '#21262d';
+const TICK   = { color:'#8b949e', font:{ size:10 } };
+
+Chart.defaults.color = '#8b949e';
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
+// Format numbers with commas
+document.getElementById('kpi-total').textContent = S.total.toLocaleString();
+
+const SHORT = S.label_stats.map(s => s.label.replace(/T\d+_/g,'').replace(/_/g,' ').trim());
+
+// TPS Chart
+if (S.tps_over_time && S.tps_over_time.length) {
+  new Chart(document.getElementById('tpsChart'), {
+    type:'line',
+    data:{
+      labels: S.tps_over_time.map(d => d.time_offset+'s'),
+      datasets:[{ label:'TPS', data: S.tps_over_time.map(d=>d.tps),
+        borderColor:'#58a6ff', backgroundColor:'rgba(88,166,255,0.1)',
+        borderWidth:1.5, pointRadius:0, fill:true, tension:0.3 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{...TICK, maxTicksLimit:12}, grid:{color:GRID} },
+        y:{ ticks:TICK, grid:{color:GRID}, beginAtZero:true }
+      }
+    }
+  });
+}
+
+// RT Bar Chart
+new Chart(document.getElementById('rtBarChart'), {
+  type:'bar',
+  data:{
+    labels: SHORT,
+    datasets:[{ label:'Avg (ms)', data: S.label_stats.map(s=>s.avg),
+      backgroundColor: COLORS, borderRadius:5 }]
+  },
+  options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:false } },
+    scales:{
+      x:{ ticks:TICK, grid:{display:false} },
+      y:{ ticks:TICK, grid:{color:GRID} }
+    }
+  }
+});
+
+// Percentile Chart
+new Chart(document.getElementById('percChart'), {
+  type:'bar',
+  data:{
+    labels: SHORT,
+    datasets:[
+      { label:'P90', data: S.label_stats.map(s=>s.p90), backgroundColor:'rgba(88,166,255,0.7)', borderRadius:3 },
+      { label:'P95', data: S.label_stats.map(s=>s.p95), backgroundColor:'rgba(210,153,34,0.7)',  borderRadius:3 },
+      { label:'P99', data: S.label_stats.map(s=>s.p99), backgroundColor:'rgba(248,81,73,0.7)',   borderRadius:3 },
+    ]
+  },
+  options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ labels:{ color:'#8b949e', font:{size:11} } } },
+    scales:{
+      x:{ ticks:TICK, grid:{display:false} },
+      y:{ ticks:TICK, grid:{color:GRID} }
+    }
+  }
+});
+
+// RT Over Time Line Chart
+if (S.rt_data && Object.keys(S.rt_data).length) {
+  const rtDatasets = Object.keys(S.rt_data).map((lbl,i) => ({
+    label: lbl.replace(/T\d+_/g,'').replace(/_/g,' ').trim(),
+    data:  S.rt_data[lbl].map(p=>({ x:p.time_offset, y:p.avg_ms })),
+    borderColor: COLORS[i % COLORS.length],
+    backgroundColor:'transparent',
+    borderWidth:1.5, pointRadius:0, tension:0.3,
+  }));
+  new Chart(document.getElementById('rtLineChart'), {
+    type:'line',
+    data:{ datasets: rtDatasets },
+    options:{ responsive:true, maintainAspectRatio:false, parsing:false,
+      plugins:{ legend:{ labels:{ color:'#8b949e', font:{size:10}, boxWidth:12 } } },
+      scales:{
+        x:{ type:'linear', ticks:{...TICK, callback:v=>v+'s', maxTicksLimit:12}, grid:{color:GRID} },
+        y:{ ticks:TICK, grid:{color:GRID} }
+      }
+    }
+  });
+}
+
+// Stats Table
+const tbody = document.getElementById('statsBody');
+const maxAvg = Math.max(...S.label_stats.map(s=>s.avg));
+S.label_stats.forEach((s,i) => {
+  const errClass = s.error_rate===0 ? 'pill-ok' : s.error_rate<1 ? 'pill-warn' : 'pill-danger';
+  const pct      = Math.round(s.avg/maxAvg*100);
+  const barClass = s.avg>1000 ? 'very-slow' : s.avg>700 ? 'slow' : '';
+  const shortName = s.label.replace(/T\d+_/g,'').replace(/_/g,' ').trim();
+  tbody.innerHTML += `<tr>
+    <td><span>${shortName}</span><span class="label-short">${s.label}</span></td>
+    <td>${s.samples.toLocaleString()}</td>
+    <td>${s.avg}</td>
+    <td>${s.median}</td>
+    <td>${s.p90}</td>
+    <td>${s.p95}</td>
+    <td>${s.p99}</td>
+    <td>${s.min}</td>
+    <td>${s.max}</td>
+    <td>${s.tps}</td>
+    <td>${s.failures}</td>
+    <td><span class="pill ${errClass}">${s.error_rate}%</span></td>
+    <td><div class="bar-bg"><div class="bar-fill ${barClass}" style="width:${pct}%"></div></div></td>
+  </tr>`;
+});
+</script>
+</body>
+</html>

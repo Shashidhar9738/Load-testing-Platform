@@ -1,0 +1,24 @@
+{
+  "profiles": [
+    {
+      "name": "Spike Load Test",
+      "steps": [
+        {
+          "tps": 25,
+          "duration": 1800,
+          "rampup": 60
+        },
+        {
+          "tps": 100,
+          "duration": 600,
+          "rampup": 30
+        },
+        {
+          "tps": 25,
+          "duration": 300,
+          "rampup": 20
+        }
+      ]
+    }
+  ]
+}

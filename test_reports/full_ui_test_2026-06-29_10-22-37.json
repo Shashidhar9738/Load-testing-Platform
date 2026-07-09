@@ -1,0 +1,2119 @@
+{
+  "timestamp": "2026-06-29_10-22-37",
+  "server": "http://127.0.0.1:5000",
+  "total": 418,
+  "passed": 415,
+  "failed": 0,
+  "warnings": 3,
+  "skipped": 0,
+  "pass_rate": 99.3,
+  "issues": [
+    {
+      "severity": "WARN",
+      "name": "Viewer panel #auditlog exists",
+      "detail": ""
+    },
+    {
+      "severity": "WARN",
+      "name": "Viewer JS function startTest() defined",
+      "detail": ""
+    },
+    {
+      "severity": "WARN",
+      "name": "Viewer JS function stopTest() defined",
+      "detail": ""
+    }
+  ],
+  "results": [
+    {
+      "result": "PASS",
+      "name": "/health responds 200",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Database connectivity",
+      "detail": "True"
+    },
+    {
+      "result": "PASS",
+      "name": "JMeter binary found",
+      "detail": "C:\\Users\\shashidhar.yadala\\Videos\\Load Testing BTC\\apache-jmeter-5.6.3\\bin\\jmeter.bat"
+    },
+    {
+      "result": "PASS",
+      "name": "Platform version 4.0",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Disk free 261.14 GB",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "/health/ui page",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /login page loads",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Login page has username field",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Login page has password field",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Login page has submit button",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Bad credentials stay on login page (not redirected)",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Login page shows error message on bad credentials",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Empty credentials rejected",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Admin login (gauravjain)",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "/api/me returns correct username",
+      "detail": "gauravjain"
+    },
+    {
+      "result": "PASS",
+      "name": "/api/me returns admin role",
+      "detail": "admin"
+    },
+    {
+      "result": "PASS",
+      "name": "/api/admins public endpoint",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Authenticated root redirects",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "/logout redirects",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "/admin redirects after logout",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /admin returns 200",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "admin.html has DOCTYPE declaration",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "admin.html has <title> tag",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "admin.html closes properly",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "No unrendered Jinja2 template variables",
+      "detail": "Found {{ in rendered HTML"
+    },
+    {
+      "result": "PASS",
+      "name": "No unrendered Jinja2 template blocks",
+      "detail": "Found {% in rendered HTML"
+    },
+    {
+      "result": "PASS",
+      "name": "No Jinja2 TemplateSyntaxError in page",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "No Internal Server Error in admin page",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "No Python traceback in admin page",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Chart.js script tag present in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-overview exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-runner exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-reports exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-testdata exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-upload exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-testconfig exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-testfeatures exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-jmxinspector exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-history exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-clients exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-users exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-auditlog exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-prereq exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-dbmaint exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-schedules exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-heatmap exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-settings exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-platformstats exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-loadprofiles exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-registrations exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-trends exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Nav panel #panel-leaderboard exists in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Start Test button (#btn-start) in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Stop Test button (#btn-stop) in DOM",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function startTest() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function stopTest() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadReportsList() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadSettings() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadUsers() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadClients() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadAuditLog() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadPrereq() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadDbStats() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadSchedules() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadHeatmap() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadPlatformStats() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadLoadProfiles() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadRegistrations() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadTrends() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function loadLeaderboard() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function showPanel() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function smokeTest() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function compareRuns() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JS function toggleTheme() defined in admin.html",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "GET /viewer returns 200",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer.html has DOCTYPE",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "viewer.html closes properly",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "No unrendered Jinja2 variables in viewer",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "No server error in viewer page",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "No traceback in viewer page",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer panel #overview exists",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer panel #reports exists",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer panel #prereq exists",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer panel #schedules exists",
+      "detail": ""
+    },
+    {
+      "result": "WARN",
+      "name": "Viewer panel #auditlog exists",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer portal has read-only indicator",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer JS function loadReportsList() defined",
+      "detail": ""
+    },
+    {
+      "result": "WARN",
+      "name": "Viewer JS function startTest() defined",
+      "detail": ""
+    },
+    {
+      "result": "WARN",
+      "name": "Viewer JS function stopTest() defined",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer JS function showPanel() defined",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/prereq/auto — prereq auto-check panel refresh",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/test/status — test status poller",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/logs?offset=0 — live log stream",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/reports — reports list panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/csv-files — CSV files panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/settings — settings panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/db/full-stats — DB maintenance panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmx-services — JMX services panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/overview-stats — overview panel KPIs",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/schedules — schedules panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/suite/status — suite runner status poller",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/prereq — prerequisites panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/sla-config — SLA config panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/sla-result — SLA result summary",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/live-stats — live stats during run",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/live-stats/labels — live stats labels",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/heatmap — heatmap panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/test/status — header status dot poller",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/platform-stats — platform stats panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/load-profiles — load profiles panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/admin/registrations — registrations panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/clients — clients panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/users — users panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/audit-log?limit=100 — audit log panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/run-history — run history panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmx-list — JMX list for runner dropdown",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/db-stats — DB stats overview card",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/test-features — test features panel",
+      "detail": "404"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/env — environment config load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/load-config — load config load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/baseline — baseline data load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/recurring-schedules — recurring schedules panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmx-requirements — JMX requirements panel",
+      "detail": "400"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/me — user profile chip",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/theme — theme preference load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/favourites — starred reports",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/presence — presence indicator",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/trends?days=7 — trends panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/leaderboard — leaderboard panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/sla-trend?limit=5 — SLA trend chart",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/backup/list — backup list",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/webhook-config — webhook config load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/test/annotations — run annotations",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/schedule-calendar — schedule calendar heatmap",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/xlsx-files — xlsx file list",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/platform-stats — platform stats",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmeter/install-status — JMeter install status",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/report/SAMPLE_Mock_Health_Check_Result.jtl — report parse — Reports panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/report/SAMPLE_Mock_Health_Check_Result.jtl/errors — error analysis button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/report/SAMPLE_Mock_Health_Check_Result.jtl/html — HTML report inline view",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/report-meta/SAMPLE_Mock_Health_Check_Result.jtl — report meta panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/scorecard/SAMPLE_Mock_Health_Check_Result.jtl — performance scorecard button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/bottleneck/SAMPLE_Mock_Health_Check_Result.jtl — bottleneck analysis button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/rt-histogram/SAMPLE_Mock_Health_Check_Result.jtl — RT Histogram button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/error-patterns/SAMPLE_Mock_Health_Check_Result.jtl — Error Patterns button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/ussd-funnel/SAMPLE_Mock_Health_Check_Result.jtl — Session Funnel button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/regression-check/SAMPLE_Mock_Health_Check_Result.jtl — regression check inline",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/sla-analysis/SAMPLE_Mock_Health_Check_Result.jtl — SLA Check modal",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/baseline/compare/SAMPLE_Mock_Health_Check_Result.jtl — baseline compare button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/csv-preview/sample_health_users.csv — CSV card preview",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmx-params/SAMPLE_Mock_Health_Check_1TPS_1min.jmx — JMX params editor",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmx-inspect/SAMPLE_Mock_Health_Check_1TPS_1min.jmx — JMX Inspector panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmx-tree/SAMPLE_Mock_Health_Check_1TPS_1min.jmx — JMX tree view",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmx/SAMPLE_Mock_Health_Check_1TPS_1min.jmx/properties — JMX properties modal",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/run-notes/SAMPLE_Mock_Health_Check_Result.jtl — run notes load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/comments/SAMPLE_Mock_Health_Check_Result.jtl — report comments load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/test/stop — Stop Test button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/test/annotate — Annotate run button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/prereq — Save Prereq button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/sla-config — Save SLA config button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/load-config — Save Load Config button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/env — Save Env button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/theme — Theme toggle button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/favourites — Star/Favourite button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/presence — Presence beacon",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/db/vacuum — Vacuum DB button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/db/purge — Purge audit button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/db/clear-audit — Clear audit button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/share/live — Share Live button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/share/report — Share Report button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/run-note — Pre-run notes button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/run-notes — Save run notes",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/webhook-config — Save webhook config",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/webhook-test — Test webhook button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/backup/run — Run backup button",
+      "detail": "400"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/archive-reports — Archive reports button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/tps-calculator — TPS Calculator button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/health-check — Check Server button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/compare-runs — Compare Runs button",
+      "detail": "400"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/compare-runs — Compare 2 runs button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/compare-reports — Side-by-side compare button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/baseline — Set Baseline button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/suite/stop — Stop Suite button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/load-config/suggest-from-jmx — Suggest from JMX button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST /api/comments/SAMPLE_Mock_Health_Check_Result.jtl — Post comment button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "DELETE /api/baseline — Clear Baseline button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "DELETE /api/load-profiles/NoSuchProfile — Delete load profile button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/reports — viewer reports list",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/overview-stats — viewer overview KPIs",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/test-features — viewer test features",
+      "detail": "404"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/sla-config — viewer SLA config",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/sla-result — viewer SLA result",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/heatmap — viewer heatmap",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/prereq/auto — viewer prereq auto-check",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/prereq — viewer prerequisites",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/jmx-list — viewer JMX list",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/jmx-services — viewer JMX services",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/test/status — viewer run status",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/logs?offset=0 — viewer log stream",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/schedules — viewer schedules",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/audit-log?limit=100 — viewer audit log",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/me — viewer profile",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/theme — viewer theme pref",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/presence — viewer presence",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/favourites — viewer favourites",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/report/SAMPLE_Mock_Health_Check_Result.jtl — viewer report parse",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer GET /api/jmx-inspect/SAMPLE_Mock_Health_Check_1TPS_1min.jmx — viewer JMX inspect",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer POST /api/test/start — viewer Start Test (with run_tests perm)",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer POST /api/prereq — viewer Save prereq",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer POST /api/favourites — viewer toggle favourite",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer POST /api/theme — viewer set theme",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer POST /api/presence — viewer presence beacon",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer POST /api/baseline (403 if no manage_baseline perm)",
+      "detail": "403"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer cannot upload JMX (no perm)",
+      "detail": "403"
+    },
+    {
+      "result": "PASS",
+      "name": "Overview panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Test Runner panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Reports panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Test Data (CSV) panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Upload panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Test Config panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Test Features panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "JMX Inspector panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Run History panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Clients panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Users panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Audit Log panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Pre-Requisites panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "DB Maintenance panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Schedules panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Heatmap panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Settings panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Platform Stats panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Load Profiles panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Registrations panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Trends panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Leaderboard panel — all API calls return <500",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Download Raw JTL button",
+      "detail": "/jtl/SAMPLE_Mock_Health_Check_Result.jtl → 0.5 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "Download HTML Report button",
+      "detail": "html/SAMPLE_Mock_Health_Check_Result.jtl → 218.7 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "Download ZIP Bundle button",
+      "detail": "ndle/SAMPLE_Mock_Health_Check_Result.jtl → 73.6 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "Download JMX button",
+      "detail": "x/SAMPLE_Mock_Health_Check_1TPS_1min.jmx → 5.9 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "Download CSV testdata button",
+      "detail": "ad/testdata-file/sample_health_users.csv → 0.1 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "Download All Reports ZIP button",
+      "detail": "/api/download/all-reports → 514.0 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "Download All Testdata ZIP button",
+      "detail": "/api/download/all-testdata → 0.6 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "Download DB Backup button",
+      "detail": "/api/download/db-backup → 96.0 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "Download Audit CSV button",
+      "detail": "/api/download/audit-csv → 2.8 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "View HTML Report button (inline)",
+      "detail": "SAMPLE_Mock_Health_Check_Result.jtl/html → 218.7 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "PDF Report button",
+      "detail": "/SAMPLE_Mock_Health_Check_Result.jtl/pdf → 2.3 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "Excel Export button",
+      "detail": "AMPLE_Mock_Health_Check_Result.jtl/excel → 5.8 KB"
+    },
+    {
+      "result": "PASS",
+      "name": "Non-existent JTL download → 404",
+      "detail": "404"
+    },
+    {
+      "result": "PASS",
+      "name": "Non-existent JMX download → 404",
+      "detail": "404"
+    },
+    {
+      "result": "PASS",
+      "name": "Non-existent XLSX download → 404",
+      "detail": "404"
+    },
+    {
+      "result": "PASS",
+      "name": "Upload JMX via upload zone",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Upload CSV via upload zone",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Upload JTL report via upload zone",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Upload without file field → 400",
+      "detail": "400"
+    },
+    {
+      "result": "PASS",
+      "name": "Delete uploaded file button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Delete uploaded JMX button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "New Client button → POST /api/clients (UI8741)",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Edit Client button → PUT /api/clients/<code>",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Client storage stats",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Delete Client button → DELETE /api/clients/<code>",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Delete active client rejected → 400",
+      "detail": "400"
+    },
+    {
+      "result": "PASS",
+      "name": "Duplicate client code rejected → 400/409",
+      "detail": "409"
+    },
+    {
+      "result": "PASS",
+      "name": "Add User button → POST /api/users",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Edit User button → PUT /api/users/<username>",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Edit permissions checkbox → PUT /api/users/<username>",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Disable user toggle → PUT enabled=false",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Enable user toggle → PUT enabled=true",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Reset Password button → POST /api/users/<u>/reset-password",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Short password rejected → 400",
+      "detail": "400"
+    },
+    {
+      "result": "PASS",
+      "name": "Delete User button → DELETE /api/users/<username>",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Cannot delete own account → 400",
+      "detail": "400"
+    },
+    {
+      "result": "PASS",
+      "name": "Change own password button → POST /api/users/me/change-password",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Report row click → parse JTL",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Error Breakdown button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET View HTML button (inline)",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET PDF Report button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Excel Export button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Download JTL button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Download HTML button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET ZIP Bundle button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Performance Scorecard panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Bottleneck Analysis panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET RT Histogram button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Error Patterns button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Session Funnel button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET SLA Check modal",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Regression Check panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Report meta load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST Set as Baseline button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Compare vs Baseline button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST Star Favourite button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "POST Share Report button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Load comments button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET Run notes load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Post comment button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Delete comment button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Settings panel load",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Settings returns JSON object",
+      "detail": "<class 'dict'>"
+    },
+    {
+      "result": "PASS",
+      "name": "Save Settings button → POST /api/settings",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "JMeter install status",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Load webhook config",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Save webhook config button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Test webhook button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Load DB stats",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Vacuum DB button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Purge old audit button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Clear all audit button (confirm=CLEAR)",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Download DB Backup button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Download Audit CSV button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Run backup button",
+      "detail": "400"
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer blocked from Admin portal page (/admin)",
+      "detail": "302"
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer blocked from Users list API (/api/users)",
+      "detail": "302"
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer blocked from DB stats API (/api/db-stats)",
+      "detail": "302"
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer blocked from DB full stats API (/api/db/full-stats)",
+      "detail": "302"
+    },
+    {
+      "result": "PASS",
+      "name": "Anon blocked from /admin",
+      "detail": "302"
+    },
+    {
+      "result": "PASS",
+      "name": "Anon blocked from /viewer",
+      "detail": "302"
+    },
+    {
+      "result": "PASS",
+      "name": "Anon blocked from /api/reports",
+      "detail": "302"
+    },
+    {
+      "result": "PASS",
+      "name": "Anon blocked from /api/clients",
+      "detail": "302"
+    },
+    {
+      "result": "PASS",
+      "name": "Anon blocked from /api/users",
+      "detail": "302"
+    },
+    {
+      "result": "PASS",
+      "name": "Anon blocked from /api/me",
+      "detail": "302"
+    },
+    {
+      "result": "PASS",
+      "name": "Anon blocked from /api/test/status",
+      "detail": "302"
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer can access Viewer portal page",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer can access Overview stats",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer can access Reports list",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer can access Own profile",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer without run_tests perm blocked from starting test",
+      "detail": "403"
+    },
+    {
+      "result": "PASS",
+      "name": "Change Password modal API call",
+      "detail": "POST /api/users/me/change-password → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Env Profiles modal API call",
+      "detail": "GET /api/env-profiles → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Run Notes modal API call",
+      "detail": "POST /api/run-notes → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "SLA Check modal API call",
+      "detail": "GET i/sla-analysis/SAMPLE_Mock_Health_Check_Result.jtl → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Compare Runs modal API call",
+      "detail": "POST /api/compare-runs → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "TPS Calculator modal API call",
+      "detail": "POST /api/tps-calculator → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Prop Override modal API call",
+      "detail": "GET /SAMPLE_Mock_Health_Check_1TPS_1min.jmx/properties → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Generate JMX modal API call",
+      "detail": "GET /api/xlsx-files → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Command Center overlay API call",
+      "detail": "GET /api/test/status → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Registrations panel API call",
+      "detail": "GET /api/admin/registrations → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Audit log panel API call",
+      "detail": "GET /api/audit-log?limit=20 → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Load Profiles modal API call",
+      "detail": "GET /api/load-profiles → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Schedules modal API call",
+      "detail": "GET /api/recurring-schedules → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Live Share modal API call",
+      "detail": "POST /api/share/live → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Report Share modal API call",
+      "detail": "POST /api/share/report → 200"
+    },
+    {
+      "result": "PASS",
+      "name": "Share Live button → POST /api/share/live",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Live share token generated",
+      "detail": "len=16"
+    },
+    {
+      "result": "PASS",
+      "name": "Shared live dashboard page loads",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Shared live page has correct title",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Public live stats API with valid token",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Invalid live share token → 403",
+      "detail": "403"
+    },
+    {
+      "result": "PASS",
+      "name": "Share Report button → POST /api/share/report",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Shared report page loads for anyone with token",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Registration form submit → POST /api/register-request",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Admin views pending registrations",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Admin Approve button → POST /api/admin/registrations/14/approve",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Admin Reject button → POST /api/admin/registrations/15/reject",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "chart.min.js loads (Charts.js)",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "chart.min.js is non-empty (200 KB)",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "No Jinja2 template syntax error in admin.html render",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "No Jinja2 undefined variable in admin.html render",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "No Flask 500 in admin page in admin.html render",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "No Malformed HTML in admin.html render",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Script src /static/chart.min.js loads",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "viewer.html: no unrendered Jinja2 vars",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "viewer.html: no 500 error",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Viewer script src /static/chart.min.js loads",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Total fetch() calls scanned in admin.html: 114",
+      "detail": ""
+    },
+    {
+      "result": "PASS",
+      "name": "Load schedules panel",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Create Recurring Schedule button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Edit Recurring Schedule (disable)",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Delete Recurring Schedule button",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "Schedule calendar heatmap",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/me",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/test/status",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/reports",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/csv-files",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/settings",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/clients",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/users",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/db-stats",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmx-list",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/overview-stats",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/theme",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/prereq",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/sla-config",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/sla-result",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/heatmap",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/audit-log?limit=10",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/platform-stats",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/schedules",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/recurring-schedules",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/trends?days=7",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/leaderboard",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/sla-trend?limit=5",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/backup/list",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/load-profiles",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/env-profiles",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/webhook-config",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/test/annotations",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/xlsx-files",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/test-features",
+      "detail": "404"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmeter/install-status",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/db/full-stats",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/run-history",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/schedule-calendar",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/favourites",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/presence",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/baseline",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/live-stats",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/live-stats/labels",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/trend-overlay",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/env",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/load-config",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/prereq/auto",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/admin/registrations",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmx-requirements",
+      "detail": "400"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/jmx-services",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /health",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /health/ui",
+      "detail": "200"
+    },
+    {
+      "result": "PASS",
+      "name": "GET /api/admins",
+      "detail": "200"
+    }
+  ]
+}

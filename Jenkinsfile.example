@@ -1,0 +1,377 @@
+#!/usr/bin/env groovy
+
+/**
+ * Jenkinsfile: Load Testing Platform Integration
+ * 
+ * This example demonstrates how to integrate Jenkins with the Load Testing Platform's CI/CD API.
+ * 
+ * Prerequisites:
+ * 1. Store platform API token in Jenkins Credentials: "platform-api-token"
+ * 2. Platform is running on: http://localhost:5000 (or configure PLATFORM_URL)
+ * 3. A CI/CD suite exists on the platform: "BTC_suite_a1b2c3d4"
+ */
+
+@Library('shared-library') _
+
+pipeline {
+    agent any
+    
+    parameters {
+        choice(name: 'SUITE', 
+               choices: [
+                   'BTC_suite_a1b2c3d4',
+                   'AFRICELL_suite_x9y8z7w6',
+                   'SAMPLE_suite_m5n4o3p2'
+               ], 
+               description: 'Select test suite to run')
+        
+        booleanParam(name: 'ARCHIVE_REPORT', 
+                     defaultValue: true, 
+                     description: 'Archive HTML report')
+        
+        string(name: 'TIMEOUT_MINUTES', 
+               defaultValue: '90', 
+               description: 'Max wait time for test execution')
+    }
+    
+    environment {
+        // Platform Configuration
+        PLATFORM_URL = credentials('platform-url') ?: 'http://localhost:5000'
+        API_TOKEN = credentials('platform-api-token')
+        
+        // Test Configuration
+        SUITE_ID = "${params.SUITE}"
+        TIMEOUT_SECS = "${params.TIMEOUT_MINUTES.toInteger() * 60}"
+        POLL_INTERVAL_SECS = '30'
+        
+        // Build info
+        BUILD_DESC = "Load Test: ${SUITE_ID}"
+    }
+    
+    options {
+        timeout(time: "${params.TIMEOUT_MINUTES}".toInteger() + 5, unit: 'MINUTES')
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+        disableConcurrentBuilds()
+    }
+    
+    stages {
+        stage('🔍 Validate Configuration') {
+            steps {
+                script {
+                    echo "═══════════════════════════════════════════════════════════"
+                    echo "  Load Testing Platform CI/CD Integration"
+                    echo "═══════════════════════════════════════════════════════════"
+                    echo "Platform URL: ${PLATFORM_URL}"
+                    echo "Suite ID: ${SUITE_ID}"
+                    echo "Timeout: ${params.TIMEOUT_MINUTES} minutes"
+                    echo "Poll Interval: ${POLL_INTERVAL_SECS}s"
+                    echo ""
+                    
+                    // Verify platform connectivity
+                    def healthResponse = sh(
+                        script: '''
+                            curl -s -o /dev/null -w "%{http_code}" \
+                              "${PLATFORM_URL}/" \
+                              -m 5
+                        ''',
+                        returnStdout: true
+                    ).trim()
+                    
+                    if (healthResponse == "200" || healthResponse == "302") {
+                        echo "✅ Platform is reachable"
+                    } else {
+                        error("❌ Cannot reach platform (HTTP ${healthResponse})")
+                    }
+                }
+            }
+        }
+        
+        stage('🚀 Trigger Load Test') {
+            steps {
+                script {
+                    echo ""
+                    echo "📤 Triggering suite execution on platform..."
+                    
+                    def curlCmd = '''
+                        curl -X POST "${PLATFORM_URL}/api/ci-cd/suites/${SUITE_ID}/run" \
+                          -H "Authorization: Bearer ${API_TOKEN}" \
+                          -H "Content-Type: application/json" \
+                          -w "\\n%{http_code}" \
+                          -s 2>&1
+                    '''
+                    
+                    def output = sh(script: curlCmd, returnStdout: true).trim()
+                    def lines = output.split('\n')
+                    def httpCode = lines[-1]
+                    def response = lines[0..-2].join('\n')
+                    
+                    echo "HTTP Status: ${httpCode}"
+                    
+                    if (httpCode == "200") {
+                        def json = readJSON text: response
+                        env.RUN_ID = json.run_id
+                        env.SUITE_NAME = json.suite_name
+                        
+                        echo "✅ Test Suite Triggered Successfully"
+                        echo "   Run ID: ${env.RUN_ID}"
+                        echo "   Suite: ${env.SUITE_NAME}"
+                        echo "   Status: ${json.status}"
+                    } else {
+                        error("❌ Failed to trigger test suite (HTTP ${httpCode})")
+                    }
+                }
+            }
+        }
+        
+        stage('⏳ Monitor Execution') {
+            steps {
+                script {
+                    echo ""
+                    echo "⏳ Monitoring test execution..."
+                    echo "   Run ID: ${env.RUN_ID}"
+                    echo "   Max wait: ${params.TIMEOUT_MINUTES} minutes"
+                    echo ""
+                    
+                    def maxAttempts = (TIMEOUT_SECS.toInteger() / POLL_INTERVAL_SECS.toInteger()).toInteger()
+                    def attempts = 0
+                    def completed = false
+                    
+                    while (!completed && attempts < maxAttempts) {
+                        sleep(POLL_INTERVAL_SECS.toInteger())
+                        attempts++
+                        
+                        // Poll status
+                        def statusResponse = sh(
+                            script: '''
+                                curl -s "${PLATFORM_URL}/api/ci-cd/runs/${RUN_ID}" \
+                                  -H "Authorization: Bearer ${API_TOKEN}"
+                            ''',
+                            returnStdout: true
+                        ).trim()
+                        
+                        try {
+                            def json = readJSON text: statusResponse
+                            def run = json.run
+                            def status = run.status
+                            
+                            // Calculate elapsed time
+                            def elapsed = (attempts * POLL_INTERVAL_SECS.toInteger()).intValue()
+                            def elapsedMin = elapsed / 60
+                            
+                            // Print progress
+                            printf "   [%2d:%02d] Status: %-12s | Requests: %6s | Errors: %4s | Avg RT: %7s ms\n",
+                                elapsedMin / 60, elapsedMin % 60,
+                                status,
+                                run.total_requests ?: "—",
+                                run.error_count ?: "—",
+                                run.avg_rt_ms?.toInteger() ?: "—"
+                            
+                            if (status == "completed") {
+                                completed = true
+                                env.TEST_STATUS = "PASSED"
+                                env.TEST_DURATION = run.duration_s
+                                env.TOTAL_REQUESTS = run.total_requests
+                                env.ERROR_COUNT = run.error_count
+                                env.SUCCESS_COUNT = run.success_count
+                                env.AVG_RT = run.avg_rt_ms
+                                env.P95_RT = run.p95_rt_ms
+                                env.REPORT_PATH = run.report_path
+                                
+                                echo ""
+                                echo "✅ Test execution completed"
+                            } else if (status == "failed") {
+                                completed = true
+                                env.TEST_STATUS = "FAILED"
+                                echo ""
+                                error("❌ Test execution failed on platform")
+                            }
+                        } catch (Exception e) {
+                            echo "⚠️ Error parsing status response: ${e.message}"
+                        }
+                    }
+                    
+                    if (!completed) {
+                        error("❌ Test execution timed out after ${params.TIMEOUT_MINUTES} minutes")
+                    }
+                }
+            }
+        }
+        
+        stage('📊 Analyze Results') {
+            steps {
+                script {
+                    echo ""
+                    echo "═══════════════════════════════════════════════════════════"
+                    echo "  TEST RESULTS SUMMARY"
+                    echo "═══════════════════════════════════════════════════════════"
+                    echo "Duration:         ${env.TEST_DURATION} seconds"
+                    echo "Total Requests:   ${env.TOTAL_REQUESTS}"
+                    echo "Successful:       ${env.SUCCESS_COUNT}"
+                    echo "Errors:           ${env.ERROR_COUNT}"
+                    echo "Avg Response Time: ${env.AVG_RT} ms"
+                    echo "P95 Response Time: ${env.P95_RT} ms"
+                    echo "Report:           ${env.REPORT_PATH}"
+                    echo "═══════════════════════════════════════════════════════════"
+                    echo ""
+                    
+                    // Convert to numbers for comparison
+                    def errorCount = env.ERROR_COUNT?.toInteger() ?: 0
+                    def totalRequests = env.TOTAL_REQUESTS?.toInteger() ?: 0
+                    def errorPct = totalRequests > 0 ? (errorCount * 100 / totalRequests) : 0
+                    def avgRt = env.AVG_RT?.toDouble() ?: 0
+                    
+                    // Quality gates
+                    def failBuild = false
+                    
+                    echo "🔍 Applying Quality Gates:"
+                    
+                    // Gate 1: Error rate
+                    if (errorPct > 5) {
+                        echo "   ❌ Error Rate ${errorPct}% > 5% threshold"
+                        failBuild = true
+                    } else {
+                        echo "   ✅ Error Rate ${errorPct}% <= 5%"
+                    }
+                    
+                    // Gate 2: Average response time
+                    if (avgRt > 500) {
+                        echo "   ❌ Avg Response Time ${avgRt}ms > 500ms threshold"
+                        failBuild = true
+                    } else {
+                        echo "   ✅ Avg Response Time ${avgRt}ms <= 500ms"
+                    }
+                    
+                    // Gate 3: Any errors
+                    if (errorCount > 100) {
+                        echo "   ⚠️  High error count: ${errorCount} errors"
+                        currentBuild.result = 'UNSTABLE'
+                    } else {
+                        echo "   ✅ Error count acceptable: ${errorCount}"
+                    }
+                    
+                    if (failBuild) {
+                        error("❌ Quality gates failed")
+                    }
+                }
+            }
+        }
+        
+        stage('📥 Download Report') {
+            when {
+                expression { params.ARCHIVE_REPORT && env.REPORT_PATH }
+            }
+            steps {
+                script {
+                    echo ""
+                    echo "📥 Downloading test report..."
+                    
+                    sh '''
+                        curl -o "load-test-report.html" \
+                          "${PLATFORM_URL}${REPORT_PATH}" \
+                          -H "Authorization: Bearer ${API_TOKEN}" \
+                          -f
+                        
+                        if [ -f "load-test-report.html" ]; then
+                            ls -lh load-test-report.html
+                            echo "✅ Report downloaded successfully"
+                        fi
+                    '''
+                }
+            }
+        }
+        
+        stage('🔗 Integration Steps') {
+            steps {
+                script {
+                    echo ""
+                    echo "Optional next steps:"
+                    echo "  • Deploy to staging environment"
+                    echo "  • Trigger performance regression tests"
+                    echo "  • Update monitoring dashboards"
+                    echo "  • Generate trend report"
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            script {
+                echo ""
+                echo "📋 Archiving artifacts..."
+                
+                // Archive reports
+                archiveArtifacts(
+                    artifacts: 'load-test-report.html',
+                    allowEmptyArchive: true,
+                    fingerprint: true
+                )
+                
+                // Clean up
+                sh 'rm -f load-test-report.html'
+            }
+        }
+        
+        success {
+            script {
+                echo ""
+                echo "✅ Load test pipeline PASSED"
+                
+                // Send success notification
+                def message = """
+                    ✅ Load Test PASSED
+                    
+                    Suite: ${env.SUITE_NAME}
+                    Run ID: ${env.RUN_ID}
+                    Duration: ${env.TEST_DURATION}s
+                    Errors: ${env.ERROR_COUNT}
+                    Avg RT: ${env.AVG_RT}ms
+                """.stripIndent()
+                
+                // Slack notification (if configured)
+                try {
+                    slackSend(
+                        color: 'good',
+                        message: message,
+                        channel: '#load-testing'
+                    )
+                } catch (Exception e) {
+                    echo "⚠️ Slack notification failed: ${e.message}"
+                }
+            }
+        }
+        
+        failure {
+            script {
+                echo ""
+                echo "❌ Load test pipeline FAILED"
+                
+                // Send failure notification
+                def message = """
+                    ❌ Load Test FAILED
+                    
+                    Suite: ${env.SUITE_NAME}
+                    Run ID: ${env.RUN_ID}
+                    
+                    Check Jenkins console for details: ${BUILD_URL}console
+                """.stripIndent()
+                
+                // Slack notification (if configured)
+                try {
+                    slackSend(
+                        color: 'danger',
+                        message: message,
+                        channel: '#load-testing'
+                    )
+                } catch (Exception e) {
+                    echo "⚠️ Slack notification failed: ${e.message}"
+                }
+            }
+        }
+        
+        unstable {
+            echo "⚠️ Load test completed with warnings (unstable)"
+        }
+    }
+}

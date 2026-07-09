@@ -1,0 +1,1452 @@
+{
+  "timestamp": "2026-06-29_02-51-31",
+  "total": 206,
+  "passed": 206,
+  "failed": 0,
+  "skipped": 0,
+  "pass_rate": 100.0,
+  "results": [
+    {
+      "section": "Auth",
+      "name": "test_01_get_login_page",
+      "result": "PASS",
+      "detail": "",
+      "ms": 27
+    },
+    {
+      "section": "Auth",
+      "name": "test_02_root_redirect_to_login_when_unauthenticated",
+      "result": "PASS",
+      "detail": "",
+      "ms": 11
+    },
+    {
+      "section": "Auth",
+      "name": "test_03_admin_login_success",
+      "result": "PASS",
+      "detail": "",
+      "ms": 253
+    },
+    {
+      "section": "Auth",
+      "name": "test_04_invalid_password_rejected",
+      "result": "PASS",
+      "detail": "",
+      "ms": 219
+    },
+    {
+      "section": "Auth",
+      "name": "test_05_invalid_username_rejected",
+      "result": "PASS",
+      "detail": "",
+      "ms": 31
+    },
+    {
+      "section": "Auth",
+      "name": "test_06_empty_credentials_rejected",
+      "result": "PASS",
+      "detail": "",
+      "ms": 24
+    },
+    {
+      "section": "Auth",
+      "name": "test_07_logout",
+      "result": "PASS",
+      "detail": "",
+      "ms": 262
+    },
+    {
+      "section": "Auth",
+      "name": "test_08_api_me_as_admin",
+      "result": "PASS",
+      "detail": "",
+      "ms": 264
+    },
+    {
+      "section": "Auth",
+      "name": "test_09_api_me_unauthenticated",
+      "result": "PASS",
+      "detail": "",
+      "ms": 10
+    },
+    {
+      "section": "Auth",
+      "name": "test_10_session_client_switch",
+      "result": "PASS",
+      "detail": "",
+      "ms": 256
+    },
+    {
+      "section": "Auth",
+      "name": "test_11_session_client_invalid",
+      "result": "PASS",
+      "detail": "",
+      "ms": 355
+    },
+    {
+      "section": "Auth",
+      "name": "test_12_viewer_login_flow",
+      "result": "PASS",
+      "detail": "",
+      "ms": 1051
+    },
+    {
+      "section": "Auth",
+      "name": "test_13_public_admin_list",
+      "result": "PASS",
+      "detail": "",
+      "ms": 23
+    },
+    {
+      "section": "Auth",
+      "name": "test_14_root_redirect_to_admin_when_logged_in",
+      "result": "PASS",
+      "detail": "",
+      "ms": 290
+    },
+    {
+      "section": "PageRoutes",
+      "name": "test_01_admin_page",
+      "result": "PASS",
+      "detail": "",
+      "ms": 399
+    },
+    {
+      "section": "PageRoutes",
+      "name": "test_02_viewer_page",
+      "result": "PASS",
+      "detail": "",
+      "ms": 820
+    },
+    {
+      "section": "PageRoutes",
+      "name": "test_03_admin_page_requires_admin_role",
+      "result": "PASS",
+      "detail": "",
+      "ms": 974
+    },
+    {
+      "section": "PageRoutes",
+      "name": "test_04_health_endpoint",
+      "result": "PASS",
+      "detail": "",
+      "ms": 22
+    },
+    {
+      "section": "PageRoutes",
+      "name": "test_05_health_ui_endpoint",
+      "result": "PASS",
+      "detail": "",
+      "ms": 6
+    },
+    {
+      "section": "PageRoutes",
+      "name": "test_06_unauthenticated_access_redirects",
+      "result": "PASS",
+      "detail": "",
+      "ms": 10
+    },
+    {
+      "section": "Overview",
+      "name": "test_01_overview_stats",
+      "result": "PASS",
+      "detail": "",
+      "ms": 236
+    },
+    {
+      "section": "Overview",
+      "name": "test_02_platform_stats",
+      "result": "PASS",
+      "detail": "",
+      "ms": 329
+    },
+    {
+      "section": "Overview",
+      "name": "test_03_heatmap",
+      "result": "PASS",
+      "detail": "",
+      "ms": 315
+    },
+    {
+      "section": "Overview",
+      "name": "test_04_trends",
+      "result": "PASS",
+      "detail": "",
+      "ms": 282
+    },
+    {
+      "section": "Overview",
+      "name": "test_05_leaderboard",
+      "result": "PASS",
+      "detail": "",
+      "ms": 2681
+    },
+    {
+      "section": "Overview",
+      "name": "test_06_sla_trend",
+      "result": "PASS",
+      "detail": "",
+      "ms": 207
+    },
+    {
+      "section": "Overview",
+      "name": "test_07_trend_overlay",
+      "result": "PASS",
+      "detail": "",
+      "ms": 203
+    },
+    {
+      "section": "Overview",
+      "name": "test_08_schedule_calendar",
+      "result": "PASS",
+      "detail": "",
+      "ms": 216
+    },
+    {
+      "section": "ClientManagement",
+      "name": "test_01_list_clients",
+      "result": "PASS",
+      "detail": "",
+      "ms": 209
+    },
+    {
+      "section": "ClientManagement",
+      "name": "test_02_create_and_delete_client",
+      "result": "PASS",
+      "detail": "",
+      "ms": 255
+    },
+    {
+      "section": "ClientManagement",
+      "name": "test_03_create_client_duplicate_code",
+      "result": "PASS",
+      "detail": "",
+      "ms": 194
+    },
+    {
+      "section": "ClientManagement",
+      "name": "test_04_create_client_missing_required_fields",
+      "result": "PASS",
+      "detail": "",
+      "ms": 194
+    },
+    {
+      "section": "ClientManagement",
+      "name": "test_05_update_client",
+      "result": "PASS",
+      "detail": "",
+      "ms": 273
+    },
+    {
+      "section": "ClientManagement",
+      "name": "test_06_cannot_delete_active_client",
+      "result": "PASS",
+      "detail": "",
+      "ms": 477
+    },
+    {
+      "section": "ClientManagement",
+      "name": "test_07_client_storage_stats",
+      "result": "PASS",
+      "detail": "",
+      "ms": 293
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_01_list_users",
+      "result": "PASS",
+      "detail": "",
+      "ms": 251
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_02_create_viewer_user",
+      "result": "PASS",
+      "detail": "",
+      "ms": 454
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_03_create_admin_user",
+      "result": "PASS",
+      "detail": "",
+      "ms": 478
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_04_duplicate_username_fails",
+      "result": "PASS",
+      "detail": "",
+      "ms": 508
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_05_missing_fields_fail",
+      "result": "PASS",
+      "detail": "",
+      "ms": 195
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_06_short_password_fails",
+      "result": "PASS",
+      "detail": "",
+      "ms": 200
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_07_update_user_name",
+      "result": "PASS",
+      "detail": "",
+      "ms": 369
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_08_update_user_role",
+      "result": "PASS",
+      "detail": "",
+      "ms": 360
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_09_update_user_permissions",
+      "result": "PASS",
+      "detail": "",
+      "ms": 846
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_10_disable_and_re_enable_user",
+      "result": "PASS",
+      "detail": "",
+      "ms": 541
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_11_cannot_disable_own_account",
+      "result": "PASS",
+      "detail": "",
+      "ms": 288
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_12_reset_user_password",
+      "result": "PASS",
+      "detail": "",
+      "ms": 700
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_13_reset_password_too_short",
+      "result": "PASS",
+      "detail": "",
+      "ms": 457
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_14_change_own_password",
+      "result": "PASS",
+      "detail": "",
+      "ms": 1309
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_15_change_own_password_wrong_current",
+      "result": "PASS",
+      "detail": "",
+      "ms": 948
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_16_delete_user",
+      "result": "PASS",
+      "detail": "",
+      "ms": 481
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_17_cannot_delete_own_account",
+      "result": "PASS",
+      "detail": "",
+      "ms": 241
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_18_delete_nonexistent_user",
+      "result": "PASS",
+      "detail": "",
+      "ms": 271
+    },
+    {
+      "section": "UserManagement",
+      "name": "test_19_update_nothing_returns_400",
+      "result": "PASS",
+      "detail": "",
+      "ms": 240
+    },
+    {
+      "section": "Control",
+      "name": "test_01_test_status",
+      "result": "PASS",
+      "detail": "",
+      "ms": 237
+    },
+    {
+      "section": "Control",
+      "name": "test_02_get_logs",
+      "result": "PASS",
+      "detail": "",
+      "ms": 242
+    },
+    {
+      "section": "Control",
+      "name": "test_03_stop_when_not_running",
+      "result": "PASS",
+      "detail": "",
+      "ms": 218
+    },
+    {
+      "section": "Control",
+      "name": "test_04_start_test_no_jmx",
+      "result": "PASS",
+      "detail": "",
+      "ms": 228
+    },
+    {
+      "section": "Control",
+      "name": "test_05_start_test_nonexistent_jmx",
+      "result": "PASS",
+      "detail": "",
+      "ms": 198
+    },
+    {
+      "section": "Control",
+      "name": "test_06_run_note",
+      "result": "PASS",
+      "detail": "",
+      "ms": 188
+    },
+    {
+      "section": "Control",
+      "name": "test_07_annotate",
+      "result": "PASS",
+      "detail": "",
+      "ms": 743
+    },
+    {
+      "section": "Control",
+      "name": "test_08_annotate_empty_text",
+      "result": "PASS",
+      "detail": "",
+      "ms": 243
+    },
+    {
+      "section": "Control",
+      "name": "test_09_get_annotations",
+      "result": "PASS",
+      "detail": "",
+      "ms": 233
+    },
+    {
+      "section": "Control",
+      "name": "test_10_jmeter_install_status",
+      "result": "PASS",
+      "detail": "",
+      "ms": 233
+    },
+    {
+      "section": "Reports",
+      "name": "test_01_list_reports",
+      "result": "PASS",
+      "detail": "",
+      "ms": 251
+    },
+    {
+      "section": "Reports",
+      "name": "test_02_parse_jtl_report",
+      "result": "PASS",
+      "detail": "",
+      "ms": 232
+    },
+    {
+      "section": "Reports",
+      "name": "test_03_report_errors",
+      "result": "PASS",
+      "detail": "",
+      "ms": 232
+    },
+    {
+      "section": "Reports",
+      "name": "test_04_report_html",
+      "result": "PASS",
+      "detail": "",
+      "ms": 234
+    },
+    {
+      "section": "Reports",
+      "name": "test_05_report_meta",
+      "result": "PASS",
+      "detail": "",
+      "ms": 259
+    },
+    {
+      "section": "Reports",
+      "name": "test_06_scorecard",
+      "result": "PASS",
+      "detail": "",
+      "ms": 204
+    },
+    {
+      "section": "Reports",
+      "name": "test_07_bottleneck",
+      "result": "PASS",
+      "detail": "",
+      "ms": 188
+    },
+    {
+      "section": "Reports",
+      "name": "test_08_rt_histogram",
+      "result": "PASS",
+      "detail": "",
+      "ms": 692
+    },
+    {
+      "section": "Reports",
+      "name": "test_09_error_patterns",
+      "result": "PASS",
+      "detail": "",
+      "ms": 261
+    },
+    {
+      "section": "Reports",
+      "name": "test_10_ussd_funnel",
+      "result": "PASS",
+      "detail": "",
+      "ms": 254
+    },
+    {
+      "section": "Reports",
+      "name": "test_11_regression_check",
+      "result": "PASS",
+      "detail": "",
+      "ms": 236
+    },
+    {
+      "section": "Reports",
+      "name": "test_12_sla_analysis",
+      "result": "PASS",
+      "detail": "",
+      "ms": 250
+    },
+    {
+      "section": "Reports",
+      "name": "test_13_compare_reports_same_file",
+      "result": "PASS",
+      "detail": "",
+      "ms": 251
+    },
+    {
+      "section": "Reports",
+      "name": "test_14_compare_reports_missing_files",
+      "result": "PASS",
+      "detail": "",
+      "ms": 253
+    },
+    {
+      "section": "Reports",
+      "name": "test_15_report_nonexistent",
+      "result": "PASS",
+      "detail": "",
+      "ms": 251
+    },
+    {
+      "section": "Reports",
+      "name": "test_16_run_history",
+      "result": "PASS",
+      "detail": "",
+      "ms": 257
+    },
+    {
+      "section": "Reports",
+      "name": "test_17_compare_runs_empty",
+      "result": "PASS",
+      "detail": "",
+      "ms": 242
+    },
+    {
+      "section": "Reports",
+      "name": "test_18_compare_runs_with_sample",
+      "result": "PASS",
+      "detail": "",
+      "ms": 247
+    },
+    {
+      "section": "Downloads",
+      "name": "test_01_download_jtl",
+      "result": "PASS",
+      "detail": "",
+      "ms": 850
+    },
+    {
+      "section": "Downloads",
+      "name": "test_02_download_html_report",
+      "result": "PASS",
+      "detail": "",
+      "ms": 269
+    },
+    {
+      "section": "Downloads",
+      "name": "test_03_download_bundle",
+      "result": "PASS",
+      "detail": "",
+      "ms": 272
+    },
+    {
+      "section": "Downloads",
+      "name": "test_04_download_all_reports_zip",
+      "result": "PASS",
+      "detail": "",
+      "ms": 320
+    },
+    {
+      "section": "Downloads",
+      "name": "test_05_download_all_testdata_zip",
+      "result": "PASS",
+      "detail": "",
+      "ms": 251
+    },
+    {
+      "section": "Downloads",
+      "name": "test_06_download_testdata_file",
+      "result": "PASS",
+      "detail": "",
+      "ms": 240
+    },
+    {
+      "section": "Downloads",
+      "name": "test_07_download_db_backup",
+      "result": "PASS",
+      "detail": "",
+      "ms": 279
+    },
+    {
+      "section": "Downloads",
+      "name": "test_08_download_audit_csv",
+      "result": "PASS",
+      "detail": "",
+      "ms": 687
+    },
+    {
+      "section": "Downloads",
+      "name": "test_09_download_jmx_file",
+      "result": "PASS",
+      "detail": "",
+      "ms": 254
+    },
+    {
+      "section": "Downloads",
+      "name": "test_10_download_nonexistent_jtl",
+      "result": "PASS",
+      "detail": "",
+      "ms": 257
+    },
+    {
+      "section": "Downloads",
+      "name": "test_11_report_html_inline",
+      "result": "PASS",
+      "detail": "",
+      "ms": 244
+    },
+    {
+      "section": "Downloads",
+      "name": "test_12_report_pdf",
+      "result": "PASS",
+      "detail": "",
+      "ms": 253
+    },
+    {
+      "section": "Downloads",
+      "name": "test_13_report_excel",
+      "result": "PASS",
+      "detail": "",
+      "ms": 303
+    },
+    {
+      "section": "Uploads",
+      "name": "test_01_upload_jmx",
+      "result": "PASS",
+      "detail": "",
+      "ms": 245
+    },
+    {
+      "section": "Uploads",
+      "name": "test_02_upload_csv",
+      "result": "PASS",
+      "detail": "",
+      "ms": 634
+    },
+    {
+      "section": "Uploads",
+      "name": "test_03_upload_jtl_report",
+      "result": "PASS",
+      "detail": "",
+      "ms": 257
+    },
+    {
+      "section": "Uploads",
+      "name": "test_04_upload_missing_file",
+      "result": "PASS",
+      "detail": "",
+      "ms": 259
+    },
+    {
+      "section": "Uploads",
+      "name": "test_05_delete_uploaded_file",
+      "result": "PASS",
+      "detail": "",
+      "ms": 260
+    },
+    {
+      "section": "JMX",
+      "name": "test_01_list_jmx",
+      "result": "PASS",
+      "detail": "",
+      "ms": 248
+    },
+    {
+      "section": "JMX",
+      "name": "test_02_inspect_jmx",
+      "result": "PASS",
+      "detail": "",
+      "ms": 270
+    },
+    {
+      "section": "JMX",
+      "name": "test_03_jmx_tree",
+      "result": "PASS",
+      "detail": "",
+      "ms": 261
+    },
+    {
+      "section": "JMX",
+      "name": "test_04_jmx_requirements",
+      "result": "PASS",
+      "detail": "",
+      "ms": 264
+    },
+    {
+      "section": "JMX",
+      "name": "test_05_jmx_services",
+      "result": "PASS",
+      "detail": "",
+      "ms": 230
+    },
+    {
+      "section": "JMX",
+      "name": "test_06_jmx_params_get",
+      "result": "PASS",
+      "detail": "",
+      "ms": 207
+    },
+    {
+      "section": "JMX",
+      "name": "test_07_jmx_properties_get",
+      "result": "PASS",
+      "detail": "",
+      "ms": 869
+    },
+    {
+      "section": "JMX",
+      "name": "test_08_jmx_nonexistent_inspect",
+      "result": "PASS",
+      "detail": "",
+      "ms": 277
+    },
+    {
+      "section": "JMX",
+      "name": "test_09_jmx_poverride",
+      "result": "PASS",
+      "detail": "",
+      "ms": 244
+    },
+    {
+      "section": "CSV",
+      "name": "test_01_list_csv_files",
+      "result": "PASS",
+      "detail": "",
+      "ms": 258
+    },
+    {
+      "section": "CSV",
+      "name": "test_02_csv_preview",
+      "result": "PASS",
+      "detail": "",
+      "ms": 264
+    },
+    {
+      "section": "CSV",
+      "name": "test_03_csv_edit_get",
+      "result": "PASS",
+      "detail": "",
+      "ms": 249
+    },
+    {
+      "section": "CSV",
+      "name": "test_04_csv_row_check",
+      "result": "PASS",
+      "detail": "",
+      "ms": 247
+    },
+    {
+      "section": "CSV",
+      "name": "test_05_validate_csv_no_file",
+      "result": "PASS",
+      "detail": "",
+      "ms": 250
+    },
+    {
+      "section": "CSV",
+      "name": "test_06_generate_csv",
+      "result": "PASS",
+      "detail": "",
+      "ms": 235
+    },
+    {
+      "section": "CSV",
+      "name": "test_07_csv_nonexistent_preview",
+      "result": "PASS",
+      "detail": "",
+      "ms": 210
+    },
+    {
+      "section": "Settings",
+      "name": "test_01_get_settings",
+      "result": "PASS",
+      "detail": "",
+      "ms": 243
+    },
+    {
+      "section": "Settings",
+      "name": "test_02_save_settings",
+      "result": "PASS",
+      "detail": "",
+      "ms": 286
+    },
+    {
+      "section": "Settings",
+      "name": "test_03_get_env",
+      "result": "PASS",
+      "detail": "",
+      "ms": 275
+    },
+    {
+      "section": "Settings",
+      "name": "test_04_post_env",
+      "result": "PASS",
+      "detail": "",
+      "ms": 255
+    },
+    {
+      "section": "Settings",
+      "name": "test_05_get_load_config",
+      "result": "PASS",
+      "detail": "",
+      "ms": 257
+    },
+    {
+      "section": "Settings",
+      "name": "test_06_post_load_config",
+      "result": "PASS",
+      "detail": "",
+      "ms": 249
+    },
+    {
+      "section": "Settings",
+      "name": "test_07_get_sla_config",
+      "result": "PASS",
+      "detail": "",
+      "ms": 255
+    },
+    {
+      "section": "Settings",
+      "name": "test_08_post_sla_config",
+      "result": "PASS",
+      "detail": "",
+      "ms": 279
+    },
+    {
+      "section": "Settings",
+      "name": "test_09_get_sla_result",
+      "result": "PASS",
+      "detail": "",
+      "ms": 203
+    },
+    {
+      "section": "Settings",
+      "name": "test_10_get_webhook_config",
+      "result": "PASS",
+      "detail": "",
+      "ms": 200
+    },
+    {
+      "section": "Settings",
+      "name": "test_11_post_webhook_config",
+      "result": "PASS",
+      "detail": "",
+      "ms": 228
+    },
+    {
+      "section": "Settings",
+      "name": "test_12_webhook_test_no_url",
+      "result": "PASS",
+      "detail": "",
+      "ms": 332
+    },
+    {
+      "section": "Settings",
+      "name": "test_13_config_diff",
+      "result": "PASS",
+      "detail": "",
+      "ms": 252
+    },
+    {
+      "section": "Prerequisites",
+      "name": "test_01_get_prereq",
+      "result": "PASS",
+      "detail": "",
+      "ms": 296
+    },
+    {
+      "section": "Prerequisites",
+      "name": "test_02_save_prereq",
+      "result": "PASS",
+      "detail": "",
+      "ms": 262
+    },
+    {
+      "section": "Prerequisites",
+      "name": "test_03_prereq_auto",
+      "result": "PASS",
+      "detail": "",
+      "ms": 271
+    },
+    {
+      "section": "Schedules",
+      "name": "test_01_list_schedules",
+      "result": "PASS",
+      "detail": "",
+      "ms": 250
+    },
+    {
+      "section": "Schedules",
+      "name": "test_02_create_schedule",
+      "result": "PASS",
+      "detail": "",
+      "ms": 279
+    },
+    {
+      "section": "Schedules",
+      "name": "test_03_delete_schedule_nonexistent",
+      "result": "PASS",
+      "detail": "",
+      "ms": 263
+    },
+    {
+      "section": "Schedules",
+      "name": "test_04_list_recurring_schedules",
+      "result": "PASS",
+      "detail": "",
+      "ms": 275
+    },
+    {
+      "section": "Schedules",
+      "name": "test_05_create_recurring_schedule",
+      "result": "PASS",
+      "detail": "",
+      "ms": 362
+    },
+    {
+      "section": "Suite",
+      "name": "test_01_suite_status",
+      "result": "PASS",
+      "detail": "",
+      "ms": 302
+    },
+    {
+      "section": "Suite",
+      "name": "test_02_suite_stop_when_idle",
+      "result": "PASS",
+      "detail": "",
+      "ms": 252
+    },
+    {
+      "section": "DBMaintenance",
+      "name": "test_01_db_stats",
+      "result": "PASS",
+      "detail": "",
+      "ms": 252
+    },
+    {
+      "section": "DBMaintenance",
+      "name": "test_02_db_full_stats",
+      "result": "PASS",
+      "detail": "",
+      "ms": 268
+    },
+    {
+      "section": "DBMaintenance",
+      "name": "test_03_vacuum",
+      "result": "PASS",
+      "detail": "",
+      "ms": 277
+    },
+    {
+      "section": "DBMaintenance",
+      "name": "test_04_purge_old_data",
+      "result": "PASS",
+      "detail": "",
+      "ms": 314
+    },
+    {
+      "section": "DBMaintenance",
+      "name": "test_05_clear_audit",
+      "result": "PASS",
+      "detail": "",
+      "ms": 293
+    },
+    {
+      "section": "DBMaintenance",
+      "name": "test_06_backup_list",
+      "result": "PASS",
+      "detail": "",
+      "ms": 247
+    },
+    {
+      "section": "DBMaintenance",
+      "name": "test_07_backup_run",
+      "result": "PASS",
+      "detail": "",
+      "ms": 201
+    },
+    {
+      "section": "AuditLog",
+      "name": "test_01_get_audit_log",
+      "result": "PASS",
+      "detail": "",
+      "ms": 201
+    },
+    {
+      "section": "AuditLog",
+      "name": "test_02_audit_log_pagination",
+      "result": "PASS",
+      "detail": "",
+      "ms": 325
+    },
+    {
+      "section": "AuditLog",
+      "name": "test_03_audit_log_search",
+      "result": "PASS",
+      "detail": "",
+      "ms": 258
+    },
+    {
+      "section": "AuditLog",
+      "name": "test_04_viewer_audit_with_permission",
+      "result": "PASS",
+      "detail": "",
+      "ms": 1034
+    },
+    {
+      "section": "Baseline",
+      "name": "test_01_get_baseline_empty",
+      "result": "PASS",
+      "detail": "",
+      "ms": 278
+    },
+    {
+      "section": "Baseline",
+      "name": "test_02_set_baseline",
+      "result": "PASS",
+      "detail": "",
+      "ms": 362
+    },
+    {
+      "section": "Baseline",
+      "name": "test_03_compare_baseline",
+      "result": "PASS",
+      "detail": "",
+      "ms": 327
+    },
+    {
+      "section": "Baseline",
+      "name": "test_04_delete_baseline",
+      "result": "PASS",
+      "detail": "",
+      "ms": 294
+    },
+    {
+      "section": "LoadProfiles",
+      "name": "test_01_list_profiles",
+      "result": "PASS",
+      "detail": "",
+      "ms": 293
+    },
+    {
+      "section": "LoadProfiles",
+      "name": "test_02_create_profile",
+      "result": "PASS",
+      "detail": "",
+      "ms": 424
+    },
+    {
+      "section": "LoadProfiles",
+      "name": "test_03_delete_nonexistent_profile",
+      "result": "PASS",
+      "detail": "",
+      "ms": 335
+    },
+    {
+      "section": "EnvProfiles",
+      "name": "test_01_list_env_profiles",
+      "result": "PASS",
+      "detail": "",
+      "ms": 314
+    },
+    {
+      "section": "EnvProfiles",
+      "name": "test_02_create_env_profile",
+      "result": "PASS",
+      "detail": "",
+      "ms": 381
+    },
+    {
+      "section": "EnvProfiles",
+      "name": "test_03_delete_nonexistent_env_profile",
+      "result": "PASS",
+      "detail": "",
+      "ms": 281
+    },
+    {
+      "section": "Personalization",
+      "name": "test_01_get_theme",
+      "result": "PASS",
+      "detail": "",
+      "ms": 288
+    },
+    {
+      "section": "Personalization",
+      "name": "test_02_set_theme_dark",
+      "result": "PASS",
+      "detail": "",
+      "ms": 279
+    },
+    {
+      "section": "Personalization",
+      "name": "test_03_set_theme_light",
+      "result": "PASS",
+      "detail": "",
+      "ms": 251
+    },
+    {
+      "section": "Personalization",
+      "name": "test_04_get_favourites",
+      "result": "PASS",
+      "detail": "",
+      "ms": 329
+    },
+    {
+      "section": "Personalization",
+      "name": "test_05_toggle_favourite",
+      "result": "PASS",
+      "detail": "",
+      "ms": 294
+    },
+    {
+      "section": "Personalization",
+      "name": "test_06_get_presence",
+      "result": "PASS",
+      "detail": "",
+      "ms": 242
+    },
+    {
+      "section": "Personalization",
+      "name": "test_07_post_presence",
+      "result": "PASS",
+      "detail": "",
+      "ms": 250
+    },
+    {
+      "section": "Personalization",
+      "name": "test_08_add_comment",
+      "result": "PASS",
+      "detail": "",
+      "ms": 343
+    },
+    {
+      "section": "Personalization",
+      "name": "test_09_get_comments",
+      "result": "PASS",
+      "detail": "",
+      "ms": 288
+    },
+    {
+      "section": "RunNotes",
+      "name": "test_01_post_run_notes",
+      "result": "PASS",
+      "detail": "",
+      "ms": 261
+    },
+    {
+      "section": "RunNotes",
+      "name": "test_02_get_run_notes",
+      "result": "PASS",
+      "detail": "",
+      "ms": 275
+    },
+    {
+      "section": "LiveSharing",
+      "name": "test_01_create_live_share_token",
+      "result": "PASS",
+      "detail": "",
+      "ms": 202
+    },
+    {
+      "section": "LiveSharing",
+      "name": "test_02_access_shared_live_with_valid_token",
+      "result": "PASS",
+      "detail": "",
+      "ms": 271
+    },
+    {
+      "section": "LiveSharing",
+      "name": "test_03_access_shared_live_with_invalid_token",
+      "result": "PASS",
+      "detail": "",
+      "ms": 276
+    },
+    {
+      "section": "LiveSharing",
+      "name": "test_04_public_stats_with_valid_token",
+      "result": "PASS",
+      "detail": "",
+      "ms": 409
+    },
+    {
+      "section": "LiveSharing",
+      "name": "test_05_public_stats_with_invalid_token",
+      "result": "PASS",
+      "detail": "",
+      "ms": 330
+    },
+    {
+      "section": "LiveSharing",
+      "name": "test_06_create_report_share",
+      "result": "PASS",
+      "detail": "",
+      "ms": 452
+    },
+    {
+      "section": "LiveSharing",
+      "name": "test_07_shared_report_invalid_token",
+      "result": "PASS",
+      "detail": "",
+      "ms": 318
+    },
+    {
+      "section": "Registration",
+      "name": "test_01_register_request",
+      "result": "PASS",
+      "detail": "",
+      "ms": 681
+    },
+    {
+      "section": "Registration",
+      "name": "test_02_register_with_short_password",
+      "result": "PASS",
+      "detail": "",
+      "ms": 225
+    },
+    {
+      "section": "Registration",
+      "name": "test_03_list_registrations",
+      "result": "PASS",
+      "detail": "",
+      "ms": 560
+    },
+    {
+      "section": "Registration",
+      "name": "test_04_reject_registration",
+      "result": "PASS",
+      "detail": "",
+      "ms": 917
+    },
+    {
+      "section": "Calculators",
+      "name": "test_01_tps_calculator",
+      "result": "PASS",
+      "detail": "",
+      "ms": 238
+    },
+    {
+      "section": "Calculators",
+      "name": "test_02_check_server",
+      "result": "PASS",
+      "detail": "",
+      "ms": 264
+    },
+    {
+      "section": "Calculators",
+      "name": "test_03_health_check_post",
+      "result": "PASS",
+      "detail": "",
+      "ms": 266
+    },
+    {
+      "section": "Calculators",
+      "name": "test_04_load_config_suggest_from_jmx",
+      "result": "PASS",
+      "detail": "",
+      "ms": 243
+    },
+    {
+      "section": "XLSX",
+      "name": "test_01_list_xlsx_files",
+      "result": "PASS",
+      "detail": "",
+      "ms": 234
+    },
+    {
+      "section": "XLSX",
+      "name": "test_02_test_features",
+      "result": "PASS",
+      "detail": "",
+      "ms": 285
+    },
+    {
+      "section": "XLSX",
+      "name": "test_03_download_nonexistent_xlsx",
+      "result": "PASS",
+      "detail": "",
+      "ms": 239
+    },
+    {
+      "section": "AI",
+      "name": "test_01_ai_chat_no_key",
+      "result": "PASS",
+      "detail": "",
+      "ms": 206
+    },
+    {
+      "section": "AI",
+      "name": "test_02_ai_narrative_no_key",
+      "result": "PASS",
+      "detail": "",
+      "ms": 255
+    },
+    {
+      "section": "RBAC",
+      "name": "test_01_anon_cannot_get_users",
+      "result": "PASS",
+      "detail": "",
+      "ms": 20
+    },
+    {
+      "section": "RBAC",
+      "name": "test_02_viewer_cannot_create_user",
+      "result": "PASS",
+      "detail": "",
+      "ms": 226
+    },
+    {
+      "section": "RBAC",
+      "name": "test_03_viewer_cannot_delete_client",
+      "result": "PASS",
+      "detail": "",
+      "ms": 220
+    },
+    {
+      "section": "RBAC",
+      "name": "test_04_viewer_can_read_reports",
+      "result": "PASS",
+      "detail": "",
+      "ms": 233
+    },
+    {
+      "section": "RBAC",
+      "name": "test_05_viewer_can_read_overview_stats",
+      "result": "PASS",
+      "detail": "",
+      "ms": 167
+    },
+    {
+      "section": "RBAC",
+      "name": "test_06_viewer_can_read_me",
+      "result": "PASS",
+      "detail": "",
+      "ms": 166
+    },
+    {
+      "section": "RBAC",
+      "name": "test_07_viewer_can_read_audit_with_permission",
+      "result": "PASS",
+      "detail": "",
+      "ms": 254
+    },
+    {
+      "section": "RBAC",
+      "name": "test_08_viewer_cannot_access_db_maintenance",
+      "result": "PASS",
+      "detail": "",
+      "ms": 244
+    },
+    {
+      "section": "RBAC",
+      "name": "test_09_viewer_cannot_vacuum_db",
+      "result": "PASS",
+      "detail": "",
+      "ms": 230
+    },
+    {
+      "section": "RBAC",
+      "name": "test_10_admin_can_access_all",
+      "result": "PASS",
+      "detail": "",
+      "ms": 295
+    },
+    {
+      "section": "RBAC",
+      "name": "test_11_anon_cannot_access_admin_page",
+      "result": "PASS",
+      "detail": "",
+      "ms": 5
+    },
+    {
+      "section": "RBAC",
+      "name": "test_12_viewer_runs_from_viewer_portal",
+      "result": "PASS",
+      "detail": "",
+      "ms": 250
+    },
+    {
+      "section": "LiveStats",
+      "name": "test_01_live_stats",
+      "result": "PASS",
+      "detail": "",
+      "ms": 234
+    },
+    {
+      "section": "LiveStats",
+      "name": "test_02_live_stats_labels",
+      "result": "PASS",
+      "detail": "",
+      "ms": 221
+    },
+    {
+      "section": "Archive",
+      "name": "test_01_archive_reports",
+      "result": "PASS",
+      "detail": "",
+      "ms": 243
+    }
+  ]
+}

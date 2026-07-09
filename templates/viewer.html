@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports — BTC Load Testing Portal</title>
+<script src="{{ url_for('static', filename='chart.min.js') }}"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c14;--surface:#0d1421;--surface2:#131d2e;--surface3:#192438;
+  --border:#1e2d45;--accent:#00d4ff;--accent2:#00ff9d;--purple:#7c3aed;
+  --warn:#f59e0b;--danger:#ef4444;--text:#e2eaf5;--muted:#64748b;
+  --sidebar:200px;--header:58px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;display:flex;flex-direction:column;min-height:100vh;}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.header{position:fixed;top:0;left:0;right:0;height:var(--header);z-index:200;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px 0 0;gap:14px;}
+.header-brand{width:var(--sidebar);flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 18px;border-right:1px solid var(--border);height:100%;}
+.brand-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.brand-name{font-size:13px;font-weight:800;background:linear-gradient(90deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.header-env{font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.header-env strong{color:var(--accent);}
+.header-spacer{flex:1;}
+.viewer-badge{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#a78bfa;}
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px 5px 8px;}
+.user-avatar{width:26px;height:26px;background:linear-gradient(135deg,var(--purple),#4f46e5);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;}
+.user-name{font-size:12px;font-weight:700;}
+.user-role{font-size:10px;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;}
+.btn-logout{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--muted);font-size:11px;cursor:pointer;transition:all .15s;}
+.btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+
+.sidebar{position:fixed;top:var(--header);left:0;bottom:0;width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
+.nav-section{padding:16px 12px 4px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;margin:2px 8px;cursor:pointer;transition:all .15s;font-size:13px;font-weight:500;}
+.nav-item:hover{background:var(--surface2);}
+.nav-item.active{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.15);}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--accent);color:#000;font-size:10px;font-weight:800;border-radius:10px;padding:1px 7px;}
+.read-only-notice{margin:12px 8px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:8px;padding:10px;font-size:11px;color:#a78bfa;text-align:center;}
+
+.main{margin-top:var(--header);margin-left:var(--sidebar);flex:1;padding:24px;min-height:calc(100vh - var(--header));}
+.panel{display:none;}.panel.active{display:block;}
+
+.sec-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.sec-head h2{font-size:16px;font-weight:700;}
+.sec-sub{font-size:12px;color:var(--muted);margin-left:4px;}
+.sec-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.ok::before{background:linear-gradient(90deg,var(--accent2),transparent);}
+.kpi.info::before{background:linear-gradient(90deg,var(--accent),transparent);}
+.kpi.warn::before{background:linear-gradient(90deg,var(--warn),transparent);}
+.kpi.danger::before{background:linear-gradient(90deg,var(--danger),transparent);}
+.kpi.purple::before{background:linear-gradient(90deg,var(--purple),transparent);}
+.kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px;}
+.kpi-val{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;}
+.kpi.ok .kpi-val{color:var(--accent2);}.kpi.info .kpi-val{color:var(--accent);}.kpi.warn .kpi-val{color:var(--warn);}.kpi.danger .kpi-val{color:var(--danger);}.kpi.purple .kpi-val{color:#a78bfa;}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:5px;}
+
+.reports-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--surface2);}
+tbody tr.selected{background:rgba(0,212,255,.07);border-left:3px solid var(--accent);}
+tbody td{padding:11px 14px;font-size:13px;}
+.pill{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:800;}
+.pill-ok{background:rgba(0,255,157,.12);color:var(--accent2);}.pill-warn{background:rgba(245,158,11,.12);color:var(--warn);}.pill-danger{background:rgba(239,68,68,.12);color:var(--danger);}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s;}
+.btn-secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text);}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+
+.perc-band{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.perc-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
+.perc-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.perc-val{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-1px;}
+.perc-val.p50{color:var(--accent2)}.perc-val.p90{color:var(--accent)}.perc-val.p95{color:var(--warn)}.perc-val.p99{color:var(--danger)}
+.perc-unit{font-size:10px;color:var(--muted);}
+
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.chart-card.full{grid-column:1/-1;}
+.chart-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.chart-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);}
+.chart-wrap{position:relative;height:200px;}.chart-wrap.tall{height:260px;}
+
+.flow-track{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:4px;}
+.flow-step{flex-shrink:0;}
+.flow-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 10px;margin:0 4px;text-align:center;min-width:100px;transition:all .15s;}
+.flow-card:hover{border-color:var(--accent);}
+.flow-num{width:22px;height:22px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:50%;font-size:11px;font-weight:800;color:#000;display:flex;align-items:center;justify-content:center;margin:0 auto 7px;}
+.flow-name{font-size:10px;font-weight:700;text-transform:uppercase;margin-bottom:5px;line-height:1.3;}
+.flow-avg{font-size:14px;font-weight:800;margin-bottom:3px;}
+.flow-avg.fast{color:var(--accent2)}.flow-avg.med{color:var(--accent)}.flow-avg.slow{color:var(--warn)}.flow-avg.vslow{color:var(--danger)}
+.flow-err{font-size:9px;padding:1px 6px;border-radius:5px;display:inline-block;}
+.flow-err.ok{background:rgba(0,255,157,.1);color:var(--accent2);}.flow-err.bad{background:rgba(239,68,68,.1);color:var(--danger);}
+.flow-arr{display:flex;align-items:center;justify-content:center;padding:0 2px;padding-top:12px;color:var(--border);font-size:14px;}
+
+.bar-bg{background:var(--surface2);border-radius:3px;height:5px;min-width:60px;}
+.bar-fill{height:5px;border-radius:3px;}
+.bar-fill.fast{background:var(--accent2)}.bar-fill.med{background:var(--accent)}.bar-fill.slow{background:var(--warn)}.bar-fill.vslow{background:var(--danger)}
+
+.report-viewer{animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* What each metric means */
+.metric-guide{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;}
+.metric-guide h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:14px;}
+.mg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.mg-item{background:var(--surface2);border-radius:8px;padding:12px;}
+.mg-term{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px;}
+.mg-def{font-size:11px;color:var(--muted);line-height:1.5;}
+/* ── PRE-REQUISITES (shared) ── */
+.pq-section{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;}
+.pq-sec-title{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.pq-num{background:linear-gradient(135deg,var(--accent),var(--purple));color:#000;min-width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;padding:0 4px;}
+.pq-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px;}
+.pq-field{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:13px;outline:none;width:100%;font-family:inherit;transition:border-color .15s;resize:vertical;}
+.pq-field:focus{border-color:var(--accent);}
+.pq-kpi{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;}
+.pq-big-inp{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:20px;font-weight:800;width:100%;outline:none;padding:2px 0;}
+.pq-big-inp:focus{border-bottom-color:var(--accent);}
+.pq-unit{font-size:9px;color:var(--muted);margin-top:4px;}
+.pq-ch{padding:6px 12px;border:2px solid var(--border);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;user-select:none;}
+.pq-ch.active{border-color:var(--accent);background:rgba(0,212,255,.08);color:var(--accent);}
+.pq-checklist{display:flex;flex-direction:column;gap:8px;}
+.pq-check-row{display:flex;align-items:flex-start;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;transition:border-color .15s;}
+.pq-check-row.done{border-color:rgba(0,255,157,.25);background:rgba(0,255,157,.03);}
+.pq-check-row.blocked{border-color:rgba(239,68,68,.2);}
+.pq-check-row.auto-checked{border-color:rgba(0,212,255,.2);background:rgba(0,212,255,.03);}
+.pq-toggle{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s;font-size:11px;font-weight:900;}
+.pq-toggle.checked{background:var(--accent2);border-color:var(--accent2);color:#000;}
+.pq-toggle.auto{background:var(--accent);border-color:var(--accent);color:#000;cursor:default;}
+.pq-toggle.blocked-x{background:var(--danger);border-color:var(--danger);color:#fff;}
+.pq-check-body{flex:1;min-width:0;}
+.pq-check-title{font-size:12px;font-weight:700;margin-bottom:2px;}
+.pq-check-sub{font-size:10px;color:var(--muted);}
+.pq-check-note{margin-top:5px;}
+.pq-check-note input{background:transparent;border:none;border-bottom:1px dashed var(--border);color:var(--muted);font-size:10px;width:100%;outline:none;padding:2px 0;}
+.pq-check-note input:focus{border-bottom-color:var(--accent);color:var(--text);}
+.pq-stat-sel{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;color:var(--text);font-size:10px;font-weight:700;outline:none;cursor:pointer;flex-shrink:0;}
+.pq-stat-sel.st-done{color:var(--accent2);border-color:rgba(0,255,157,.3);}
+.pq-stat-sel.st-prog{color:var(--accent);border-color:rgba(0,212,255,.3);}
+.pq-stat-sel.st-pend{color:var(--warn);border-color:rgba(245,158,11,.3);}
+.pq-stat-sel.st-block{color:var(--danger);border-color:rgba(239,68,68,.3);}
+.pq-act-inp{background:transparent;border:none;color:var(--text);font-size:12px;width:100%;outline:none;min-width:50px;}
+.pq-act-inp:focus{border-bottom:1px solid var(--accent);}
+.pq-act-inp::placeholder{color:var(--muted);}
+.pq-auto-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;}
+.pq-auto-card.ok{border-color:rgba(0,255,157,.25);background:rgba(0,255,157,.04);}
+.pq-auto-card.fail{border-color:rgba(239,68,68,.2);background:rgba(239,68,68,.03);}
+
+/* ── Mobile responsive ── */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;color:var(--text);font-size:20px;}
+@media (max-width:768px){
+  :root{--sidebar:200px;}
+  .hamburger{display:flex;align-items:center;}
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease;z-index:300;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;padding:16px;}
+  .header{padding:0 12px 0 0;gap:8px;}
+  .header-brand{width:auto;border-right:none;padding:0 12px;}
+  .header-env{display:none;}
+  .viewer-badge{display:none;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)!important;}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:299;}
+  .sidebar-overlay.open{display:block;}
+}
+/* ── JMX Inspector ── */
+.ji-section{border-top:1px solid var(--border);}
+.ji-section-hdr{padding:7px 16px;background:var(--surface3);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--accent);border-left:3px solid var(--accent);display:flex;align-items:center;gap:6px;}
+.ji-field-grid{display:grid;grid-template-columns:190px 1fr;}
+.ji-field-label{padding:7px 16px;font-size:11px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);background:rgba(0,0,0,.12);display:flex;align-items:center;}
+.ji-field-val{padding:7px 16px;font-size:12px;color:var(--text);border-bottom:1px solid var(--border);display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
+.ji-subsec-hdr{padding:5px 12px 5px 14px;background:rgba(0,0,0,.18);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.ji-param-table{width:100%;border-collapse:collapse;font-size:11px;}
+.ji-param-table th{padding:5px 12px;background:var(--surface);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:left;border-bottom:1px solid var(--border);}
+.ji-param-table td{padding:6px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.ji-param-table tr:last-child td{border-bottom:none;}
+.ji-inp{background:var(--surface2);border:1px solid var(--accent);border-radius:5px;color:var(--text);font-size:11px;padding:4px 8px;outline:none;transition:box-shadow .15s;font-family:inherit;}
+.ji-inp:focus{box-shadow:0 0 0 2px rgba(0,212,255,.2);}
+.ji-inp-num{width:80px;}
+.ji-inp-full{width:100%;box-sizing:border-box;}
+.ji-ro{font-family:monospace;font-size:11px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+<div class="header">
+  <button class="hamburger" onclick="toggleSidebar()" title="Menu">☰</button>
+  <div class="header-brand">
+    <div class="brand-icon">📡</div>
+    <div class="brand-name">BTC Load Test</div>
+  </div>
+  <div class="header-env">Client: <strong id="v-client-label">{{ active_client.name }}</strong></div>
+  {% if clients|length > 1 %}
+  <select id="v-client-switcher" onchange="switchClient(this.value)"
+    style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+           color:var(--text);font-size:12px;padding:5px 10px;cursor:pointer;outline:none;">
+    {% for c in clients %}
+    <option value="{{ c.code }}" {% if c.code == active_client.code %}selected{% endif %}>
+      {{ c.logo_emoji }} {{ c.name }}
+    </option>
+    {% endfor %}
+  </select>
+  {% endif %}
+  <div class="header-spacer"></div>
+  <div class="viewer-badge">🧪 Tester Mode</div>
+  <div class="user-chip">
+    <div class="user-avatar">{{ session.initials }}</div>
+    <div style="line-height:1.2;">
+      <div class="user-name">{{ session.name }}</div>
+      <div class="user-role">Tester</div>
+    </div>
+  </div>
+  <button class="btn-logout" id="v-theme-btn" onclick="toggleTheme()" style="margin-right:4px;" title="Toggle theme">🌙</button>
+  <button class="btn-logout" onclick="document.getElementById('v-shortcuts-modal').style.display='flex'" title="Keyboard shortcuts" style="margin-right:4px;">&#9000;</button>
+  <div id="presence-bar" style="display:flex;gap:4px;align-items:center;margin-right:4px;"></div>
+  <button class="btn-logout" onclick="openChangePwd()" style="margin-right:4px;">🔑 Change Password</button>
+  <a href="/logout"><button class="btn-logout">Sign Out</button></a>
+</div>
+
+<div class="sidebar">
+  <div class="nav-section">Navigation</div>
+  <div class="nav-item active" onclick="showPanel('overview');loadViewerOverview()">
+    <span class="nav-icon">📊</span> Overview
+  </div>
+  <div class="nav-item" onclick="showPanel('reports');loadReportsList()">
+    <span class="nav-icon">📋</span> Reports
+    <span class="nav-badge">{{ jtl_files|length }}</span>
+  </div>
+  <div class="nav-item" onclick="showPanel('testfeatures');loadTestFeatures()">
+    <span class="nav-icon">📐</span> Test Config
+  </div>
+  <div class="nav-item" onclick="showPanel('sla');loadSlaViewer()">
+    <span class="nav-icon">🎯</span> SLA Results
+  </div>
+  <div class="nav-item" onclick="showPanel('prereq');loadPrereq()">
+    <span class="nav-icon">📋</span> Pre-Requisites
+  </div>
+  <div class="nav-item" onclick="showPanel('heatmap');loadHeatmapViewer()">
+    <span class="nav-icon">🔥</span> Heatmap
+  </div>
+  <div class="nav-item" onclick="showPanel('guide')">
+    <span class="nav-icon">📖</span> Metrics Guide
+  </div>
+  <div class="nav-item" onclick="showPanel('jmxinspector');loadJmxInspectorView()">
+    <span class="nav-icon">🔬</span> JMX Inspector
+  </div>
+  <!-- Permission-gated nav items (hidden until permissions loaded) -->
+  <div class="nav-item" id="nav-run" style="display:none;" onclick="showPanel('run');loadRunPanel()">
+    <span class="nav-icon">▶</span> Run Test
+  </div>
+  <div class="nav-item" id="nav-upload" style="display:none;" onclick="showPanel('upload');loadUploadPanel()">
+    <span class="nav-icon">⬆</span> Upload Files
+  </div>
+  <div class="nav-item" id="nav-schedules" style="display:none;" onclick="showPanel('schedules');loadSchedulesList()">
+    <span class="nav-icon">🕐</span> Schedules
+  </div>
+  <div class="nav-item" id="nav-audit" style="display:none;" onclick="showPanel('audit');loadAuditLog()">
+    <span class="nav-icon">📜</span> Audit Log
+  </div>
+  <div class="read-only-notice" id="viewer-notice">
+    🧪 <strong>Tester</strong><br>
+    Contact manager for access
+  </div>
+</div>
+
+<div class="main">
+
+<!-- OVERVIEW PANEL -->
+<div class="panel active" id="panel-overview">
+  <div class="sec-head">
+    <span>📊</span><h2>Overview</h2>
+    <span class="sec-sub">{{ active_client.name }} · Read-Only View</span>
+    <div class="sec-line"></div>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="loadViewerOverview()">↻ Refresh</button>
+  </div>
+
+  <!-- Running banner -->
+  <div id="vov-running-banner" style="display:none;background:rgba(0,255,157,.08);border:1px solid rgba(0,255,157,.3);
+      border-radius:10px;padding:12px 18px;margin-bottom:16px;align-items:center;gap:10px;font-size:13px;">
+    <span style="font-size:18px;">🟢</span>
+    <span>Test currently running: <strong id="vov-running-jmx" style="color:var(--accent2);"></strong></span>
+  </div>
+
+  <div class="kpi-grid" id="vov-kpis">
+    <div class="kpi info"><div class="kpi-label">JMX Plans</div><div class="kpi-val" id="vov-jmx-count">{{ jmx_files|length }}</div><div class="kpi-sub">Available test plans</div></div>
+    <div class="kpi ok"><div class="kpi-label">Total Runs</div><div class="kpi-val" id="vov-total-runs">{{ jtl_files|length }}</div><div class="kpi-sub">JTL result files</div></div>
+    <div class="kpi purple"><div class="kpi-label">Test Data</div><div class="kpi-val" id="vov-csv-count">{{ csv_files|length }}</div><div class="kpi-sub">CSV data files</div></div>
+    <div class="kpi info"><div class="kpi-label">Test Status</div><div class="kpi-val" id="vov-status">Idle</div><div class="kpi-sub">—</div></div>
+    <div class="kpi warn"><div class="kpi-label">Last Run</div><div class="kpi-val" style="font-size:13px;" id="vov-last-run">{{ jtl_files[0] if jtl_files else '—' }}</div>
+      <div class="kpi-sub">SLA: <span id="vov-sla-badge" style="font-weight:700;">—</span></div></div>
+    <div class="kpi ok"><div class="kpi-label">Active Client</div><div class="kpi-val" style="font-size:16px;">{{ active_client.logo_emoji }} {{ active_client.name }}</div><div class="kpi-sub">{{ active_client.code }}</div></div>
+  </div>
+
+  <!-- TPS trend chart -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin:16px 0;">
+    <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px;">📈 Performance Trend (Last 5 Runs)</div>
+    <canvas id="vov-trend-chart" height="110"></canvas>
+  </div>
+
+  <!-- Available JMX list -->
+  <div class="sec-head" style="margin-top:8px;">
+    <span>📄</span><h2>Available Test Plans</h2><div class="sec-line"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:20px;">
+    {% for jmx in jmx_files %}
+    <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
+      <div style="font-size:24px;">📄</div>
+      <div><div style="font-size:13px;font-weight:700;">{{ jmx }}</div>
+        <div style="font-size:11px;color:var(--muted);">JMeter test plan</div></div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- TEST FEATURES PANEL -->
+<div class="panel" id="panel-testfeatures">
+  <div class="sec-head">
+    <span>📐</span><h2>Test Configuration</h2>
+    <span class="sec-sub">Load distribution and scenario settings</span>
+    <div class="sec-line"></div>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="loadTestFeatures()">↻ Refresh</button>
+  </div>
+  <div id="tf-content"><div style="color:var(--muted);padding:20px;">Loading…</div></div>
+</div>
+
+<!-- SLA RESULTS PANEL -->
+<div class="panel" id="panel-sla">
+  <div class="sec-head">
+    <span>🎯</span><h2>SLA Thresholds &amp; Results</h2>
+    <span class="sec-sub">Configured thresholds and last run evaluation</span>
+    <div class="sec-line"></div>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="loadSlaViewer()">↻ Refresh</button>
+  </div>
+  <div id="sla-viewer-content"><div style="color:var(--muted);padding:20px;">Loading…</div></div>
+</div>
+
+<!-- REPORTS PANEL -->
+<div class="panel" id="panel-reports">
+  <div class="sec-head">
+    <span>📋</span><h2>Test Reports</h2>
+    <span class="sec-sub">Click any report to view the full dashboard</span>
+    <div class="sec-line"></div>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="loadReportsList()">↻ Refresh</button>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-bottom:12px;align-items:center;">
+    <input type="text" id="v-reports-search" placeholder="&#128269; Search reports…" oninput="filterVReports(this.value)"
+      style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:13px;outline:none;">
+    <button onclick="filterVReports('');document.getElementById('v-reports-search').value=''" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);padding:7px 12px;cursor:pointer;font-size:12px;">&times;</button>
+  </div>
+  <div class="reports-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>&#11088;</th>
+          <th>File Name</th>
+          <th>Date / Time</th>
+          <th>Samples</th>
+          <th>Size (KB)</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="reports-tbody">
+        <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Embedded report dashboard -->
+  <div id="report-viewer" style="display:none;" class="report-viewer">
+    <div class="sec-head" style="margin-top:8px;">
+      <span>📈</span><h2 id="rpt-title">Report</h2>
+      <div class="sec-line"></div>
+      <div style="font-size:12px;color:var(--muted);" id="rpt-meta"></div>
+    </div>
+
+    <div class="kpi-grid" id="rpt-kpis"></div>
+    <div class="perc-band" id="rpt-percs"></div>
+
+    <div class="sec-head"><span>📱</span><h2>USSD Transaction Flow (P2P Transfer)</h2><div class="sec-line"></div></div>
+    <div class="card" style="overflow-x:auto;margin-bottom:20px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+        Each box shows one step of the *1239# USSD menu. Color = speed: <span style="color:var(--accent2)">■ Fast (&lt;500ms)</span> &nbsp;
+        <span style="color:var(--accent)">■ OK (&lt;1s)</span> &nbsp;
+        <span style="color:var(--warn)">■ Slow (&lt;2s)</span> &nbsp;
+        <span style="color:var(--danger)">■ Very Slow (&gt;2s)</span>
+      </div>
+      <div class="flow-track" id="rpt-flow"></div>
+    </div>
+
+    <div class="sec-head"><span>📉</span><h2>Performance Charts</h2><div class="sec-line"></div></div>
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <div class="chart-title"><div class="chart-dot"></div>Throughput Over Time — How many requests per second during the test</div>
+        <div class="chart-wrap tall"><canvas id="ch-tps"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><div class="chart-dot" style="background:var(--warn)"></div>Average Response Time by USSD Step (ms) — Lower is better</div>
+        <div class="chart-wrap"><canvas id="ch-rt-bar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><div class="chart-dot" style="background:var(--purple)"></div>Response Time Distribution — How many requests took how long</div>
+        <div class="chart-wrap"><canvas id="ch-hist"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><div class="chart-dot" style="background:var(--warn)"></div>Percentile Comparison — P90/P95/P99 response times per step</div>
+        <div class="chart-wrap"><canvas id="ch-perc"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><div class="chart-dot" style="background:var(--danger)"></div>Error Distribution — Which steps had failures</div>
+        <div class="chart-wrap"><canvas id="ch-err"></canvas></div>
+      </div>
+    </div>
+
+    <div class="sec-head"><span>📊</span><h2>Transaction Summary Table</h2><div class="sec-line"></div></div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">
+      Each row = one USSD step. <strong>TC - P2P</strong> = total end-to-end transaction time (all 7 steps combined).
+    </div>
+    <div class="reports-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Transaction Step</th><th>Samples</th><th>Avg (ms)</th><th>Median</th>
+            <th>P90</th><th>P95</th><th>P99</th><th>Min</th><th>Max</th>
+            <th>TPS</th><th>Errors</th><th>Error %</th><th>Speed Bar</th>
+          </tr>
+        </thead>
+        <tbody id="rpt-tbody"></tbody>
+      </table>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+      <div class="card">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:14px;">🌐 HTTP Response Codes</div>
+        <div id="rpt-rc"></div>
+      </div>
+      <div class="card">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:14px;">📊 Run Summary</div>
+        <div id="rpt-stats"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- METRICS GUIDE PANEL -->
+<div class="panel" id="panel-guide">
+  <div class="sec-head">
+    <span>📖</span><h2>Metrics Reference Guide</h2>
+    <span class="sec-sub">What every metric means</span>
+    <div class="sec-line"></div>
+  </div>
+  <div class="metric-guide">
+    <h3>Key Performance Indicators</h3>
+    <div class="mg-grid">
+      <div class="mg-item"><div class="mg-term">Throughput (TPS/RPS)</div><div class="mg-def">Number of transactions/requests completed per second. Higher = better system capacity.</div></div>
+      <div class="mg-item"><div class="mg-term">Avg Response Time</div><div class="mg-def">Average time (ms) for the server to respond to a request. Lower = faster.</div></div>
+      <div class="mg-item"><div class="mg-term">P50 / Median</div><div class="mg-def">50% of requests were faster than this value. Typical user experience.</div></div>
+      <div class="mg-item"><div class="mg-term">P90</div><div class="mg-def">90% of requests were faster than this. 10% were slower — these are the slowest typical users.</div></div>
+      <div class="mg-item"><div class="mg-term">P95</div><div class="mg-def">95% of requests were faster. Represents near-worst-case user experience.</div></div>
+      <div class="mg-item"><div class="mg-term">P99</div><div class="mg-def">99% of requests were faster. Worst-case experience (only 1% are slower).</div></div>
+      <div class="mg-item"><div class="mg-term">Error Rate</div><div class="mg-def">% of requests that failed (non-200 response or timeout). Target: &lt;1% for production.</div></div>
+      <div class="mg-item"><div class="mg-term">Std Deviation</div><div class="mg-def">How consistent response times are. High std dev means unpredictable performance.</div></div>
+      <div class="mg-item"><div class="mg-term">TC - P2P</div><div class="mg-def">Transaction Controller: measures total end-to-end time for all 7 USSD steps combined.</div></div>
+      <div class="mg-item"><div class="mg-term">Concurrent Users</div><div class="mg-def">Number of virtual users running simultaneously. Simulates peak load.</div></div>
+      <div class="mg-item"><div class="mg-term">Ramp-up</div><div class="mg-def">Time to gradually increase from 0 to full thread count. Avoids sudden server spike.</div></div>
+      <div class="mg-item"><div class="mg-term">Samples</div><div class="mg-def">Total number of HTTP requests sent for that transaction step.</div></div>
+    </div>
+  </div>
+  <div class="metric-guide" style="margin-top:0;">
+    <h3>USSD P2P Transfer Flow (*1239#)</h3>
+    <div style="font-size:13px;line-height:2;color:var(--text);">
+      <ol style="padding-left:20px;">
+        <li><strong>Step 1 — Dial *1239#</strong>: Customer dials the USSD code, opening a session on the BTC network → <em>menu-manager/RequestReceiver</em></li>
+        <li><strong>Step 2 — Input: 1359</strong>: Customer selects the P2P (Person to Person) transfer menu option</li>
+        <li><strong>Step 3 — Input: 3</strong>: Customer selects transfer type (e.g., to mobile wallet)</li>
+        <li><strong>Step 4 — Input: 1</strong>: Customer selects account type (e.g., own account)</li>
+        <li><strong>Step 5 — Receiver MSISDN</strong>: Customer enters the recipient's mobile number</li>
+        <li><strong>Step 6 — Amount</strong>: Customer enters the transfer amount in BWP</li>
+        <li><strong>Step 7 — Confirm (1)</strong>: Customer confirms the transaction by entering PIN + 1 to approve</li>
+      </ol>
+    </div>
+  </div>
+  <div class="metric-guide" style="margin-top:0;">
+    <h3>Interpreting Results — Pass / Fail Thresholds</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
+      <div style="background:rgba(0,255,157,.05);border:1px solid rgba(0,255,157,.15);border-radius:8px;padding:14px;">
+        <div style="font-weight:700;color:var(--accent2);margin-bottom:8px;">✅ PASS Criteria</div>
+        <div style="line-height:2;color:var(--text);">
+          Error Rate &lt; 1%<br>
+          Avg Response &lt; 3,000 ms<br>
+          P90 &lt; 5,000 ms<br>
+          Throughput stable (not dropping)<br>
+          No Out-of-Memory errors
+        </div>
+      </div>
+      <div style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:14px;">
+        <div style="font-weight:700;color:var(--danger);margin-bottom:8px;">❌ FAIL Criteria</div>
+        <div style="line-height:2;color:var(--text);">
+          Error Rate &gt; 5%<br>
+          P99 &gt; 10,000 ms<br>
+          Throughput degrading over time<br>
+          Connection timeouts / Socket errors<br>
+          Server 5xx errors
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JMX INSPECTOR PANEL (view-only for testers) -->
+<div class="panel" id="panel-jmxinspector">
+  <div class="sec-head">
+    <span>🔬</span><h2>JMX Inspector</h2>
+    <span class="sec-sub">Service steps, parameters &amp; assertions</span>
+    <div class="sec-line"></div>
+    <select id="vji-jmx-select" onchange="loadJmxInspectorView()"
+      style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 12px;font-size:12px;outline:none;"></select>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;margin-left:8px;" onclick="loadJmxInspectorView()">↻ Refresh</button>
+  </div>
+  <div id="vji-content"><div style="color:var(--muted);padding:30px;text-align:center;">Select a JMX file above to inspect.</div></div>
+</div>
+
+<!-- HEATMAP PANEL -->
+<div class="panel" id="panel-heatmap">
+  <div class="sec-head">
+    <span>🔥</span><h2>Run Heatmap</h2><span class="sec-sub">Test run frequency by hour and day</span>
+    <div class="sec-line"></div>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="loadHeatmapViewer()">↻ Refresh</button>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Each cell shows how many test runs were executed at that hour × day-of-week combination for the active client.</div>
+    <div id="v-heatmap-container" style="overflow-x:auto;"></div>
+  </div>
+</div>
+
+<!-- PRE-REQUISITES PANEL -->
+<div class="panel" id="panel-prereq">
+  <div class="sec-head">
+    <span>📋</span><h2>Pre-Requisites &amp; Activity Tracker</h2>
+    <span class="sec-sub">Shared with admin — auto-checks update every 30s</span>
+    <div class="sec-line"></div>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="savePrereq()">💾 Save</button>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;margin-left:6px;" onclick="loadPrereq()">↻ Refresh</button>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;margin-left:6px;" onclick="window.print()">🖨 Print / PDF</button>
+  </div>
+  <div id="pq-auto-banner" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;"></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px;">
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--accent);" id="pq-sum-total">0</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:3px;">Activities</div></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--accent2);" id="pq-sum-done">0</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:3px;">Completed</div></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--warn);" id="pq-sum-pending">0</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:3px;">Pending</div></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--danger);" id="pq-sum-blocked">0</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:3px;">Blocked</div></div>
+  </div>
+  <!-- 1: Targets -->
+  <div class="pq-section">
+    <div class="pq-sec-title"><span class="pq-num">1</span> Load Test Targets</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;">
+      <div class="pq-kpi" style="border-top:2px solid var(--accent);"><div class="pq-label">Target TPS</div><input id="pq-tps" class="pq-big-inp" placeholder="e.g. 40" type="number"><div class="pq-unit">trans / sec</div></div>
+      <div class="pq-kpi" style="border-top:2px solid var(--accent2);"><div class="pq-label">Avg TPS SLA</div><input id="pq-avg-sla" class="pq-big-inp" placeholder="e.g. 35" type="number"><div class="pq-unit">min sustained</div></div>
+      <div class="pq-kpi" style="border-top:2px solid var(--purple);"><div class="pq-label">Peak TPS</div><input id="pq-peak" class="pq-big-inp" placeholder="e.g. 45" type="number"><div class="pq-unit">burst max</div></div>
+      <div class="pq-kpi" style="border-top:2px solid var(--warn);"><div class="pq-label">Duration</div><input id="pq-duration" class="pq-big-inp" placeholder="4 Hrs" style="font-size:16px;"><div class="pq-unit">test window</div></div>
+      <div class="pq-kpi" style="border-top:2px solid var(--danger);"><div class="pq-label">Error Rate SLA</div><input id="pq-err-sla" class="pq-big-inp" placeholder="e.g. 1" type="number"><div class="pq-unit">max error %</div></div>
+      <div class="pq-kpi" style="border-top:2px solid var(--accent);"><div class="pq-label">P90 SLA</div><input id="pq-p90-sla" class="pq-big-inp" placeholder="3000" type="number"><div class="pq-unit">milliseconds</div></div>
+    </div>
+  </div>
+  <!-- 2: Environment -->
+  <div class="pq-section">
+    <div class="pq-sec-title"><span class="pq-num">2</span> Environment Details</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div><div class="pq-label">Environment Name</div><input id="pq-env-name" class="pq-field" placeholder="preprod / staging"></div>
+      <div><div class="pq-label">App / LB Endpoint</div><input id="pq-endpoint" class="pq-field" placeholder="smegapreprod.btc.bw"></div>
+      <div><div class="pq-label">Build / Release Version</div><input id="pq-build" class="pq-field" placeholder="v3.12.4"></div>
+      <div><div class="pq-label">JMeter Version</div><input id="pq-jmeter-ver" class="pq-field" placeholder="Apache JMeter 5.5"></div>
+      <div style="grid-column:1/-1;"><div class="pq-label">DB Details</div><textarea id="pq-db" class="pq-field" rows="2" placeholder="Oracle 19c — 172.16.x.x:1521/orcl"></textarea></div>
+      <div><div class="pq-label">Server / Nodes</div><textarea id="pq-servers" class="pq-field" rows="2" placeholder="4-node cluster"></textarea></div>
+      <div><div class="pq-label">Monitoring / Grafana URL</div><textarea id="pq-tools" class="pq-field" rows="2" placeholder="Grafana http://172.16.x.x:3000"></textarea></div>
+    </div>
+  </div>
+  <!-- 3: Service Mix -->
+  <div class="pq-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="pq-sec-title" style="margin:0;"><span class="pq-num">3</span> Service-wise Load Distribution</div>
+      <button onclick="pqAddSvc()" style="background:none;border:1px solid var(--border);border-radius:7px;padding:4px 12px;color:var(--muted);font-size:11px;cursor:pointer;">+ Add Row</button>
+    </div>
+    <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border);">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:var(--surface);border-bottom:2px solid var(--border);">
+          <th style="padding:8px 10px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;">#</th>
+          <th style="padding:8px 10px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;">Service</th>
+          <th style="padding:8px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;">Channel</th>
+          <th style="padding:8px 10px;text-align:right;color:var(--muted);font-size:10px;text-transform:uppercase;">TPS %</th>
+          <th style="padding:8px 10px;text-align:right;color:var(--muted);font-size:10px;text-transform:uppercase;">Threads</th>
+          <th style="padding:8px 10px;text-align:center;color:var(--muted);font-size:10px;text-transform:uppercase;">CSV</th>
+          <th style="padding:8px 10px;text-align:center;color:var(--muted);font-size:10px;text-transform:uppercase;">Status</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="pq-svc-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <!-- 4–6: Checklists -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+    <div class="pq-section" style="margin:0;"><div class="pq-sec-title"><span class="pq-num">4</span> All Services Up &amp; Stable</div><div id="pq-cl-services" class="pq-checklist"></div></div>
+    <div class="pq-section" style="margin:0;"><div class="pq-sec-title"><span class="pq-num">5</span> Test Data Preparation</div><div id="pq-cl-data" class="pq-checklist"></div></div>
+    <div class="pq-section" style="margin:0;"><div class="pq-sec-title"><span class="pq-num">6</span> Grafana Access &amp; AWR Collection</div><div id="pq-cl-grafana" class="pq-checklist"></div></div>
+    <div class="pq-section" style="margin:0;">
+      <div class="pq-sec-title"><span class="pq-num">7</span> Channels in Scope</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="pq-channels">
+        <div class="pq-ch" data-ch="USSD">📱 USSD</div>
+        <div class="pq-ch" data-ch="API">🌐 API</div>
+        <div class="pq-ch" data-ch="Web">💻 Web</div>
+        <div class="pq-ch" data-ch="Mobile">📲 Mobile</div>
+        <div class="pq-ch" data-ch="Agent">🏧 Agent</div>
+      </div>
+      <div style="display:flex;gap:14px;margin-top:14px;">
+        <div><div class="pq-label">No. of Iterations</div><input id="pq-iterations" class="pq-field" type="number" placeholder="—" style="width:80px;font-size:18px;font-weight:800;text-align:center;"></div>
+        <div><div class="pq-label">Total Hours</div><input id="pq-hours" class="pq-field" type="number" placeholder="—" style="width:80px;font-size:18px;font-weight:800;text-align:center;"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Activity Tracker -->
+  <div class="pq-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="pq-sec-title" style="margin:0;color:var(--warn);"><span class="pq-num" style="background:linear-gradient(135deg,var(--warn),#c46000);">▶</span> Activity Tracker</div>
+      <button onclick="pqAddAct()" style="background:none;border:1px solid var(--border);border-radius:7px;padding:4px 12px;color:var(--muted);font-size:11px;cursor:pointer;">+ Add Row</button>
+    </div>
+    <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border);">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:var(--surface);border-bottom:2px solid var(--border);">
+          <th style="padding:8px 10px;min-width:160px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;">Activity</th>
+          <th style="padding:8px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;">Status</th>
+          <th style="padding:8px 10px;text-align:center;color:var(--muted);font-size:10px;text-transform:uppercase;">Day</th>
+          <th style="padding:8px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;">Duration</th>
+          <th style="padding:8px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;">Owner</th>
+          <th style="padding:8px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;">Pre-requisites</th>
+          <th style="padding:8px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;">AWR</th>
+          <th style="padding:8px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;">Remarks</th>
+          <th style="padding:8px 10px;color:var(--muted);font-size:10px;text-transform:uppercase;">Ref</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="pq-act-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+<!-- ── RUN TEST PANEL (perm: run_tests) ── -->
+<div class="panel" id="panel-run">
+  <div class="sec-head">
+    <span>▶</span><h2>Run Load Test</h2>
+    <span class="sec-sub">Start or stop a JMeter test run</span>
+    <div class="sec-line"></div>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="loadRunPanel()">↻ Refresh</button>
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:6px;">JMX Test Plan</div>
+        <select id="vrun-jmx" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:13px;outline:none;">
+          <option value="">— Select JMX —</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:6px;">Threads (Users)</div>
+        <input id="vrun-threads" type="number" value="10" min="1" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:13px;outline:none;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:6px;">Duration (sec)</div>
+        <input id="vrun-duration" type="number" value="300" min="30" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:13px;outline:none;">
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;">
+      <button class="btn" id="vrun-start-btn" onclick="vrunStart()" style="background:linear-gradient(135deg,var(--accent2),#00b36b);color:#000;font-weight:900;padding:10px 24px;">▶ Start Test</button>
+      <button class="btn" id="vrun-stop-btn" onclick="vrunStop()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:var(--danger);padding:10px 24px;" disabled>■ Stop</button>
+      <div id="vrun-status" style="font-size:13px;color:var(--muted);">Idle</div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Live Log</div>
+    <pre id="vrun-log" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;color:#a0c4ff;overflow-y:auto;max-height:260px;white-space:pre-wrap;line-height:1.6;">Waiting for test to start…</pre>
+  </div>
+</div>
+
+<!-- ── UPLOAD FILES PANEL (perm: upload_files) ── -->
+<div class="panel" id="panel-upload">
+  <div class="sec-head">
+    <span>⬆</span><h2>Upload Files</h2>
+    <span class="sec-sub">Upload JMX test plans and CSV test data</span>
+    <div class="sec-line"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px;">📄 JMX Test Plans</div>
+      <input type="file" id="vup-jmx-input" accept=".jmx" multiple style="display:none;" onchange="vupDoUpload('jmx')">
+      <div onclick="document.getElementById('vup-jmx-input').click()" style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:border-color .15s;margin-bottom:12px;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <div style="font-size:28px;margin-bottom:8px;">📄</div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">Click to upload .jmx</div>
+      </div>
+      <div id="vup-jmx-log" style="font-size:12px;color:var(--muted);max-height:120px;overflow-y:auto;"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:12px;">📊 Test Data (CSV)</div>
+      <input type="file" id="vup-csv-input" accept=".csv" multiple style="display:none;" onchange="vupDoUpload('testdata')">
+      <div onclick="document.getElementById('vup-csv-input').click()" style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:border-color .15s;margin-bottom:12px;" onmouseenter="this.style.borderColor='var(--accent2)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <div style="font-size:28px;margin-bottom:8px;">📊</div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent2);">Click to upload .csv</div>
+      </div>
+      <div id="vup-csv-log" style="font-size:12px;color:var(--muted);max-height:120px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHEDULES PANEL (perm: manage_schedules) ── -->
+<div class="panel" id="panel-schedules">
+  <div class="sec-head">
+    <span>🕐</span><h2>Scheduled Tests</h2>
+    <span class="sec-sub">Create and manage one-time scheduled runs</span>
+    <div class="sec-line"></div>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="loadSchedulesList()">↻ Refresh</button>
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px;">+ Create Schedule</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:12px;align-items:end;">
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:5px;">JMX</div>
+        <select id="vsched-jmx" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;outline:none;"></select>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:5px;">Run At</div>
+        <input id="vsched-time" type="datetime-local" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;outline:none;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:5px;">Threads</div>
+        <input id="vsched-threads" type="number" value="10" min="1" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;outline:none;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:5px;">Duration (sec)</div>
+        <input id="vsched-duration" type="number" value="300" min="30" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-size:12px;outline:none;">
+      </div>
+      <button class="btn btn-secondary" onclick="vschedCreate()" style="padding:9px 18px;font-size:12px;font-weight:700;">+ Schedule</button>
+    </div>
+  </div>
+  <div id="vsched-list" style="color:var(--muted);padding:20px;">Loading…</div>
+</div>
+
+<!-- ── AUDIT LOG PANEL (perm: view_audit) ── -->
+<div class="panel" id="panel-audit">
+  <div class="sec-head">
+    <span>📜</span><h2>Audit Log</h2>
+    <span class="sec-sub">All user actions on this platform</span>
+    <div class="sec-line"></div>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="loadAuditLog()">↻ Refresh</button>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr>
+        <th style="background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Timestamp</th>
+        <th style="background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">User</th>
+        <th style="background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Action</th>
+        <th style="background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Details</th>
+      </tr></thead>
+      <tbody id="vaudit-tbody">
+        <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<script>
+const COLORS=['#00d4ff','#00ff9d','#f59e0b','#ef4444','#a78bfa','#f0883e','#39d353','#79c0ff'];
+const GRID='#1e2d45',TICK={color:'#64748b',font:{size:10}};
+Chart.defaults.color='#64748b';
+Chart.defaults.font.family='"Segoe UI",-apple-system,sans-serif';
+let _charts={};
+
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  const map={overview:0,reports:1,testfeatures:2,sla:3,prereq:4,guide:5};
+  if(map[name]!==undefined) document.querySelectorAll('.nav-item')[map[name]]?.classList.add('active');
+  const navEl=document.getElementById('nav-'+name); if(navEl) navEl.classList.add('active');
+  if(name==='prereq') _startPqPoll(); else _stopPqPoll();
+  if(name==='run') _vrunStartPoll(); else _vrunStopPoll();
+}
+
+async function loadReportsList(){
+  const tbody=document.getElementById('reports-tbody');
+  tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Loading…</td></tr>';
+  const r=await fetch('/api/reports');
+  const data=await r.json();
+  if(!data.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">No reports available.</td></tr>';return;}
+  tbody.innerHTML=data.map(f=>`
+    <tr onclick="loadReport('${escAttr(f.name)}',this)">
+      <td><strong>${escHtml(f.name)}</strong>
+        ${f.is_baseline?'<span style="margin-left:6px;font-size:10px;background:rgba(0,255,157,.12);color:var(--accent2);border:1px solid rgba(0,255,157,.3);border-radius:5px;padding:1px 6px;">📌 BASELINE</span>':''}
+      </td>
+      <td>${escHtml(f.modified)}</td>
+      <td>${f.samples.toLocaleString()}</td>
+      <td>${f.size_kb}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-secondary" style="padding:4px 12px;font-size:11px;" onclick="event.stopPropagation();loadReport('${escAttr(f.name)}',this.closest('tr'))">📊 View</button>
+        <a class="btn btn-secondary" href="/api/download/html/${encodeURIComponent(f.name)}" target="_blank" style="padding:4px 12px;font-size:11px;text-decoration:none;margin-left:4px;">⬇ HTML</a>
+        <a class="btn btn-secondary" href="/api/report/${encodeURIComponent(f.name)}/pdf" target="_blank" style="padding:4px 12px;font-size:11px;text-decoration:none;margin-left:4px;">📄 PDF</a>
+        ${_myPerms.has('download_jtl')?`<a class="btn btn-secondary" href="/api/download/jtl/${encodeURIComponent(f.name)}" style="padding:4px 12px;font-size:11px;text-decoration:none;margin-left:4px;" onclick="event.stopPropagation()">⬇ JTL</a><a class="btn btn-secondary" href="/api/download/bundle/${encodeURIComponent(f.name)}" style="padding:4px 12px;font-size:11px;text-decoration:none;margin-left:4px;" onclick="event.stopPropagation()">📦 ZIP</a>`:''}
+        ${_myPerms.has('manage_baseline')?`<button class="btn btn-secondary" style="padding:4px 12px;font-size:11px;margin-left:4px;" onclick="event.stopPropagation();vSetBaseline('${escAttr(f.name)}')">📌 Baseline</button>`:''}
+      </td>
+    </tr>`).join('');
+}
+
+async function loadReport(fname,row){
+  document.querySelectorAll('#reports-tbody tr').forEach(r=>r.classList.remove('selected'));
+  if(row) row.classList.add('selected');
+  document.getElementById('report-viewer').style.display='none';
+  const r=await fetch('/api/report/'+encodeURIComponent(fname));
+  if(!r.ok) return;
+  const S=await r.json();
+  if(S.error) return;
+  renderReport(S,fname);
+  document.getElementById('report-viewer').style.display='block';
+  document.getElementById('report-viewer').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderReport(S,fname){
+  document.getElementById('rpt-title').textContent=fname;
+  document.getElementById('rpt-meta').textContent=`${S.start_time} → ${S.end_time}  |  Duration: ${S.test_duration}  |  ${S.peak_threads} threads`;
+  const ec=S.error_rate<1?'ok':S.error_rate<5?'warn':'danger';
+  document.getElementById('rpt-kpis').innerHTML=`
+    <div class="kpi info"><div class="kpi-label">Total Requests</div><div class="kpi-val">${S.total.toLocaleString()}</div><div class="kpi-sub">${S.label_stats.length} transactions</div></div>
+    <div class="kpi ok"><div class="kpi-label">Success Rate</div><div class="kpi-val">${(100-S.error_rate).toFixed(2)}%</div><div class="kpi-sub">${S.passed.toLocaleString()} passed</div></div>
+    <div class="kpi info"><div class="kpi-label">Throughput</div><div class="kpi-val">${S.throughput}</div><div class="kpi-sub">req / second</div></div>
+    <div class="kpi purple"><div class="kpi-label">Peak Threads</div><div class="kpi-val">${S.peak_threads}</div><div class="kpi-sub">virtual users</div></div>
+    <div class="kpi warn"><div class="kpi-label">Avg Response</div><div class="kpi-val">${S.avg_rt.toLocaleString()}</div><div class="kpi-sub">milliseconds</div></div>
+    <div class="kpi ${ec}"><div class="kpi-label">Total Errors</div><div class="kpi-val">${S.failed}</div><div class="kpi-sub">${S.error_rate}% error rate</div></div>`;
+  document.getElementById('rpt-percs').innerHTML=`
+    <div class="perc-card"><div class="perc-label">P50 Median</div><div class="perc-val p50">${S.p50.toLocaleString()}</div><div class="perc-unit">ms — typical user</div></div>
+    <div class="perc-card"><div class="perc-label">P90</div><div class="perc-val p90">${S.p90.toLocaleString()}</div><div class="perc-unit">ms — 90% faster</div></div>
+    <div class="perc-card"><div class="perc-label">P95</div><div class="perc-val p95">${S.p95.toLocaleString()}</div><div class="perc-unit">ms — near worst</div></div>
+    <div class="perc-card"><div class="perc-label">P99</div><div class="perc-val p99">${S.p99.toLocaleString()}</div><div class="perc-unit">ms — worst case</div></div>`;
+
+  const flowDefs=[{k:/001|Dial/i,n:'Dial *1239#'},{k:/002|1359/i,n:'Select P2P'},{k:/003|Step 3/i,n:'Type (3)'},{k:/004|Step 4/i,n:'Account (1)'},{k:/005|Reciever/i,n:'Receiver'},{k:/006|amount/i,n:'Amount'},{k:/007|confirm/i,n:'Confirm'}];
+  const steps=S.label_stats.filter(s=>!/^TC /i.test(s.label));
+  let fh='';
+  steps.forEach((st,i)=>{
+    const def=flowDefs.find(d=>d.k.test(st.label))||{n:'Step '+(i+1)};
+    const cls=st.avg<500?'fast':st.avg<1000?'med':st.avg<2000?'slow':'vslow';
+    const eh=st.failures>0?`<span class="flow-err bad">${st.error_rate}% err</span>`:`<span class="flow-err ok">No errors</span>`;
+    fh+=`<div class="flow-step"><div class="flow-card"><div class="flow-num">${i+1}</div><div class="flow-name">${escHtml(def.n)}</div><div class="flow-avg ${cls}">${st.avg.toLocaleString()} ms</div><div style="font-size:9px;color:var(--muted);margin:2px 0">${st.samples} reqs</div>${eh}</div></div>`;
+    if(i<steps.length-1) fh+='<div class="flow-arr">→</div>';
+  });
+  document.getElementById('rpt-flow').innerHTML=fh;
+
+  Object.values(_charts).forEach(c=>{try{c.destroy()}catch(e){}});
+  _charts={};
+
+  if(S.tps_over_time?.length){
+    _charts.tps=new Chart(document.getElementById('ch-tps'),{type:'line',
+      data:{labels:S.tps_over_time.map(d=>d.time_offset+'s'),datasets:[
+        {label:'TPS',data:S.tps_over_time.map(d=>d.tps),borderColor:COLORS[0],backgroundColor:'rgba(0,212,255,.07)',borderWidth:2,pointRadius:0,fill:true,tension:.4},
+        {label:'Avg ('+S.throughput+')',data:S.tps_over_time.map(()=>S.throughput),borderColor:'rgba(0,255,157,.35)',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{size:10}}}},scales:{x:{ticks:{...TICK,maxTicksLimit:15},grid:{color:GRID}},y:{ticks:TICK,grid:{color:GRID},beginAtZero:true}}}});
+  }
+  if(steps.length){
+    const sl=steps.map(s=>s.label.replace(/P2P \d+ - /,'').split(':')[0].substring(0,18));
+    _charts.rtBar=new Chart(document.getElementById('ch-rt-bar'),{type:'bar',
+      data:{labels:sl,datasets:[{label:'Avg ms',data:steps.map(s=>s.avg),backgroundColor:steps.map(s=>s.avg<500?'rgba(0,255,157,.7)':s.avg<1000?'rgba(0,212,255,.7)':s.avg<2000?'rgba(245,158,11,.7)':'rgba(239,68,68,.7)'),borderRadius:5,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:TICK,grid:{display:false}},y:{ticks:TICK,grid:{color:GRID},beginAtZero:true}}}});
+    _charts.perc=new Chart(document.getElementById('ch-perc'),{type:'bar',
+      data:{labels:sl,datasets:[{label:'P90',data:steps.map(s=>s.p90),backgroundColor:'rgba(0,212,255,.65)',borderRadius:3},{label:'P95',data:steps.map(s=>s.p95),backgroundColor:'rgba(245,158,11,.65)',borderRadius:3},{label:'P99',data:steps.map(s=>s.p99),backgroundColor:'rgba(239,68,68,.65)',borderRadius:3}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',font:{size:10}}}},scales:{x:{ticks:TICK,grid:{display:false}},y:{ticks:TICK,grid:{color:GRID}}}}});
+  }
+  if(S.hist_data?.length){
+    _charts.hist=new Chart(document.getElementById('ch-hist'),{type:'bar',
+      data:{labels:S.hist_data.map(h=>h.range),datasets:[{label:'Requests',data:S.hist_data.map(h=>h.count),backgroundColor:['#00ff9d','#00d4ff','#00d4ff','#00d4ff','#f59e0b','#f59e0b','#ef4444','#ef4444'],borderRadius:4,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:TICK,grid:{display:false}},y:{ticks:TICK,grid:{color:GRID},beginAtZero:true}}}});
+  }
+  const errS=steps.filter(s=>s.failures>0);
+  if(errS.length){
+    _charts.err=new Chart(document.getElementById('ch-err'),{type:'doughnut',
+      data:{labels:errS.map(s=>s.label.replace(/P2P \d+ - /,'').substring(0,25)),datasets:[{data:errS.map(s=>s.failures),backgroundColor:['#ef4444','#f59e0b','#a78bfa','#f0883e'],borderColor:'#0d1421',borderWidth:3}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#64748b',font:{size:9},boxWidth:10}}}}});
+  } else {
+    const ctx=document.getElementById('ch-err').getContext('2d');
+    ctx.clearRect(0,0,300,200);
+    ctx.fillStyle='#64748b';ctx.font='13px Segoe UI';ctx.textAlign='center';
+    ctx.fillText('✅ No errors in this run',150,100);
+  }
+
+  const maxA=Math.max(...S.label_stats.map(s=>s.avg));
+  document.getElementById('rpt-tbody').innerHTML=S.label_stats.map((s,i)=>{
+    const ec=s.error_rate===0?'pill-ok':s.error_rate<1?'pill-warn':'pill-danger';
+    const pct=Math.round(s.avg/maxA*100);
+    const bc=s.avg<500?'fast':s.avg<1000?'med':s.avg<2000?'slow':'vslow';
+    const isTC=/^TC /i.test(s.label);
+    const hasFailures=s.failures>0;
+    const detailId=`rpt-fail-detail-${i}`;
+    let failBtn='';
+    let failRow='';
+    if(hasFailures){
+      const reasons=(s.failure_reasons||[]);
+      const reasonsHtml=reasons.length
+        ? reasons.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;border-bottom:1px solid rgba(239,68,68,.1);font-size:11px;">
+            <span style="color:#e2eaf5;word-break:break-word;flex:1;margin-right:12px;">${escHtml(r.reason)}</span>
+            <span style="color:var(--danger);font-weight:800;white-space:nowrap;">${r.count.toLocaleString()} × failed</span>
+          </div>`).join('')
+        : '<div style="padding:8px 10px;font-size:11px;color:var(--muted);">No detail available</div>';
+      failBtn=`<button onclick="event.stopPropagation();toggleFailDetail('${detailId}')" style="margin-left:4px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:5px;padding:1px 8px;color:var(--danger);font-size:10px;font-weight:700;cursor:pointer;" title="Why it failed">Why failed?</button>`;
+      failRow=`<tr id="${detailId}" style="display:none;">
+        <td colspan="13" style="padding:0;">
+          <div style="background:rgba(239,68,68,.05);border-top:1px solid rgba(239,68,68,.2);border-bottom:1px solid rgba(239,68,68,.2);">
+            <div style="padding:8px 14px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--danger);">Failure Reasons — ${escHtml(s.label)}</div>
+            ${reasonsHtml}
+          </div>
+        </td>
+      </tr>`;
+    }
+    return `<tr style="${isTC?'background:rgba(0,212,255,.04);font-style:italic;':''}">
+      <td><div style="font-weight:700">${escHtml(s.label)}</div>${isTC?'<div style="font-size:10px;color:var(--muted)">End-to-end transaction controller</div>':''}${failBtn}</td>
+      <td>${s.samples.toLocaleString()}</td><td>${s.avg.toLocaleString()}</td>
+      <td>${s.median.toLocaleString()}</td><td>${s.p90.toLocaleString()}</td>
+      <td>${s.p95.toLocaleString()}</td><td>${s.p99.toLocaleString()}</td>
+      <td>${s.min.toLocaleString()}</td><td>${s.max.toLocaleString()}</td>
+      <td>${s.tps}</td><td>${s.failures}</td>
+      <td><span class="pill ${ec}">${s.error_rate}%</span></td>
+      <td><div class="bar-bg"><div class="bar-fill ${bc}" style="width:${pct}%"></div></div></td>
+    </tr>${failRow}`;
+  }).join('');
+
+  document.getElementById('rpt-rc').innerHTML=Object.entries(S.rc_dist).map(([k,v])=>{
+    const cls=k.startsWith('2')?'pill-ok':k.startsWith('4')?'pill-warn':'pill-danger';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;">
+      <span style="color:var(--muted)">HTTP ${escHtml(k)}</span>
+      <span><span class="pill ${cls}">${escHtml(k)}</span> &nbsp;<strong>${v.toLocaleString()}</strong></span></div>`;
+  }).join('');
+  document.getElementById('rpt-stats').innerHTML=[
+    ['Start','Run started at '+S.start_time],
+    ['End','Run ended at '+S.end_time],
+    ['Duration',S.test_duration+' ('+S.duration_s+' seconds)'],
+    ['Std Deviation',S.std_dev.toLocaleString()+' ms — consistency measure'],
+    ['Min / Max RT',S.min_rt+'ms fastest / '+S.max_rt.toLocaleString()+'ms slowest'],
+  ].map(([l,v])=>`<div style="display:flex;flex-direction:column;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;">
+    <span style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.4px;">${l}</span>
+    <strong style="color:var(--accent);margin-top:2px;">${v}</strong></div>`).join('');
+}
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escAttr(s){return String(s||'').replace(/'/g,"\\'");}
+function toggleFailDetail(id){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'table-row':'none';}
+
+// ── JMX Inspector (full edit, same as admin) ─────────────────────────────────
+let _vjiJmxList=[], _vjiData=null, _vjiEditMode=false;
+
+async function loadJmxInspectorView(){
+  const box=document.getElementById('vji-content');
+  const sel=document.getElementById('vji-jmx-select');
+  if(!sel)return;
+  _vjiEditMode=false; _vjiData=null;
+  if(!_vjiJmxList.length){
+    const r=await fetch('/api/jmx-list');
+    if(r.ok){const d=await r.json();_vjiJmxList=d.files||[];sel.innerHTML=_vjiJmxList.map(f=>`<option value="${escAttr(f)}">${escHtml(f)}</option>`).join('');}
+  }
+  const fname=sel.value;
+  if(!fname){box.innerHTML='<div style="color:var(--muted);padding:30px;text-align:center;">No JMX files found.</div>';return;}
+  box.innerHTML='<div style="color:var(--muted);padding:30px;text-align:center;">🔬 Parsing JMX…</div>';
+  const r=await fetch('/api/jmx-inspect/'+encodeURIComponent(fname));
+  const d=await r.json();
+  if(!r.ok||d.error){box.innerHTML=`<div style="color:var(--danger);padding:20px;">${escHtml(d.error||'Error')}</div>`;return;}
+  _vjiData=d; _vjiRender(false);
+}
+
+// viewer JMX Inspector helpers (flat concat, no deep backtick nesting)
+const _JI_SKIP = new Set(['LOGIN','PASSWORD','SESSION_ID','MSISDN']);
+
+function _vjiAssertHtml(a, ai, si, stpi, em) {
+  var expId    = 'vji-exp-'   + si + '-' + stpi + '-' + ai;
+  var anameId  = 'vji-aname-' + si + '-' + stpi + '-' + ai;
+  var amatchId = 'vji-amatch-'+ si + '-' + stpi + '-' + ai;
+  var typeLabel = a.type === 'JSR223' ? 'JSR223 Groovy Script' : 'Response Assertion';
+  var matchColor = a.match === 'contains' ? 'var(--warn)' : a.match === 'equals' ? 'var(--accent)' : 'var(--muted)';
+  var nameHtml = em
+    ? '<input id="' + anameId + '" class="ji-inp ji-inp-full" value="' + escAttr(a.name) + '" style="font-weight:700;">'
+    : '<strong>' + escHtml(a.name) + '</strong>';
+  var matchHtml;
+  if (em && a.type === 'JSR223') {
+    matchHtml = '<select id="' + amatchId + '" class="ji-inp" style="width:150px;">'
+      + '<option value="equals"'   + (a.match === 'equals'   ? ' selected' : '') + '>Equals (exact)</option>'
+      + '<option value="contains"' + (a.match === 'contains' ? ' selected' : '') + '>Contains</option>'
+      + '</select>';
+  } else {
+    matchHtml = '<span style="font-weight:800;font-size:11px;color:' + matchColor + ';">' + escHtml((a.match||'').toUpperCase()) + '</span>';
+  }
+  var expHtml = em
+    ? '<input id="' + expId + '" class="ji-inp ji-inp-full" value="' + escAttr(a.expected) + '" style="font-family:monospace;background:rgba(0,255,157,.05);border-color:rgba(0,255,157,.3);color:var(--accent2);">'
+    : '<span style="font-family:monospace;font-size:11px;color:var(--accent2);">&quot;' + escHtml(a.expected) + '&quot;</span>';
+  return '<div class="ji-field-grid" style="background:rgba(239,68,68,.025);">'
+    + '<div class="ji-field-label" style="color:var(--danger);">Assertion Name</div>'
+    + '<div class="ji-field-val">' + nameHtml + '</div>'
+    + '<div class="ji-field-label" style="color:var(--danger);">Type</div>'
+    + '<div class="ji-field-val"><span style="font-size:10px;background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.25);border-radius:4px;padding:2px 8px;font-weight:700;">' + escHtml(typeLabel) + '</span></div>'
+    + '<div class="ji-field-label" style="color:var(--danger);">Match Rule</div>'
+    + '<div class="ji-field-val">' + matchHtml + '</div>'
+    + '<div class="ji-field-label" style="color:var(--danger);">Expected String</div>'
+    + '<div class="ji-field-val" style="padding:8px 16px;">' + expHtml + '</div>'
+    + '</div>';
+}
+
+function _vjiStepHtml(step, stpi, si, em) {
+  var isFirst = step.params['NewRequest'] === '1';
+  var inpId = 'vji-inp-' + si + '-' + stpi;
+  var color = isFirst ? 'var(--accent)' : 'var(--text)';
+  var h = '<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden;">';
+  h += '<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--surface3);">';
+  h += '<div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#000;flex-shrink:0;">' + (stpi+1) + '</div>';
+  h += '<div style="font-size:12px;font-weight:700;flex:1;color:' + color + ';">' + escHtml(step.label) + '</div>';
+  if (isFirst) h += '<span style="font-size:9px;background:rgba(0,212,255,.15);color:var(--accent);border:1px solid rgba(0,212,255,.3);border-radius:4px;padding:2px 8px;flex-shrink:0;">NEW SESSION</span>';
+  if (step.preprocessors.length) h += '<span style="font-size:9px;color:var(--purple);background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:4px;padding:2px 8px;flex-shrink:0;">&#9881; ' + escHtml(step.preprocessors[0]) + '</span>';
+  h += '</div>';
+  h += '<div class="ji-subsec-hdr">Web Server / HTTP Request</div>';
+  h += '<div class="ji-field-grid">';
+  h += '<div class="ji-field-label">Method</div><div class="ji-field-val"><span style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);border-radius:4px;padding:2px 10px;font-size:11px;font-weight:800;color:var(--accent);">' + escHtml(step.method) + '</span></div>';
+  h += '<div class="ji-field-label">Path</div><div class="ji-field-val"><span class="ji-ro">' + escHtml(step.path) + '</span></div>';
+  h += '<div class="ji-field-label">Protocol</div><div class="ji-field-val"><span style="color:var(--muted);">HTTPS</span></div>';
+  h += '</div>';
+  h += '<div class="ji-subsec-hdr">Parameters</div>';
+  h += '<table class="ji-param-table"><thead><tr><th style="width:140px;">Name</th><th>Value</th><th style="width:70px;text-align:center;">Editable</th></tr></thead><tbody>';
+  var params = Object.entries(step.params);
+  for (var pi = 0; pi < params.length; pi++) {
+    var k = params[pi][0], v = params[pi][1];
+    var isInput = k === 'INPUT';
+    var isSys = _JI_SKIP.has(k);
+    var valHtml;
+    if (isInput && em) {
+      valHtml = '<input id="' + inpId + '" class="ji-inp ji-inp-full" value="' + escAttr(v) + '" style="font-family:monospace;">';
+    } else {
+      var vc = isInput ? 'var(--warn)' : isSys ? 'rgba(100,116,139,.5)' : 'var(--muted)';
+      valHtml = '<span class="ji-ro" style="color:' + vc + ';">' + escHtml(v) + '</span>';
+    }
+    h += '<tr style="' + (isInput ? 'background:rgba(245,158,11,.04);' : '') + (isSys ? 'opacity:.55;' : '') + '">';
+    h += '<td style="font-weight:' + (isInput ? '800' : '600') + ';color:' + (isInput ? 'var(--warn)' : 'var(--text)') + ';">' + escHtml(k) + '</td>';
+    h += '<td>' + valHtml + '</td>';
+    h += '<td style="text-align:center;font-size:13px;">' + (isInput ? '&#9998;' : '&mdash;') + '</td>';
+    h += '</tr>';
+  }
+  h += '</tbody></table>';
+  if (step.preprocessors.length) {
+    h += '<div class="ji-subsec-hdr">Pre-Processor</div><div style="padding:8px 14px;">';
+    for (var pj = 0; pj < step.preprocessors.length; pj++) {
+      h += '<div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--purple);">&#9881; <strong>' + escHtml(step.preprocessors[pj]) + '</strong> <span style="color:var(--muted);">(Groovy / JSR223)</span></div>';
+    }
+    h += '</div>';
+  }
+  if (step.assertions.length) {
+    h += '<div class="ji-subsec-hdr">Response Assertions (' + step.assertions.length + ')</div>';
+    for (var aj = 0; aj < step.assertions.length; aj++) {
+      h += _vjiAssertHtml(step.assertions[aj], aj, si, stpi, em);
+    }
+  }
+  h += '</div>';
+  return h;
+}
+
+function _vjiRender(editMode){
+  _vjiEditMode=editMode;
+  const box=document.getElementById('vji-content');
+  const svcs=(_vjiData&&_vjiData.services)||[];
+  if(!svcs.length){box.innerHTML='<div style="color:var(--muted);padding:20px;">No services found.</div>';return;}
+  var enC=svcs.filter(function(s){return s.enabled;}).length;
+  var totS=svcs.reduce(function(a,s){return a+s.steps.length;},0);
+  var totA=svcs.reduce(function(a,s){return s.steps.reduce(function(b,st){return b+st.assertions.length;},0)+a;},0);
+  var em=editMode;
+
+  var html='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;flex:1;">'
+    +'<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--accent);">'+svcs.length+'</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px;">Services</div></div>'
+    +'<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--accent2);">'+enC+'</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px;">Enabled</div></div>'
+    +'<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--warn);">'+totS+'</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px;">Steps</div></div>'
+    +'<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--danger);">'+totA+'</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px;">Assertions</div></div>'
+    +'</div>'
+    +(em
+      ?'<button class="btn" id="vji-save-btn" onclick="_vjiSave()" style="background:linear-gradient(135deg,var(--accent2),#00b36b);color:#000;font-weight:900;padding:10px 20px;">&#128190; Save JMX</button>'
+       +'<button class="btn btn-secondary" onclick="_vjiRender(false)" style="padding:10px 16px;">&#10005; Cancel</button>'
+      :'<button class="btn btn-secondary" onclick="_vjiRender(true)" style="padding:10px 18px;">&#9998; Edit Mode</button>')
+    +'</div>';
+
+  for(var si=0;si<svcs.length;si++){
+    var svc=svcs[si];
+    var svcId='vji-svc-'+si;
+    var en=svc.enabled;
+    var enColor=en?'var(--accent2)':'var(--muted)';
+    var enBg=en?'rgba(0,255,157,.1)':'rgba(100,116,139,.1)';
+    var enBrd=en?'rgba(0,255,157,.25)':'rgba(100,116,139,.2)';
+    var enLabel=en?'&#9679; ENABLED':'&#9675; DISABLED';
+    var totalA=0; for(var tx=0;tx<svc.steps.length;tx++) totalA+=svc.steps[tx].assertions.length;
+
+    var thrFld=em?'<input id="vji-thr-'+si+'" class="ji-inp ji-inp-num" type="number" min="1" value="'+escAttr(svc.threads)+'">':'<strong style="color:var(--accent);">'+escHtml(svc.threads)+'</strong>';
+    var rmpFld=em?'<input id="vji-rmp-'+si+'" class="ji-inp ji-inp-num" type="number" min="0" value="'+escAttr(svc.rampup)+'">':'<strong style="color:var(--accent);">'+escHtml(svc.rampup)+'</strong>';
+    var durFld=em?'<input id="vji-dur-'+si+'" class="ji-inp ji-inp-num" type="number" min="0" value="'+escAttr(svc.duration)+'">':'<strong style="color:var(--accent);">'+escHtml(svc.duration)+'</strong>';
+    var enFld=em?'<select id="vji-en-'+si+'" class="ji-inp" style="width:130px;"><option value="true"'+(en?' selected':'')+'> Enabled</option><option value="false"'+(!en?' selected':'')+'> Disabled</option></select>'
+               :'<span style="color:'+enColor+';font-weight:700;">'+enLabel+'</span>';
+
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden;">';
+    html+='<div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--surface2);cursor:pointer;" onclick="vjiToggle(\''+svcId+'\')">';
+    html+='<div style="font-size:14px;font-weight:800;flex:1;">'+escHtml(svc.name)+'</div>';
+    html+='<span style="font-size:10px;font-weight:800;padding:3px 10px;border-radius:10px;background:'+enBg+';border:1px solid '+enBrd+';color:'+enColor+';">'+enLabel+'</span>';
+    html+='<span style="font-size:11px;color:var(--muted);">'+svc.steps.length+' steps | '+totalA+' asserts</span>';
+    html+='<span id="'+svcId+'-arrow" style="color:var(--muted);font-size:14px;">&#9660;</span>';
+    html+='</div>';
+    html+='<div id="'+svcId+'" style="display:none;">';
+
+    // Thread Properties
+    html+='<div class="ji-section"><div class="ji-section-hdr">Thread Properties</div><div class="ji-field-grid">';
+    html+='<div class="ji-field-label">Number of Threads</div><div class="ji-field-val">'+thrFld+'</div>';
+    html+='<div class="ji-field-label">Ramp-up Period</div><div class="ji-field-val">'+rmpFld+' <span style="color:var(--muted);margin-left:4px;font-size:11px;">seconds</span></div>';
+    html+='<div class="ji-field-label">Duration</div><div class="ji-field-val">'+durFld+' <span style="color:var(--muted);margin-left:4px;font-size:11px;">seconds</span></div>';
+    html+='<div class="ji-field-label">Status</div><div class="ji-field-val">'+enFld+'</div>';
+    html+='<div class="ji-field-label">On Sample Error</div><div class="ji-field-val"><span style="color:var(--muted);">Continue</span></div>';
+    html+='</div></div>';
+
+    // CSV
+    if(svc.csv_file){
+      var varChips=''; var vvs=(svc.csv_vars||'').split(',');
+      for(var vi=0;vi<vvs.length;vi++) varChips+='<span style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);border-radius:5px;padding:2px 8px;font-size:10px;color:var(--accent);font-weight:700;">'+escHtml(vvs[vi].trim())+'</span>';
+      html+='<div class="ji-section"><div class="ji-section-hdr">CSV Data Set Config</div><div class="ji-field-grid">';
+      html+='<div class="ji-field-label">Filename</div><div class="ji-field-val"><strong style="color:var(--accent);">'+escHtml(svc.csv_file)+'</strong></div>';
+      html+='<div class="ji-field-label">Variable Names</div><div class="ji-field-val" style="gap:6px;">'+varChips+'</div>';
+      html+='<div class="ji-field-label">Recycle on EOF</div><div class="ji-field-val"><span style="color:var(--muted);">True</span></div>';
+      html+='</div></div>';
+    }
+
+    // TC
+    if(svc.tc){
+      html+='<div class="ji-section"><div class="ji-section-hdr">Transaction Controller</div><div class="ji-field-grid">';
+      html+='<div class="ji-field-label">Name</div><div class="ji-field-val"><strong style="color:var(--purple);">'+escHtml(svc.tc)+'</strong></div>';
+      html+='<div class="ji-field-label">Generate Parent Sample</div><div class="ji-field-val"><span style="color:var(--accent2);">&#10004; Yes</span></div>';
+      html+='</div></div>';
+    }
+
+    // Steps
+    html+='<div class="ji-section"><div class="ji-section-hdr">HTTP Samplers &mdash; '+svc.steps.length+' Step'+(svc.steps.length!==1?'s':'')+'</div>';
+    html+='<div style="padding:14px 16px;">';
+    for(var stpi2=0;stpi2<svc.steps.length;stpi2++){
+      html+=_vjiStepHtml(svc.steps[stpi2],stpi2,si,em);
+    }
+    html+='</div></div>';
+    html+='</div></div>';
+  }
+  box.innerHTML=html;
+}
+
+async function _vjiSave(){
+  const sel=document.getElementById('vji-jmx-select');
+  if(!sel||!_vjiData)return;
+  const svcs=_vjiData.services||[];
+  const payload={services:svcs.map((svc,si)=>{
+    const g=id=>{const el=document.getElementById(id);return el?el.value:null;};
+    const enEl=document.getElementById(`vji-en-${si}`);
+    return{
+      name:svc.name,tg:svc.tg,
+      threads:g(`vji-thr-${si}`)??svc.threads,
+      rampup:g(`vji-rmp-${si}`)??svc.rampup,
+      duration:g(`vji-dur-${si}`)??svc.duration,
+      enabled:enEl?enEl.value==='true':svc.enabled,
+      steps:svc.steps.map((step,stpi)=>({
+        label:step.label,
+        input:g(`vji-inp-${si}-${stpi}`)??(step.params['INPUT']||''),
+        assertions:step.assertions.map((a,ai)=>({
+          name:     a.name,
+          new_name: g(`vji-aname-${si}-${stpi}-${ai}`)??a.name,
+          match:    g(`vji-amatch-${si}-${stpi}-${ai}`)??a.match,
+          expected: g(`vji-exp-${si}-${stpi}-${ai}`)??a.expected
+        }))
+      }))
+    };
+  })};
+  const btn=document.getElementById('vji-save-btn');
+  if(btn){btn.textContent='⏳ Saving…';btn.disabled=true;}
+  const r=await fetch('/api/jmx-edit/'+encodeURIComponent(sel.value),{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+  });
+  const d=await r.json();
+  if(r.ok&&d.ok){
+    showNotif(`✅ Saved — ${d.changes} change${d.changes!==1?'s':''} written to JMX`,'ok');
+    _vjiData=null;_vjiJmxList=[];loadJmxInspectorView();
+  }else{
+    showNotif('❌ '+(d.error||'Save failed'),'err');
+    if(btn){btn.textContent='💾 Save JMX';btn.disabled=false;}
+  }
+}
+
+function vjiToggle(id){const el=document.getElementById(id);const ar=document.getElementById(id+'-arrow');if(!el)return;const open=el.style.display!=='none';el.style.display=open?'none':'block';if(ar)ar.textContent=open?'▼':'▲';}
+
+// ── Viewer Overview ─────────────────────────────────────────────────────────
+async function loadViewerOverview(){
+  const r = await fetch('/api/overview-stats');
+  if(!r.ok) return;
+  const d = await r.json();
+  const set=(id,val)=>{ const el=document.getElementById(id); if(el) el.textContent=val; };
+  set('vov-total-runs', d.total_runs);
+  set('vov-last-run',   d.last_run);
+  set('vov-csv-count',  d.csv_count);
+  set('vov-jmx-count',  d.jmx_count);
+  set('vov-status',     d.running ? 'Running ⏳' : 'Idle');
+  const slaBadge = document.getElementById('vov-sla-badge');
+  if(slaBadge){
+    slaBadge.textContent = d.sla_status || '—';
+    slaBadge.style.color = d.sla_status==='PASS'?'var(--accent2)':d.sla_status==='FAIL'?'var(--danger)':'var(--muted)';
+  }
+  const banner = document.getElementById('vov-running-banner');
+  if(banner){
+    banner.style.display = d.running ? 'flex' : 'none';
+    const span = document.getElementById('vov-running-jmx');
+    if(span && d.running) span.textContent = d.active_jmx || 'test';
+  }
+  if(d.trend && d.trend.length){
+    const canvas = document.getElementById('vov-trend-chart');
+    if(canvas){
+      if(window._vovTrendChart){ window._vovTrendChart.destroy(); window._vovTrendChart=null; }
+      window._vovTrendChart = new Chart(canvas.getContext('2d'),{
+        type:'line',
+        data:{
+          labels: d.trend.map(t=>t.date),
+          datasets:[
+            {label:'TPS',data:d.trend.map(t=>t.tps),borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,.1)',tension:.4,pointRadius:4,pointBackgroundColor:'#00d4ff'},
+            {label:'P95 ms',data:d.trend.map(t=>t.p95),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.06)',tension:.4,pointRadius:4,pointBackgroundColor:'#f59e0b',yAxisID:'y1'},
+          ]
+        },
+        options:{
+          responsive:true,animation:{duration:600},
+          plugins:{legend:{labels:{color:'#e2eaf5',font:{size:11}}}},
+          scales:{
+            x:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+            y:{ticks:{color:'#00d4ff',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'},title:{display:true,text:'TPS',color:'#00d4ff',font:{size:10}}},
+            y1:{position:'right',ticks:{color:'#f59e0b',font:{size:10}},grid:{drawOnChartArea:false},title:{display:true,text:'P95 ms',color:'#f59e0b',font:{size:10}}},
+          }
+        }
+      });
+    }
+  }
+}
+
+// ── Test Features / Config ───────────────────────────────────────────────────
+async function loadTestFeatures(){
+  const box = document.getElementById('tf-content');
+  box.innerHTML='<div style="color:var(--muted);padding:20px;">Loading…</div>';
+  const r = await fetch('/api/test-features');
+  if(!r.ok){ box.innerHTML='<div style="color:var(--danger);padding:20px;">Failed to load test features. Admin may need to import the Excel file.</div>'; return; }
+  const d = await r.json();
+  if(!d.files || !d.files.length){
+    box.innerHTML='<div style="color:var(--muted);padding:20px;">No test feature data available. Ask admin to import the Excel file.</div>'; return;
+  }
+  let html = '';
+  for(const file of d.files){
+    html += `<div style="margin-bottom:8px;font-size:12px;color:var(--muted);">📎 ${escHtml(file.filename)}</div>`;
+    const sheetEntries = Object.entries(file.sheets || {});
+    for(const [sheetName, sheetData] of sheetEntries){
+      html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:12px;">📋 ${escHtml(sheetName||'Sheet')}</div>
+        <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <tbody>${(sheetData.rows||[]).map((row,i)=>`
+            <tr style="border-bottom:1px solid var(--border);${i%2===0?'background:var(--surface2);':''}">
+              ${(row||[]).map(cell=>`<td style="padding:7px 10px;">${escHtml(String(cell===null||cell===undefined?'':cell))}</td>`).join('')}
+            </tr>`).join('')}
+          </tbody>
+        </table></div></div>`;
+    }
+  }
+  box.innerHTML = html;
+}
+
+// ── SLA Viewer ───────────────────────────────────────────────────────────────
+async function loadSlaViewer(){
+  const box = document.getElementById('sla-viewer-content');
+  box.innerHTML='<div style="color:var(--muted);padding:20px;">Loading…</div>';
+  const [cr, rr] = await Promise.all([fetch('/api/sla-config'), fetch('/api/sla-result')]);
+  const cfg = cr.ok ? await cr.json() : {};
+  const res = rr.ok ? await rr.json() : {};
+
+  let cfgHtml = '';
+  if(cfg.p90||cfg.p95||cfg.err_rate||cfg.min_tps){
+    cfgHtml = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px;">⚙ Configured Thresholds</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        ${cfg.p90?`<div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">P90 Max</div>
+          <div style="font-size:20px;font-weight:800;color:var(--accent);">${cfg.p90} ms</div></div>`:''}
+        ${cfg.p95?`<div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">P95 Max</div>
+          <div style="font-size:20px;font-weight:800;color:var(--warn);">${cfg.p95} ms</div></div>`:''}
+        ${cfg.err_rate?`<div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Error Rate Max</div>
+          <div style="font-size:20px;font-weight:800;color:var(--danger);">${cfg.err_rate}%</div></div>`:''}
+        ${cfg.min_tps?`<div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Min TPS</div>
+          <div style="font-size:20px;font-weight:800;color:var(--accent2);">${cfg.min_tps}</div></div>`:''}
+      </div></div>`;
+  }
+
+  let resHtml = '';
+  if(res && res.checks){
+    const pass = res.passed;
+    resHtml = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">📊 Last Run SLA Result</div>
+        <div style="font-size:16px;font-weight:800;color:${pass?'var(--accent2)':'var(--danger)'};">${pass?'✅ PASS':'❌ FAIL'}</div>
+        <div style="font-size:11px;color:var(--muted);">${escHtml(res.jtl||'')}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${res.checks.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;
+          padding:8px 12px;background:${c.pass?'rgba(0,255,157,.05)':'rgba(239,68,68,.05)'};
+          border:1px solid ${c.pass?'rgba(0,255,157,.15)':'rgba(239,68,68,.15)'};border-radius:6px;font-size:12px;">
+          <span style="color:var(--muted);">${escHtml(c.check)}</span>
+          <span style="color:${c.pass?'var(--accent2)':'var(--danger)'};font-weight:700;">${c.pass?'✅':'❌'} ${escHtml(String(c.actual))}</span>
+        </div>`).join('')}
+      </div></div>`;
+  } else {
+    resHtml = '<div style="color:var(--muted);padding:20px;">No SLA result available — run a test first.</div>';
+  }
+
+  box.innerHTML = cfgHtml + resHtml;
+}
+
+// ── Permissions ──────────────────────────────────────────────────────────────
+let _myPerms = new Set();
+async function loadMyPerms(){
+  const r = await fetch('/api/me');
+  if(!r.ok) return;
+  const d = await r.json();
+  _myPerms = new Set(d.permissions || []);
+  applyPermissions();
+}
+function applyPermissions(){
+  const show = id => { const el=document.getElementById(id); if(el) el.style.display='flex'; };
+  if(_myPerms.has('run_tests'))        show('nav-run');
+  if(_myPerms.has('upload_files'))     show('nav-upload');
+  if(_myPerms.has('manage_schedules')) show('nav-schedules');
+  if(_myPerms.has('view_audit'))       show('nav-audit');
+  // Update viewer-notice if user has any elevated perm
+  const notice = document.getElementById('viewer-notice');
+  if(notice && _myPerms.size > 0){
+    notice.innerHTML = '🧪 <strong>Tester</strong><br>'+_myPerms.size+' permission'+((_myPerms.size>1)?'s':'')+' active';
+  }
+  // Reload reports list with updated buttons
+  loadReportsList();
+  // Load JMX list for run/schedule panels
+  _vLoadJmxList();
+}
+
+window.addEventListener('DOMContentLoaded',()=>{ initTheme(); loadMyPerms(); loadViewerOverview(); loadReportsList(); });
+
+// ── Mobile sidebar ───────────────────────────────────────────────────────────
+function toggleSidebar(){
+  const sb=document.querySelector('.sidebar');
+  const ov=document.getElementById('sidebar-overlay');
+  if(sb){sb.classList.toggle('open'); if(ov) ov.classList.toggle('open');}
+}
+function closeSidebar(){
+  const sb=document.querySelector('.sidebar');
+  const ov=document.getElementById('sidebar-overlay');
+  if(sb){sb.classList.remove('open'); if(ov) ov.classList.remove('open');}
+}
+
+// ── Client switcher ──────────────────────────────────────────────────────────
+async function switchClient(code){
+  const r = await fetch('/api/session/client',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({code})
+  });
+  const d = await r.json();
+  if(d.ok){
+    showNotif(`Switched to ${d.client.logo_emoji} ${d.client.name}`,'ok');
+    setTimeout(()=>location.reload(), 600);
+  } else {
+    showNotif(d.error||'Failed to switch client','err');
+    // Reset dropdown to current value
+    const sel = document.getElementById('v-client-switcher');
+    if(sel) sel.value = document.getElementById('v-client-label').textContent.trim();
+  }
+}
+
+// ── Shared notification (minimal) ──
+function showNotif(msg,type){
+  let n=document.getElementById('v-notif');
+  if(!n){n=document.createElement('div');n.id='v-notif';
+    n.style.cssText='position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;z-index:9999;transition:opacity .3s;';
+    document.body.appendChild(n);}
+  n.textContent=msg;
+  n.style.background=type==='ok'?'rgba(0,255,157,.15)':type==='err'?'rgba(239,68,68,.15)':'rgba(0,212,255,.12)';
+  n.style.border='1px solid '+(type==='ok'?'rgba(0,255,157,.4)':type==='err'?'rgba(239,68,68,.4)':'rgba(0,212,255,.3)');
+  n.style.color=type==='ok'?'#00ff9d':type==='err'?'#ef4444':'#00d4ff';
+  n.style.opacity='1';
+  setTimeout(()=>n.style.opacity='0',3000);
+}
+
+// ── Pre-Requisites JS ────────────────────────────────────────────────────────
+const PQ_DEFAULT_CL = {
+  services:[
+    {id:'svc-nodes', title:'All application nodes healthy',     sub:'App servers responding to health checks',        auto:false, note:''},
+    {id:'svc-db',    title:'Database connections stable',       sub:'Connection pool not exhausted, no locks',        auto:false, note:''},
+    {id:'svc-lb',    title:'Load balancer routing correctly',   sub:'All nodes registered, health checks green',     auto:false, note:''},
+    {id:'svc-mock',  title:'External integrations/mocks ready', sub:'Hollard, Betway, downstream services mocked',   auto:false, note:''},
+    {id:'svc-notif', title:'Notifications disabled on env',     sub:'SMS/push/email suppressed during test',         auto:false, note:''},
+  ],
+  data:[
+    {id:'data-csv',    title:'CSV files uploaded to platform',    sub:'All service CSV files in clients/{code}/testdata/', autoKey:'csv_ok',  note:''},
+    {id:'data-client', title:'Client confirmation on data',       sub:'Owner: Tapan — data sign-off from client',         auto:false,        note:''},
+    {id:'data-idx',    title:'DB indexes rebuilt & analysed',     sub:'Owner: Balaji — run before Day 1',                 auto:false,        note:''},
+    {id:'data-ld',     title:'Load distribution configured',      sub:'Service-wise TPS % set in Test Config',            autoKey:'ld_ok',   note:''},
+  ],
+  grafana:[
+    {id:'graf-dash',   title:'Grafana dashboards accessible',    sub:'All panels healthy, no stale data',     auto:false,        note:''},
+    {id:'graf-awr',    title:'AWR snapshot collection enabled',  sub:'Begin snapshot before run start',       auto:false,        note:''},
+    {id:'graf-jmeter', title:'JMeter configured & tools ready',  sub:'JMeter bin path set and valid',         autoKey:'jmeter_ok',note:''},
+    {id:'graf-sla',    title:'SLA thresholds configured',        sub:'P90, P95, error rate set in Test Config',autoKey:'sla_ok',  note:''},
+  ],
+};
+
+let _pqData=null, _pqAuto={}, _pqAutoPollTimer=null;
+
+function _startPqPoll(){ if(_pqAutoPollTimer) return; _pqAutoPollTimer=setInterval(_pqPollAuto,30000); }
+function _stopPqPoll(){  if(_pqAutoPollTimer){clearInterval(_pqAutoPollTimer);_pqAutoPollTimer=null;} }
+async function _pqPollAuto(){
+  const r=await fetch('/api/prereq/auto'); if(!r.ok) return;
+  _pqAuto=await r.json();
+  _pqRenderAutoBanner();
+  _pqRenderChecklist('pq-cl-services',PQ_DEFAULT_CL.services,_pqData&&_pqData.cl_services);
+  _pqRenderChecklist('pq-cl-data',    PQ_DEFAULT_CL.data,    _pqData&&_pqData.cl_data);
+  _pqRenderChecklist('pq-cl-grafana', PQ_DEFAULT_CL.grafana, _pqData&&_pqData.cl_grafana);
+}
+
+async function loadPrereq(){
+  const r=await fetch('/api/prereq'); if(!r.ok){showNotif('Failed to load.','err');return;}
+  const resp=await r.json(); _pqData=resp.data||{}; _pqAuto=resp.auto||{}; _pqRender();
+}
+
+function _pqRender(){
+  const d=_pqData;
+  const tv=k=>d.targets?.[k]||'';
+  document.getElementById('pq-tps').value      =tv('tps');
+  document.getElementById('pq-avg-sla').value  =tv('avg_sla');
+  document.getElementById('pq-peak').value     =tv('peak');
+  document.getElementById('pq-duration').value =tv('duration');
+  document.getElementById('pq-err-sla').value  =tv('err_sla');
+  document.getElementById('pq-p90-sla').value  =tv('p90_sla');
+  const ev=k=>d.environment?.[k]||'';
+  document.getElementById('pq-env-name').value =ev('name');
+  document.getElementById('pq-endpoint').value =ev('endpoint');
+  document.getElementById('pq-build').value    =ev('build');
+  document.getElementById('pq-jmeter-ver').value=ev('jmeter');
+  document.getElementById('pq-db').value       =ev('db');
+  document.getElementById('pq-servers').value  =ev('servers');
+  document.getElementById('pq-tools').value    =ev('tools');
+  document.getElementById('pq-iterations').value=d.iterations||'';
+  document.getElementById('pq-hours').value    =d.hours||'';
+  const activeCh=d.channels||['USSD'];
+  document.querySelectorAll('.pq-ch').forEach(el=>{
+    el.classList.toggle('active',activeCh.includes(el.dataset.ch));
+    el.onclick=()=>el.classList.toggle('active');
+  });
+  _pqRenderAutoBanner();
+  _pqRenderSvcTable();
+  _pqRenderChecklist('pq-cl-services',PQ_DEFAULT_CL.services,d.cl_services);
+  _pqRenderChecklist('pq-cl-data',    PQ_DEFAULT_CL.data,    d.cl_data);
+  _pqRenderChecklist('pq-cl-grafana', PQ_DEFAULT_CL.grafana, d.cl_grafana);
+  _pqRenderActs();
+  _pqUpdateSummary();
+}
+
+function _pqRenderAutoBanner(){
+  const a=_pqAuto;
+  const items=[
+    {label:'JMX Scripts',   ok:a.jmx_count>0, detail:a.jmx_count+' file'+(a.jmx_count!==1?'s':'')},
+    {label:'Test Data CSVs',ok:a.csv_count>0,  detail:a.csv_count+' CSV file'+(a.csv_count!==1?'s':'')},
+    {label:'JMeter Tool',   ok:a.jmeter_ok,   detail:a.jmeter_ok?'Path verified':'Not configured'},
+    {label:'SLA Config',    ok:a.sla_ok,       detail:a.sla_ok?'Thresholds set':'Not configured'},
+    {label:'Load Config',   ok:a.ld_ok,        detail:a.ld_ok?'Services set':'Not configured'},
+  ];
+  document.getElementById('pq-auto-banner').innerHTML=items.map(i=>`
+    <div class="pq-auto-card ${i.ok?'ok':'fail'}">
+      <div style="font-size:18px;">${i.ok?'✅':'⚠️'}</div>
+      <div style="font-size:11px;font-weight:700;color:${i.ok?'var(--accent2)':'var(--warn)'};">${escHtml(i.label)}</div>
+      <div style="font-size:10px;color:var(--muted);">${escHtml(i.detail)}</div>
+    </div>`).join('');
+}
+
+function _pqStatCls(v){return {'Pending':'st-pend','In-Progress':'st-prog','Completed':'st-done','Blocked':'st-block','N/A':''}[v]||'st-pend';}
+function _pqClKey(cid){return {'pq-cl-services':'cl_services','pq-cl-data':'cl_data','pq-cl-grafana':'cl_grafana'}[cid];}
+function _pqClDefaults(cid){return {'pq-cl-services':PQ_DEFAULT_CL.services,'pq-cl-data':PQ_DEFAULT_CL.data,'pq-cl-grafana':PQ_DEFAULT_CL.grafana}[cid];}
+
+function _pqRenderChecklist(cid,defaults,saved){
+  const c=document.getElementById(cid); if(!c) return;
+  const sm={}; (saved||[]).forEach(s=>sm[s.id]=s);
+  c.innerHTML=defaults.map(item=>{
+    const s=sm[item.id]||{};
+    const autoOk=item.autoKey?!!_pqAuto[item.autoKey]:null;
+    const isChecked=autoOk===true?true:(s.checked||false);
+    const isBlocked=s.blocked||false;
+    let tc='',tt='',rc='';
+    if(autoOk===true){tc='auto';tt='⚡';rc='auto-checked';}
+    else if(isBlocked){tc='blocked-x';tt='✗';rc='blocked';}
+    else if(isChecked){tc='checked';tt='✓';rc='done';}
+    return `<div class="pq-check-row ${rc}" id="pqrow-${item.id}">
+      <div class="pq-toggle ${tc}" onclick="${autoOk===true?'':(`pqToggle('${item.id}','${cid}')`)}">${tt}</div>
+      <div class="pq-check-body">
+        <div class="pq-check-title">${escHtml(item.title)}${autoOk===true?'<span style="font-size:9px;color:var(--accent);margin-left:6px;background:rgba(0,212,255,.12);padding:1px 6px;border-radius:4px;">⚡ system</span>':''}</div>
+        <div class="pq-check-sub">${escHtml(item.sub)}</div>
+        <div class="pq-check-note"><input placeholder="Add note…" value="${escAttr(s.note||item.note||'')}" onchange="pqNoteChange('${item.id}','${cid}',this.value)"></div>
+      </div>
+      <select class="pq-stat-sel ${_pqStatCls(s.status||'Pending')}" onchange="pqStatChange('${item.id}','${cid}',this.value);this.className='pq-stat-sel '+_pqStatCls(this.value)">
+        ${['Pending','In-Progress','Completed','Blocked','N/A'].map(v=>`<option ${(s.status||'Pending')===v?'selected':''}>${v}</option>`).join('')}
+      </select>
+    </div>`;
+  }).join('');
+}
+
+function pqToggle(id,cid){
+  if(!_pqData)return; const key=_pqClKey(cid); const list=_pqData[key]||[];
+  const idx=list.findIndex(x=>x.id===id);
+  if(idx>=0)list[idx].checked=!list[idx].checked; else list.push({id,checked:true});
+  _pqData[key]=list; _pqRenderChecklist(cid,_pqClDefaults(cid),_pqData[key]); _pqUpdateSummary();
+}
+function pqNoteChange(id,cid,val){
+  if(!_pqData)return; const key=_pqClKey(cid); const list=_pqData[key]||[];
+  const idx=list.findIndex(x=>x.id===id);
+  if(idx>=0)list[idx].note=val; else list.push({id,note:val}); _pqData[key]=list;
+}
+function pqStatChange(id,cid,val){
+  if(!_pqData)return; const key=_pqClKey(cid); const list=_pqData[key]||[];
+  const idx=list.findIndex(x=>x.id===id); const blocked=val==='Blocked'; const checked=val==='Completed';
+  if(idx>=0){list[idx].status=val;list[idx].blocked=blocked;list[idx].checked=checked;}
+  else list.push({id,status:val,blocked,checked}); _pqData[key]=list;
+  const row=document.getElementById('pqrow-'+id);
+  if(row) row.className='pq-check-row'+(blocked?' blocked':checked?' done':'');
+  _pqUpdateSummary();
+}
+
+function _pqRenderSvcTable(){
+  const svcs=_pqData&&_pqData.services||[];
+  const tb=document.getElementById('pq-svc-tbody');
+  if(!svcs.length){tb.innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:14px;">No services. Click + Add Row.</td></tr>`;return;}
+  tb.innerHTML=svcs.map((s,i)=>`
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:7px 10px;color:var(--muted);font-size:11px;">${i+1}</td>
+      <td style="padding:7px 10px;"><input class="pq-act-inp" value="${escAttr(s.name||'')}" style="font-weight:700;min-width:120px;" onchange="_pqData.services[${i}].name=this.value"></td>
+      <td style="padding:7px 10px;"><select class="pq-stat-sel" onchange="_pqData.services[${i}].channel=this.value">${['USSD','API','Web','Mobile','Agent'].map(c=>`<option ${(s.channel||'USSD')===c?'selected':''}>${c}</option>`).join('')}</select></td>
+      <td style="padding:7px 10px;text-align:right;"><input class="pq-act-inp" type="number" value="${escAttr(String(s.pct||''))}" placeholder="%" style="width:50px;text-align:right;" onchange="_pqData.services[${i}].pct=this.value"></td>
+      <td style="padding:7px 10px;text-align:right;"><input class="pq-act-inp" type="number" value="${escAttr(String(s.threads||''))}" placeholder="—" style="width:50px;text-align:right;" onchange="_pqData.services[${i}].threads=this.value"></td>
+      <td style="padding:7px 10px;text-align:center;">${s.has_csv?'<span style="color:var(--accent2);">✅</span>':'<span style="color:var(--muted);">—</span>'}</td>
+      <td style="padding:7px 10px;"><select class="pq-stat-sel ${_pqStatCls(s.status||'Pending')}" onchange="_pqData.services[${i}].status=this.value;this.className='pq-stat-sel '+_pqStatCls(this.value);_pqUpdateSummary()">${['Pending','In-Progress','Completed','Blocked'].map(v=>`<option ${(s.status||'Pending')===v?'selected':''}>${v}</option>`).join('')}</select></td>
+      <td style="padding:7px 10px;"><button onclick="_pqData.services.splice(${i},1);_pqRenderSvcTable()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;opacity:.5;">✕</button></td>
+    </tr>`).join('');
+}
+function pqAddSvc(){ if(!_pqData)_pqData={}; if(!_pqData.services)_pqData.services=[]; _pqData.services.push({name:'New Service',channel:'USSD',pct:'',threads:'',status:'Pending'}); _pqRenderSvcTable(); }
+
+function _pqRenderActs(){
+  const PQ_DEFAULT_ACTS=[
+    {activity:'Script preparations',status:'Pending',day:'0',duration:'—',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Pre-requisites — Tools readiness',status:'Pending',day:'0',duration:'—',owner:'',prereq:'JMeter, Grafana',awr:'',remarks:'',ref:''},
+    {activity:'Environment preparation\n• Enable all nodes\n• Server readiness',status:'Pending',day:'1',duration:'—',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Data preparations',status:'Pending',day:'1',duration:'—',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Data confirmation from client',status:'Pending',day:'1',duration:'—',owner:'',prereq:'Confirmation from client required',awr:'',remarks:'',ref:''},
+    {activity:'Services mocked',status:'Pending',day:'1',duration:'—',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Notifications disabled',status:'Pending',day:'1',duration:'—',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Rebuild indexes & analyse for DB',status:'Pending',day:'1',duration:'—',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Load execution at 25 TPS — Run 1',status:'Pending',day:'1',duration:'30 mins',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Load execution at 25 TPS — Run 2',status:'Pending',day:'1',duration:'2 Hrs',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Load execution at 25 TPS — Run 3',status:'Pending',day:'1',duration:'4 Hrs',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Load execution at 25 TPS — Run 4',status:'Pending',day:'2',duration:'8 Hrs',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Load execution at 35 TPS — Run 1',status:'Pending',day:'3',duration:'4 Hrs',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Load execution at 35 TPS — Run 2',status:'Pending',day:'3',duration:'8 Hrs',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Load execution at 40 TPS — Run 1',status:'Pending',day:'4',duration:'4 Hrs',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+    {activity:'Load execution at 40 TPS — Run 2',status:'Pending',day:'4',duration:'8 Hrs',owner:'',prereq:'',awr:'',remarks:'',ref:''},
+  ];
+  const acts=(_pqData&&_pqData.activities)||PQ_DEFAULT_ACTS;
+  const tb=document.getElementById('pq-act-tbody');
+  tb.innerHTML=acts.map((a,i)=>`
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:8px 10px;"><textarea class="pq-act-inp" rows="${Math.max(1,(a.activity.match(/\n/g)||[]).length+1)}" style="resize:none;min-width:150px;" onchange="_pqActSet(${i},'activity',this.value)">${escHtml(a.activity)}</textarea></td>
+      <td style="padding:8px 10px;"><select class="pq-stat-sel ${_pqStatCls(a.status||'Pending')}" onchange="_pqActSet(${i},'status',this.value);this.className='pq-stat-sel '+_pqStatCls(this.value);_pqUpdateSummary()">${['Pending','In-Progress','Completed','Blocked','N/A'].map(v=>`<option ${(a.status||'Pending')===v?'selected':''}>${v}</option>`).join('')}</select></td>
+      <td style="padding:8px 10px;text-align:center;"><input class="pq-act-inp" value="${escAttr(a.day||'')}" placeholder="—" style="width:34px;text-align:center;font-weight:700;" onchange="_pqActSet(${i},'day',this.value)"></td>
+      <td style="padding:8px 10px;"><input class="pq-act-inp" value="${escAttr(a.duration||'')}" placeholder="—" style="width:70px;" onchange="_pqActSet(${i},'duration',this.value)"></td>
+      <td style="padding:8px 10px;"><input class="pq-act-inp" value="${escAttr(a.owner||'')}" placeholder="Owner" style="min-width:80px;" onchange="_pqActSet(${i},'owner',this.value)"></td>
+      <td style="padding:8px 10px;"><input class="pq-act-inp" value="${escAttr(a.prereq||'')}" placeholder="—" style="min-width:90px;" onchange="_pqActSet(${i},'prereq',this.value)"></td>
+      <td style="padding:8px 10px;"><input class="pq-act-inp" value="${escAttr(a.awr||'')}" placeholder="—" style="min-width:60px;" onchange="_pqActSet(${i},'awr',this.value)"></td>
+      <td style="padding:8px 10px;"><input class="pq-act-inp" value="${escAttr(a.remarks||'')}" placeholder="—" style="min-width:110px;" onchange="_pqActSet(${i},'remarks',this.value)"></td>
+      <td style="padding:8px 10px;"><input class="pq-act-inp" value="${escAttr(a.ref||'')}" placeholder="—" style="min-width:60px;" onchange="_pqActSet(${i},'ref',this.value)"></td>
+      <td style="padding:8px 10px;"><button onclick="pqRemoveAct(${i})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;opacity:.5;">✕</button></td>
+    </tr>`).join('');
+  _pqUpdateSummary();
+}
+function _pqActSet(i,k,v){ if(!_pqData.activities)return; _pqData.activities[i][k]=v; }
+function pqRemoveAct(i){ if(_pqData&&_pqData.activities){_pqData.activities.splice(i,1);_pqRenderActs();} }
+function pqAddAct(){
+  if(!_pqData)_pqData={}; if(!_pqData.activities)_pqData.activities=[];
+  _pqData.activities.push({activity:'New Activity',status:'Pending',day:'',duration:'',owner:'',prereq:'',awr:'',remarks:'',ref:''});
+  _pqRenderActs();
+}
+function _pqUpdateSummary(){
+  const sels=document.querySelectorAll('#pq-act-tbody .pq-stat-sel,#pq-cl-services .pq-stat-sel,#pq-cl-data .pq-stat-sel,#pq-cl-grafana .pq-stat-sel');
+  let done=0,pending=0,blocked=0,total=0;
+  sels.forEach(s=>{total++;if(s.value==='Completed')done++;else if(s.value==='Blocked')blocked++;else if(s.value!=='N/A')pending++;});
+  const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  s('pq-sum-total',total);s('pq-sum-done',done);s('pq-sum-pending',pending);s('pq-sum-blocked',blocked);
+}
+function _pqCollect(){
+  return {
+    targets:{tps:document.getElementById('pq-tps').value,avg_sla:document.getElementById('pq-avg-sla').value,peak:document.getElementById('pq-peak').value,duration:document.getElementById('pq-duration').value,err_sla:document.getElementById('pq-err-sla').value,p90_sla:document.getElementById('pq-p90-sla').value},
+    environment:{name:document.getElementById('pq-env-name').value,endpoint:document.getElementById('pq-endpoint').value,build:document.getElementById('pq-build').value,jmeter:document.getElementById('pq-jmeter-ver').value,db:document.getElementById('pq-db').value,servers:document.getElementById('pq-servers').value,tools:document.getElementById('pq-tools').value},
+    channels:[...document.querySelectorAll('.pq-ch.active')].map(e=>e.dataset.ch),
+    iterations:document.getElementById('pq-iterations').value,
+    hours:document.getElementById('pq-hours').value,
+    services:_pqData?(_pqData.services||[]):[],
+    cl_services:_pqData?(_pqData.cl_services||[]):[],
+    cl_data:_pqData?(_pqData.cl_data||[]):[],
+    cl_grafana:_pqData?(_pqData.cl_grafana||[]):[],
+    activities:_pqData?(_pqData.activities||[]):[],
+  };
+}
+async function savePrereq(){
+  const r=await fetch('/api/prereq',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(_pqCollect())});
+  if(r.ok) showNotif('Pre-requisites saved.','ok'); else showNotif('Failed to save.','err');
+}
+
+// ── Shared: load JMX list into dropdowns ──────────────────────────────────────
+async function _vLoadJmxList(){
+  const r = await fetch('/api/jmx-services');
+  if(!r.ok) return;
+  const d = await r.json();
+  const jmxList = d.all_jmx || [];
+  ['vrun-jmx','vsched-jmx'].forEach(id=>{
+    const sel = document.getElementById(id); if(!sel) return;
+    sel.innerHTML = '<option value="">— Select JMX —</option>' +
+      jmxList.map(j=>`<option value="${escAttr(j.filename)}">${escHtml(j.filename)}</option>`).join('');
+  });
+}
+
+// ── RUN TEST panel ─────────────────────────────────────────────────────────────
+let _vrunLogOff=0, _vrunPollTimer=null;
+function _vrunStartPoll(){ if(_vrunPollTimer) return; _vrunPollTimer=setInterval(_vrunPoll,2000); }
+function _vrunStopPoll(){  if(_vrunPollTimer){clearInterval(_vrunPollTimer);_vrunPollTimer=null;} }
+
+async function loadRunPanel(){
+  const r = await fetch('/api/test/status'); if(!r.ok) return;
+  const d = await r.json();
+  _vrunUpdateStatus(d);
+}
+function _vrunUpdateStatus(d){
+  const startBtn = document.getElementById('vrun-start-btn');
+  const stopBtn  = document.getElementById('vrun-stop-btn');
+  const statusEl = document.getElementById('vrun-status');
+  if(!startBtn) return;
+  if(d.running){
+    startBtn.disabled=true; stopBtn.disabled=false;
+    statusEl.innerHTML=`<span style="color:var(--accent2);">🟢 Running — ${escHtml(d.jmx||'')}</span>`;
+  } else {
+    startBtn.disabled=false; stopBtn.disabled=true;
+    statusEl.innerHTML='<span style="color:var(--muted);">Idle</span>';
+  }
+}
+async function _vrunPoll(){
+  const [sr,lr] = await Promise.all([fetch('/api/test/status'), fetch('/api/logs?offset='+_vrunLogOff)]);
+  if(sr.ok){ const d=await sr.json(); _vrunUpdateStatus(d); }
+  if(lr.ok){
+    const ld=await lr.json();
+    if(ld.lines&&ld.lines.length){
+      const el=document.getElementById('vrun-log');
+      if(el){ el.textContent+=(el.textContent==='Waiting for test to start…'?'':'\n')+ld.lines.join('\n'); el.scrollTop=el.scrollHeight; }
+      _vrunLogOff=ld.offset;
+    }
+  }
+}
+async function vrunStart(){
+  const jmx=document.getElementById('vrun-jmx').value;
+  const threads=document.getElementById('vrun-threads').value||10;
+  const duration=document.getElementById('vrun-duration').value||300;
+  if(!jmx){showNotif('Select a JMX file first.','err');return;}
+  _vrunLogOff=0;
+  document.getElementById('vrun-log').textContent='Starting…';
+  const r=await fetch('/api/test/start',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({jmx,threads:+threads,duration:+duration,rampup:30})});
+  const d=await r.json();
+  if(!r.ok||d.error){showNotif(d.error||'Failed to start','err');return;}
+  showNotif('Test started.','ok');
+}
+async function vrunStop(){
+  const r=await fetch('/api/test/stop',{method:'POST'});
+  const d=await r.json();
+  if(r.ok) showNotif('Stop signal sent.','ok'); else showNotif(d.error,'err');
+}
+
+// ── UPLOAD FILES panel ─────────────────────────────────────────────────────────
+async function loadUploadPanel(){}  // nothing to preload
+async function vupDoUpload(type){
+  const inputId = type==='jmx'?'vup-jmx-input':'vup-csv-input';
+  const logId   = type==='jmx'?'vup-jmx-log':'vup-csv-log';
+  const files = document.getElementById(inputId).files;
+  if(!files.length) return;
+  const fd = new FormData();
+  for(const f of files) fd.append('file', f);
+  const logEl = document.getElementById(logId);
+  logEl.innerHTML = 'Uploading…';
+  const r = await fetch(`/api/upload/${type}`,{method:'POST',body:fd});
+  const d = await r.json();
+  if(r.ok){
+    const saved = d.saved||[];
+    logEl.innerHTML = saved.map(s=>`<div style="color:var(--accent2);">✅ ${escHtml(s.filename)} (${s.size_kb} KB)</div>`).join('') +
+      (d.errors||[]).map(e=>`<div style="color:var(--danger);">❌ ${escHtml(e)}</div>`).join('');
+    showNotif(`Uploaded ${saved.length} file(s).`,'ok');
+  } else {
+    logEl.innerHTML = `<div style="color:var(--danger);">❌ ${escHtml(d.error||'Upload failed')}</div>`;
+    showNotif(d.error||'Upload failed','err');
+  }
+}
+
+// ── SCHEDULES panel ────────────────────────────────────────────────────────────
+async function loadSchedulesList(){
+  const r=await fetch('/api/schedules'); if(!r.ok) return;
+  const d=await r.json();
+  const list=document.getElementById('vsched-list');
+  const scheds=(d.schedules||[]).slice().reverse();
+  if(!scheds.length){list.innerHTML='<div style="color:var(--muted);padding:16px;">No scheduled tests.</div>';return;}
+  list.innerHTML=`<table style="width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+    <thead><tr>
+      <th style="background:var(--surface2);color:var(--muted);font-size:10px;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">JMX</th>
+      <th style="background:var(--surface2);color:var(--muted);font-size:10px;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Run At</th>
+      <th style="background:var(--surface2);color:var(--muted);font-size:10px;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);">Status</th>
+      <th style="background:var(--surface2);color:var(--muted);font-size:10px;text-transform:uppercase;padding:10px 14px;border-bottom:1px solid var(--border);"></th>
+    </tr></thead>
+    <tbody>${scheds.map(s=>{
+      const sc=s.status==='done'?'var(--accent2)':s.status==='failed'?'var(--danger)':s.status==='running'?'var(--accent)':'var(--warn)';
+      return `<tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:10px 14px;font-size:13px;font-weight:700;">${escHtml(s.jmx)}</td>
+        <td style="padding:10px 14px;font-size:12px;color:var(--muted);">${escHtml(s.run_at)}</td>
+        <td style="padding:10px 14px;"><span style="font-size:11px;font-weight:700;color:${sc};">${s.status.toUpperCase()}</span></td>
+        <td style="padding:10px 14px;">
+          ${s.status==='pending'?`<button onclick="vschedCancel('${escAttr(s.id)}')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);font-size:11px;cursor:pointer;">✕ Cancel</button>`:''}
+        </td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+async function vschedCreate(){
+  const jmx=document.getElementById('vsched-jmx').value;
+  const rt=document.getElementById('vsched-time').value;
+  const threads=document.getElementById('vsched-threads').value||10;
+  const duration=document.getElementById('vsched-duration').value||300;
+  if(!jmx||!rt){showNotif('Select JMX and run-at time.','err');return;}
+  const r=await fetch('/api/schedules',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({jmx,run_at:rt,threads:+threads,duration:+duration,rampup:30})});
+  const d=await r.json();
+  if(r.ok){showNotif('Schedule created.','ok');loadSchedulesList();}
+  else showNotif(d.error||'Failed','err');
+}
+async function vschedCancel(sid){
+  const r=await fetch(`/api/schedules/${sid}`,{method:'DELETE'});
+  if(r.ok){showNotif('Schedule cancelled.','ok');loadSchedulesList();}
+}
+
+// ── AUDIT LOG panel ────────────────────────────────────────────────────────────
+async function loadAuditLog(){
+  const r=await fetch('/api/audit-log?limit=100'); if(!r.ok) return;
+  const d=await r.json();
+  const rows=(d.entries||[]);
+  const tb=document.getElementById('vaudit-tbody');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No audit entries.</td></tr>';return;}
+  tb.innerHTML=rows.map(e=>`<tr style="border-bottom:1px solid var(--border);">
+    <td style="padding:9px 14px;font-size:11px;color:var(--muted);white-space:nowrap;">${escHtml(e.timestamp||'')}</td>
+    <td style="padding:9px 14px;font-size:12px;font-weight:700;">${escHtml(e.username||'')}</td>
+    <td style="padding:9px 14px;font-size:11px;color:var(--accent);">${escHtml(e.action||'')}</td>
+    <td style="padding:9px 14px;font-size:11px;color:var(--muted);">${escHtml(e.details||'')}</td>
+  </tr>`).join('');
+}
+
+// ── Baseline (manage_baseline) ────────────────────────────────────────────────
+async function vSetBaseline(fname){
+  const r=await fetch('/api/baseline',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:fname})});
+  const d=await r.json();
+  if(r.ok){showNotif('Baseline set: '+fname,'ok');loadReportsList();}
+  else showNotif(d.error||'Failed','err');
+}
+
+// ── Change Own Password ──────────────────────────────────────────────────────
+function openChangePwd(){
+  document.getElementById('chpwd-overlay').style.display='flex';
+  document.getElementById('chpwd-cur').value='';
+  document.getElementById('chpwd-new').value='';
+  document.getElementById('chpwd-confirm').value='';
+  document.getElementById('chpwd-err').textContent='';
+}
+function closeChangePwd(){ document.getElementById('chpwd-overlay').style.display='none'; }
+async function submitChangePwd(){
+  const cur=document.getElementById('chpwd-cur').value;
+  const nw=document.getElementById('chpwd-new').value;
+  const conf=document.getElementById('chpwd-confirm').value;
+  const errEl=document.getElementById('chpwd-err');
+  errEl.textContent='';
+  if(!cur||!nw||!conf){errEl.textContent='All fields are required.';return;}
+  if(nw.length<6){errEl.textContent='New password must be at least 6 characters.';return;}
+  if(nw!==conf){errEl.textContent='New passwords do not match.';return;}
+  const r=await fetch('/api/users/me/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({current_password:cur,new_password:nw})});
+  const d=await r.json();
+  if(r.ok){closeChangePwd();showNotif('Password changed successfully.','ok');}
+  else errEl.textContent=d.error||'Failed to change password.';
+}
+</script>
+
+<!-- Change Password Modal -->
+<div id="chpwd-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,.6);">
+    <div style="font-size:17px;font-weight:800;margin-bottom:6px;">🔑 Change Password</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:22px;">Update your account password</div>
+    <div id="chpwd-err" style="color:var(--danger);font-size:12px;margin-bottom:12px;min-height:16px;"></div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Current Password</div>
+      <input id="chpwd-cur" type="password" placeholder="Enter current password" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;outline:none;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">New Password</div>
+      <input id="chpwd-new" type="password" placeholder="Min 6 characters" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;outline:none;">
+    </div>
+    <div style="margin-bottom:22px;">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Confirm New Password</div>
+      <input id="chpwd-confirm" type="password" placeholder="Repeat new password" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;outline:none;">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="submitChangePwd()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--accent),#7c3aed);border:none;border-radius:8px;color:#fff;font-weight:800;font-size:13px;cursor:pointer;">Update Password</button>
+      <button onclick="closeChangePwd()" style="flex:1;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── AI Assistant FAB ─────────────────────────────────────────────────── -->
+<div onclick="toggleAiChat()" title="AI Load Test Assistant"
+  style="position:fixed;bottom:28px;right:28px;z-index:900;width:54px;height:54px;border-radius:50%;
+         background:linear-gradient(135deg,#7c3aed,#00d4ff);box-shadow:0 4px 20px rgba(124,58,237,.5);
+         cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;
+         transition:transform .2s;user-select:none;" onmouseenter="this.style.transform='scale(1.12)'" onmouseleave="this.style.transform='scale(1)'">
+  🤖
+  <div id="ai-unread" style="display:none;position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;
+    font-size:10px;font-weight:700;border-radius:50%;width:18px;height:18px;align-items:center;justify-content:center;">1</div>
+</div>
+
+<div id="ai-chat-window" style="display:none;position:fixed;bottom:94px;right:28px;z-index:900;
+  width:420px;height:580px;background:#0d1724;border:1px solid rgba(124,58,237,.4);border-radius:16px;
+  box-shadow:0 8px 40px rgba(0,0,0,.6);flex-direction:column;overflow:hidden;">
+  <div style="background:linear-gradient(135deg,rgba(124,58,237,.3),rgba(0,212,255,.15));
+    padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(124,58,237,.2);">
+    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#00d4ff);
+      display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🤖</div>
+    <div style="flex:1;">
+      <div style="font-weight:700;color:var(--text);font-size:14px;">Load Test AI</div>
+      <div style="font-size:11px;color:#00d4a1;" id="ai-status-line">Ready</div>
+    </div>
+    <button onclick="clearAiChat()" title="Clear chat" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:16px;padding:4px;">🗑</button>
+    <button onclick="toggleAiChat()" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:20px;padding:4px;">✕</button>
+  </div>
+  <div id="ai-chips" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.07);">
+    <button class="ai-chip" onclick="aiQuick('Review my current load distribution and flag any issues.')">🔍 Review config</button>
+    <button class="ai-chip" onclick="aiQuick('Validate TPS, thread counts, ramp-up and duration values and suggest improvements.')">✅ Validate values</button>
+    <button class="ai-chip" onclick="aiQuick('Are my thread counts sized correctly for the TPS targets? Give the formula and check each service.')">🧵 Check threads</button>
+    <button class="ai-chip" onclick="aiQuick('Summarise the entire test configuration in a format suitable for a test plan document.')">📄 Summarize</button>
+  </div>
+  <div id="ai-messages" style="flex:1;overflow-y:auto;padding:14px 14px 0;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth;">
+    <div class="ai-msg ai-msg-bot">
+      <div class="ai-msg-bubble">
+        👋 Hi! I'm your load testing assistant. I have full visibility of your test configuration, load distribution, and environment settings.<br><br>
+        Ask me anything — or tap a quick action above to get started.
+      </div>
+    </div>
+  </div>
+  <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,.07);display:flex;gap:8px;align-items:flex-end;">
+    <textarea id="ai-input" placeholder="Ask about your test config…" rows="2"
+      style="flex:1;background:#1a2640;border:1px solid rgba(255,255,255,.1);border-radius:10px;
+             color:#e2e8f0;padding:9px 12px;font-size:13px;resize:none;outline:none;
+             font-family:inherit;line-height:1.5;max-height:100px;"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAiMessage();}"></textarea>
+    <button onclick="sendAiMessage()" id="ai-send-btn"
+      style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#00d4ff);
+             border:none;cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+      ➤
+    </button>
+  </div>
+  <div style="text-align:center;font-size:10px;color:#64748b;padding:4px 0 8px;">Powered by OpenRouter</div>
+</div>
+
+<style>
+.ai-chip{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:#e2e8f0;
+  border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;transition:background .15s;}
+.ai-chip:hover{background:rgba(124,58,237,.28);}
+.ai-msg{display:flex;flex-direction:column;}
+.ai-msg-user{align-items:flex-end;}
+.ai-msg-bot{align-items:flex-start;}
+.ai-msg-bubble{max-width:88%;padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.6;word-wrap:break-word;}
+.ai-msg-user .ai-msg-bubble{background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(0,212,255,.2));color:#e2e8f0;border-bottom-right-radius:4px;}
+.ai-msg-bot .ai-msg-bubble{background:rgba(255,255,255,.06);color:#e2e8f0;border-bottom-left-radius:4px;}
+.ai-msg-bot .ai-msg-bubble strong{color:#00d4a1;}
+.ai-msg-bot .ai-msg-bubble ul{margin:6px 0 6px 16px;padding:0;}
+.ai-msg-bot .ai-msg-bubble li{margin-bottom:3px;}
+.ai-typing .ai-msg-bubble{color:#64748b;font-style:italic;}
+#ai-messages::-webkit-scrollbar{width:4px;}
+#ai-messages::-webkit-scrollbar-track{background:transparent;}
+#ai-messages::-webkit-scrollbar-thumb{background:rgba(124,58,237,.4);border-radius:4px;}
+</style>
+
+<script>
+let _aiHistory=[], _aiOpen=false;
+function toggleAiChat(){
+  _aiOpen=!_aiOpen;
+  const w=document.getElementById('ai-chat-window');
+  w.style.display=_aiOpen?'flex':'none';
+  if(_aiOpen){document.getElementById('ai-unread').style.display='none';document.getElementById('ai-input').focus();_aiScroll();}
+}
+function clearAiChat(){
+  _aiHistory=[];
+  document.getElementById('ai-messages').innerHTML='<div class="ai-msg ai-msg-bot"><div class="ai-msg-bubble">Chat cleared. What would you like to know?</div></div>';
+}
+function _aiScroll(){const b=document.getElementById('ai-messages');setTimeout(()=>{b.scrollTop=b.scrollHeight;},60);}
+function _aiAddMsg(role,html){
+  const b=document.getElementById('ai-messages');
+  const d=document.createElement('div');
+  d.className=`ai-msg ai-msg-${role}`;
+  d.innerHTML=`<div class="ai-msg-bubble">${html}</div>`;
+  b.appendChild(d);_aiScroll();return d;
+}
+function _md(t){
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`([^`]+)`/g,'<code style="background:rgba(0,212,255,.1);padding:1px 5px;border-radius:3px;font-size:12px;">$1</code>')
+    .replace(/^#{1,3} (.+)$/gm,'<strong style="font-size:14px;color:#00d4ff">$1</strong>')
+    .replace(/^[•\-\*] (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs,m=>`<ul>${m}</ul>`)
+    .replace(/\n/g,'<br>');
+}
+async function aiQuick(p){if(!_aiOpen)toggleAiChat();document.getElementById('ai-input').value=p;await sendAiMessage();}
+async function sendAiMessage(){
+  const inp=document.getElementById('ai-input');
+  const txt=inp.value.trim(); if(!txt) return;
+  inp.value=''; document.getElementById('ai-send-btn').disabled=true;
+  _aiAddMsg('user',_md(txt));
+  _aiHistory.push({role:'user',content:txt});
+  const typing=_aiAddMsg('bot typing','⋯ thinking…');
+  document.getElementById('ai-status-line').textContent='Thinking…';
+  try{
+    const res=await fetch('/api/ai/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:_aiHistory})});
+    const data=await res.json();
+    typing.remove();
+    if(!res.ok){
+      _aiAddMsg('bot',data.error==='NO_API_KEY'?'⚠️ No API key configured. Ask your admin to set the OpenRouter API key in Settings.':'⚠️ Error: '+_md(data.error||'Unknown error'));
+      document.getElementById('ai-status-line').textContent='Error';
+    } else {
+      const reply=data.reply||'';
+      _aiHistory.push({role:'assistant',content:reply});
+      _aiAddMsg('bot',_md(reply));
+      const tok=data.usage?`${data.usage.in}→${data.usage.out} tokens`:'';
+      document.getElementById('ai-status-line').textContent='Ready · '+tok;
+      if(!_aiOpen){const b=document.getElementById('ai-unread');b.style.display='flex';}
+    }
+  }catch(ex){typing.remove();_aiAddMsg('bot','⚠️ Network error: '+ex.message);document.getElementById('ai-status-line').textContent='Network error';}
+  document.getElementById('ai-send-btn').disabled=false;
+  document.getElementById('ai-input').focus();
+}
+
+// ── Theme Toggle ─────────────────────────────────────────────────
+let _currentTheme='dark';
+async function initTheme(){
+  try{
+    const r=await fetch('/api/theme'); const d=await r.json();
+    _currentTheme=d.theme||'dark'; applyTheme(_currentTheme);
+  }catch(e){}
+}
+function applyTheme(theme){
+  const root=document.documentElement;
+  const btn=document.getElementById('v-theme-btn');
+  if(theme==='light'){
+    root.style.setProperty('--bg','#f0f4f8'); root.style.setProperty('--surface','#ffffff');
+    root.style.setProperty('--surface2','#e8edf3'); root.style.setProperty('--surface3','#dde4ee');
+    root.style.setProperty('--border','#c8d5e8'); root.style.setProperty('--text','#1a2332');
+    root.style.setProperty('--muted','#5a6a7e'); if(btn) btn.textContent='☀';
+  } else {
+    root.style.setProperty('--bg','#080c14'); root.style.setProperty('--surface','#0d1421');
+    root.style.setProperty('--surface2','#131d2e'); root.style.setProperty('--surface3','#192438');
+    root.style.setProperty('--border','#1e2d45'); root.style.setProperty('--text','#e2eaf5');
+    root.style.setProperty('--muted','#64748b'); if(btn) btn.textContent='🌙';
+  }
+}
+async function toggleTheme(){
+  _currentTheme=_currentTheme==='dark'?'light':'dark';
+  applyTheme(_currentTheme);
+  await fetch('/api/theme',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({theme:_currentTheme})});
+}
+
+// ── Heatmap ──────────────────────────────────────────────────────
+async function loadHeatmapViewer(){
+  const r=await fetch('/api/heatmap');
+  if(!r.ok) return;
+  const d=await r.json();
+  const {heatmap,days,hours}=d;
+  const maxVal=Math.max(1,...heatmap.flat());
+  const container=document.getElementById('v-heatmap-container');
+  if(!container) return;
+  let html=`<table style="border-collapse:separate;border-spacing:3px;font-size:11px;">
+    <thead><tr><th style="padding:4px 8px;color:var(--muted);">Hour</th>${days.map(d=>`<th style="padding:4px 8px;color:var(--muted);min-width:44px;">${d}</th>`).join('')}</tr></thead>
+    <tbody>`;
+  hours.forEach(h=>{
+    const label=`${String(h).padStart(2,'0')}:00`;
+    html+=`<tr><td style="padding:3px 8px;color:var(--muted);font-family:monospace;font-size:10px;">${label}</td>`;
+    days.forEach((_,di)=>{
+      const v=heatmap[h][di]||0;
+      const intensity=v/maxVal;
+      const rC=Math.round(0+intensity*239),gC=Math.round(212-intensity*144),bC=Math.round(255-intensity*255);
+      const bg=v===0?'rgba(30,45,69,.3)':`rgba(${rC},${gC},${bC},${0.15+intensity*0.85})`;
+      html+=`<td style="padding:6px 4px;text-align:center;border-radius:4px;background:${bg};color:${v===0?'var(--muted)':'var(--text)'};font-weight:${v>0?'700':'400'};" title="${label} ${days[di]}: ${v} run${v!==1?'s':''}">${v||''}</td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  html+=`<div style="margin-top:14px;display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted);">
+    <span>Low</span><div style="width:120px;height:12px;border-radius:6px;background:linear-gradient(90deg,rgba(30,45,69,.3),rgba(239,68,111,.9));"></div><span>High</span></div>`;
+  container.innerHTML=html;
+}
+
+// ── Presence ──────────────────────────────────────────────────────────────
+async function updateVPresence(){
+  try{
+    const r=await fetch('/api/presence',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({panel:'viewer'})});
+    const d=await r.json();
+    const bar=document.getElementById('presence-bar');
+    if(bar) bar.innerHTML=d.users.slice(0,4).map(u=>`<div style="width:26px;height:26px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;" title="${escHtml(u.name)}">${escHtml(u.initials)}</div>`).join('');
+  }catch(e){}
+}
+
+// ── Favourites ────────────────────────────────────────────────────────────
+let _vFavourites=[];
+async function loadVFavourites(){
+  try{const r=await fetch('/api/favourites');const d=await r.json();_vFavourites=d.favourites||[];}catch(e){}
+}
+async function toggleVFavourite(fname,btn){
+  const r=await fetch('/api/favourites',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:fname})});
+  const d=await r.json();_vFavourites=d.favourites||[];
+  if(btn) btn.textContent=d.favourited?'⭐':'☆';
+}
+
+// ── Report search ─────────────────────────────────────────────────────────
+function filterVReports(q){
+  const rows=document.querySelectorAll('#reports-tbody tr[data-fname]');
+  const lq=q.toLowerCase();
+  rows.forEach(r=>{r.style.display=(!lq||r.dataset.fname.toLowerCase().includes(lq))?'':'none';});
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  if(e.key==='?'){e.preventDefault();const m=document.getElementById('v-shortcuts-modal');if(m)m.style.display='flex';return;}
+  if(e.key==='Escape'){const m=document.getElementById('v-shortcuts-modal');if(m)m.style.display='none';return;}
+  if(!e.altKey) return;
+  if(e.key==='t'){e.preventDefault();toggleTheme();}
+  if(e.key==='s'){e.preventDefault();showPanel('reports');if(typeof loadReportsList==='function')loadReportsList();}
+  if(e.key==='r'){e.preventDefault();if(typeof loadViewerOverview==='function')loadViewerOverview();}
+});
+
+setInterval(updateVPresence, 30000);
+updateVPresence();
+loadVFavourites();
+</script>
+
+<!-- Viewer shortcuts modal -->
+<div id="v-shortcuts-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center;" onclick="this.style.display='none'">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;min-width:300px;" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:16px;">&#9000; Shortcuts</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><td style="padding:6px;color:var(--accent);font-weight:700;">Alt+R</td><td style="padding:6px;">Refresh Overview</td></tr>
+      <tr><td style="padding:6px;color:var(--accent);font-weight:700;">Alt+S</td><td style="padding:6px;">Go to Reports</td></tr>
+      <tr><td style="padding:6px;color:var(--accent);font-weight:700;">Alt+T</td><td style="padding:6px;">Toggle theme</td></tr>
+      <tr><td style="padding:6px;color:var(--accent);font-weight:700;">Escape</td><td style="padding:6px;">Close modal</td></tr>
+      <tr><td style="padding:6px;color:var(--accent);font-weight:700;">?</td><td style="padding:6px;">This help</td></tr>
+    </table>
+    <button onclick="document.getElementById('v-shortcuts-modal').style.display='none'" style="margin-top:16px;width:100%;padding:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;">Close</button>
+  </div>
+</div>
+</body>
+</html>

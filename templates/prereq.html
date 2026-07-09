@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Load Test Pre-requisites — BTC Botswana</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c14;--surface:#0d1421;--surface2:#131d2e;--surface3:#192438;
+  --border:#1e2d45;--accent:#00d4ff;--accent2:#00ff9d;--purple:#7c3aed;
+  --warn:#f59e0b;--danger:#ef4444;--text:#e2eaf5;--muted:#64748b;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;min-height:100vh;}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── Header ── */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:0;display:flex;align-items:center;height:58px;gap:14px;padding:0 28px;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.brand-name{font-size:14px;font-weight:800;background:linear-gradient(90deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.header-sep{flex:1;}
+.header-badge{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:var(--accent);}
+.btn-pdf{display:flex;align-items:center;gap:6px;padding:7px 16px;background:linear-gradient(135deg,var(--accent),#0099bb);color:#000;border:none;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;margin-left:10px;transition:opacity .15s;}
+.btn-pdf:hover{opacity:.85;}
+.btn-reset{background:none;border:1px solid var(--border);border-radius:8px;padding:7px 14px;color:var(--muted);font-size:12px;cursor:pointer;margin-left:6px;}
+.btn-reset:hover{border-color:var(--danger);color:var(--danger);}
+
+/* ── Main layout ── */
+.main{max-width:1200px;margin:0 auto;padding:28px 24px 60px;}
+
+/* ── Page title ── */
+.page-title{margin-bottom:28px;}
+.page-title h1{font-size:22px;font-weight:800;margin-bottom:4px;}
+.page-title .sub{font-size:13px;color:var(--muted);}
+.page-title .meta{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+.meta-field{display:flex;align-items:center;gap:6px;font-size:12px;}
+.meta-field label{color:var(--muted);white-space:nowrap;}
+.meta-field input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--text);font-size:12px;outline:none;min-width:140px;}
+.meta-field input:focus{border-color:var(--accent);}
+
+/* ── Section card ── */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:20px;}
+.sec-title{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.sec-num{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#000;flex-shrink:0;}
+.sec-title h2{font-size:15px;font-weight:700;}
+.sec-title .sec-sub{font-size:11px;color:var(--muted);margin-left:4px;}
+
+/* ── KPI grid (section 1) ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.kpi-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+.kpi-item::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi-item.accent::before{background:linear-gradient(90deg,var(--accent),transparent);}
+.kpi-item.ok::before{background:linear-gradient(90deg,var(--accent2),transparent);}
+.kpi-item.warn::before{background:linear-gradient(90deg,var(--warn),transparent);}
+.kpi-item.danger::before{background:linear-gradient(90deg,var(--danger),transparent);}
+.kpi-item.purple::before{background:linear-gradient(90deg,var(--purple),transparent);}
+.kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px;}
+.kpi-input{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:20px;font-weight:800;width:100%;outline:none;padding:2px 0;font-variant-numeric:tabular-nums;}
+.kpi-input:focus{border-bottom-color:var(--accent);}
+.kpi-input::placeholder{color:var(--muted);font-size:16px;font-weight:400;}
+.kpi-unit{font-size:10px;color:var(--muted);margin-top:5px;}
+
+/* ── Env grid (section 2) ── */
+.env-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:640px){.env-grid{grid-template-columns:1fr;}}
+.env-item{display:flex;flex-direction:column;gap:5px;}
+.env-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
+.env-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none;width:100%;transition:border-color .15s;}
+.env-input:focus{border-color:var(--accent);}
+.env-input.tall{min-height:70px;resize:vertical;font-family:inherit;}
+
+/* ── Checklist (sections 3-7) ── */
+.checklist{display:flex;flex-direction:column;gap:10px;}
+.check-item{display:flex;align-items:flex-start;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;transition:border-color .15s;}
+.check-item.done{border-color:rgba(0,255,157,.2);background:rgba(0,255,157,.03);}
+.check-item.blocked{border-color:rgba(239,68,68,.2);background:rgba(239,68,68,.03);}
+.check-toggle{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s;}
+.check-toggle.checked{background:var(--accent2);border-color:var(--accent2);}
+.check-toggle.checked::after{content:'✓';font-size:13px;font-weight:900;color:#000;}
+.check-toggle.blocked{background:var(--danger);border-color:var(--danger);}
+.check-toggle.blocked::after{content:'✗';font-size:13px;font-weight:900;color:#fff;}
+.check-body{flex:1;}
+.check-title{font-size:13px;font-weight:700;margin-bottom:3px;}
+.check-desc{font-size:11px;color:var(--muted);}
+.check-note{margin-top:6px;}
+.check-note input{background:transparent;border:none;border-bottom:1px dashed var(--border);color:var(--muted);font-size:11px;width:100%;outline:none;padding:2px 0;}
+.check-note input:focus{border-bottom-color:var(--accent);color:var(--text);}
+.check-actions{display:flex;gap:6px;margin-left:auto;align-items:center;flex-shrink:0;}
+.status-pill{padding:3px 10px;border-radius:10px;font-size:10px;font-weight:800;cursor:pointer;border:1px solid;user-select:none;}
+.status-pill.ok{background:rgba(0,255,157,.12);color:var(--accent2);border-color:rgba(0,255,157,.25);}
+.status-pill.pending{background:rgba(245,158,11,.12);color:var(--warn);border-color:rgba(245,158,11,.25);}
+.status-pill.blocked{background:rgba(239,68,68,.12);color:var(--danger);border-color:rgba(239,68,68,.25);}
+.status-pill.na{background:rgba(100,116,139,.12);color:var(--muted);border-color:rgba(100,116,139,.25);}
+
+/* ── Channels grid ── */
+.channel-grid{display:flex;gap:10px;flex-wrap:wrap;}
+.channel-card{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:14px 18px;cursor:pointer;transition:all .15s;min-width:100px;}
+.channel-card.active{border-color:var(--accent);background:rgba(0,212,255,.06);}
+.channel-card .ch-icon{font-size:22px;}
+.channel-card .ch-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
+.channel-card .ch-badge{font-size:9px;padding:2px 8px;border-radius:8px;}
+.channel-card.active .ch-badge{background:rgba(0,212,255,.15);color:var(--accent);}
+
+/* ── Load plan (iterations/hours) ── */
+.load-plan{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.plan-item{display:flex;flex-direction:column;gap:5px;min-width:130px;}
+.plan-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
+.plan-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:22px;font-weight:800;outline:none;width:100%;text-align:center;}
+.plan-input:focus{border-color:var(--accent);}
+
+/* ── Activity table ── */
+.act-table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+.act-table{width:100%;border-collapse:collapse;font-size:13px;}
+.act-table thead th{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;text-align:left;white-space:nowrap;border-bottom:2px solid var(--border);}
+.act-table tbody tr{border-bottom:1px solid var(--border);}
+.act-table tbody tr:last-child{border-bottom:none;}
+.act-table tbody tr:hover{background:rgba(255,255,255,.02);}
+.act-table td{padding:10px 12px;vertical-align:middle;}
+.act-table td.activity{font-weight:600;min-width:220px;}
+.act-table td.sub{font-size:11px;color:var(--muted);padding-top:2px;}
+.act-inline{background:transparent;border:none;color:var(--text);font-size:12px;width:100%;outline:none;min-width:60px;}
+.act-inline:focus{border-bottom:1px solid var(--accent);}
+.act-inline::placeholder{color:var(--muted);}
+.act-owner{display:flex;flex-wrap:wrap;gap:4px;}
+.owner-chip{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.2);border-radius:8px;padding:2px 8px;font-size:10px;font-weight:700;color:#a78bfa;white-space:nowrap;}
+
+/* ── Status select ── */
+select.stat-sel{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 8px;color:var(--text);font-size:11px;font-weight:700;outline:none;cursor:pointer;}
+select.stat-sel.st-completed{color:var(--accent2);border-color:rgba(0,255,157,.25);}
+select.stat-sel.st-pending{color:var(--warn);border-color:rgba(245,158,11,.25);}
+select.stat-sel.st-inprogress{color:var(--accent);border-color:rgba(0,212,255,.25);}
+select.stat-sel.st-blocked{color:var(--danger);border-color:rgba(239,68,68,.25);}
+select.stat-sel.st-na{color:var(--muted);}
+
+/* ── Summary banner ── */
+.summary-banner{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;}
+.sum-val{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;}
+.sum-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px;}
+
+/* ── Print ── */
+@media print{
+  body{background:#fff;color:#000;}
+  .header,.btn-pdf,.btn-reset{display:none!important;}
+  .section{border:1px solid #ccc;background:#fff;break-inside:avoid;}
+  .kpi-item,.env-item,.check-item,.act-table thead th{background:#f5f5f5;}
+  :root{--bg:#fff;--surface:#fff;--surface2:#f5f5f5;--border:#ddd;--text:#111;--muted:#666;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <div class="brand-icon">📡</div>
+    <div>
+      <div class="brand-name">BTC Load Test</div>
+    </div>
+  </div>
+  <div class="header-sep"></div>
+  <div class="header-badge">📋 Pre-Requisites Document</div>
+  <button class="btn-pdf" onclick="window.print()">🖨 Print / Save PDF</button>
+  <button class="btn-reset" onclick="resetAll()" title="Clear all fields">↺ Reset</button>
+</div>
+
+<div class="main">
+
+<!-- Page title -->
+<div class="page-title">
+  <h1>Load Test Pre-Requisites &amp; Activity Tracker</h1>
+  <div class="sub">Fill in all sections before initiating the load test execution.</div>
+  <div class="meta">
+    <div class="meta-field"><label>Project:</label><input id="meta-project" placeholder="BTC Botswana" value="BTC Botswana"></div>
+    <div class="meta-field"><label>Prepared by:</label><input id="meta-author" placeholder="Gaurav / Shashidhar" value="Gaurav / Shashidhar"></div>
+    <div class="meta-field"><label>Date:</label><input id="meta-date" type="date"></div>
+    <div class="meta-field"><label>Version:</label><input id="meta-ver" placeholder="v1.0" style="max-width:80px;" value="v1.0"></div>
+  </div>
+</div>
+
+<!-- ── Summary ── -->
+<div class="summary-banner" id="summary-banner">
+  <div class="sum-card"><div class="sum-val" id="sum-total" style="color:var(--accent);">0</div><div class="sum-label">Total Activities</div></div>
+  <div class="sum-card"><div class="sum-val" id="sum-done" style="color:var(--accent2);">0</div><div class="sum-label">Completed</div></div>
+  <div class="sum-card"><div class="sum-val" id="sum-pending" style="color:var(--warn);">0</div><div class="sum-label">Pending</div></div>
+  <div class="sum-card"><div class="sum-val" id="sum-blocked" style="color:var(--danger);">0</div><div class="sum-label">Blocked</div></div>
+</div>
+
+<!-- ── Section 1: Load Test Targets ── -->
+<div class="section">
+  <div class="sec-title">
+    <div class="sec-num">1</div>
+    <h2>Load Test Targets</h2>
+    <span class="sec-sub">Define the performance goals and SLAs</span>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-item accent">
+      <div class="kpi-label">Target TPS</div>
+      <input class="kpi-input" id="t-tps" placeholder="e.g. 40" type="number">
+      <div class="kpi-unit">Transactions per Second</div>
+    </div>
+    <div class="kpi-item ok">
+      <div class="kpi-label">Average TPS SLA</div>
+      <input class="kpi-input" id="t-avg-sla" placeholder="e.g. 35" type="number">
+      <div class="kpi-unit">Minimum sustained TPS</div>
+    </div>
+    <div class="kpi-item purple">
+      <div class="kpi-label">Peak TPS</div>
+      <input class="kpi-input" id="t-peak" placeholder="e.g. 45" type="number">
+      <div class="kpi-unit">Maximum expected burst</div>
+    </div>
+    <div class="kpi-item warn">
+      <div class="kpi-label">Duration</div>
+      <input class="kpi-input" id="t-dur" placeholder="e.g. 4 Hrs">
+      <div class="kpi-unit">Total test window</div>
+    </div>
+    <div class="kpi-item danger">
+      <div class="kpi-label">Error Rate SLA</div>
+      <input class="kpi-input" id="t-err" placeholder="e.g. 1" type="number">
+      <div class="kpi-unit">Maximum acceptable error %</div>
+    </div>
+    <div class="kpi-item accent">
+      <div class="kpi-label">P90 Response SLA</div>
+      <input class="kpi-input" id="t-p90" placeholder="e.g. 3000" type="number">
+      <div class="kpi-unit">Milliseconds</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Section 2: Environment Details ── -->
+<div class="section">
+  <div class="sec-title">
+    <div class="sec-num">2</div>
+    <h2>Environment Details</h2>
+    <span class="sec-sub">Target environment configuration</span>
+  </div>
+  <div class="env-grid">
+    <div class="env-item">
+      <div class="env-label">Environment Name</div>
+      <input class="env-input" id="e-env" placeholder="e.g. preprod / staging / prod-shadow">
+    </div>
+    <div class="env-item">
+      <div class="env-label">App / LB Endpoint</div>
+      <input class="env-input" id="e-endpoint" placeholder="e.g. smegapreprod.btc.bw or 172.16.50.x">
+    </div>
+    <div class="env-item">
+      <div class="env-label">Build / Release Version</div>
+      <input class="env-input" id="e-build" placeholder="e.g. v3.12.4 / Release-2024-06">
+    </div>
+    <div class="env-item">
+      <div class="env-label">JMeter Version</div>
+      <input class="env-input" id="e-jmeter" placeholder="e.g. Apache JMeter 5.5">
+    </div>
+    <div class="env-item" style="grid-column:1/-1;">
+      <div class="env-label">DB Details</div>
+      <textarea class="env-input tall" id="e-db" placeholder="e.g. Oracle 19c — 172.16.x.x:1521/orcl&#10;AWR snapshots: enabled&#10;Connections: 200 pool size"></textarea>
+    </div>
+    <div class="env-item">
+      <div class="env-label">Server / Nodes Info</div>
+      <textarea class="env-input tall" id="e-servers" placeholder="e.g. 4-node cluster&#10;8 vCPU, 32 GB RAM each"></textarea>
+    </div>
+    <div class="env-item">
+      <div class="env-label">Monitoring Tools</div>
+      <textarea class="env-input tall" id="e-tools" placeholder="e.g. Grafana — http://172.16.x.x:3000&#10;AWR enabled&#10;AppDynamics / NewRelic"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ── Section 3: Service-wise Load Distribution ── -->
+<div class="section">
+  <div class="sec-title">
+    <div class="sec-num">3</div>
+    <h2>Service-wise Load Distribution &amp; Transaction Mix</h2>
+    <span class="sec-sub">Defined in the Test Config panel of the Load Testing Platform</span>
+  </div>
+  <div style="background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:14px 18px;font-size:13px;color:var(--muted);margin-bottom:14px;">
+    💡 Load distribution is managed in the platform at <a href="http://localhost:5000" style="color:var(--accent);" target="_blank">localhost:5000</a> → Test Config → Load Distribution. Import from Excel or configure manually.
+  </div>
+  <div id="svc-dist-box">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border);">
+          <th style="padding:9px 12px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px;">#</th>
+          <th style="padding:9px 12px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px;">Service / Transaction</th>
+          <th style="padding:9px 12px;text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px;">Channel</th>
+          <th style="padding:9px 12px;text-align:right;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px;">Target TPS %</th>
+          <th style="padding:9px 12px;text-align:right;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px;">Threads</th>
+          <th style="padding:9px 12px;text-align:center;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px;">Status</th>
+        </tr>
+      </thead>
+      <tbody id="svc-tbody">
+        <!-- rows added by JS -->
+      </tbody>
+    </table>
+    <button onclick="addSvcRow()" style="margin-top:10px;background:none;border:1px dashed var(--border);border-radius:8px;padding:7px 16px;color:var(--muted);font-size:12px;cursor:pointer;width:100%;">+ Add Service Row</button>
+  </div>
+</div>
+
+<!-- ── Section 4: Services Up & Stable ── -->
+<div class="section">
+  <div class="sec-title">
+    <div class="sec-num">4</div>
+    <h2>All Services Up &amp; Stable</h2>
+    <span class="sec-sub">Confirm each component is healthy before execution</span>
+  </div>
+  <div class="checklist" id="services-checklist">
+    <div class="check-item" data-id="s1">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">All application nodes healthy</div>
+        <div class="check-desc">All app servers in cluster responding to health checks</div>
+        <div class="check-note"><input placeholder="Add note…"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+    <div class="check-item" data-id="s2">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">Database connections stable</div>
+        <div class="check-desc">Connection pool not exhausted, no pending locks</div>
+        <div class="check-note"><input placeholder="Add note…"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+    <div class="check-item" data-id="s3">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">Load balancer configured and routing correctly</div>
+        <div class="check-desc">All backend nodes registered, health checks green</div>
+        <div class="check-note"><input placeholder="Add note…"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+    <div class="check-item" data-id="s4">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">External integrations / mock services ready</div>
+        <div class="check-desc">All downstream services mocked or available (Hollard, Betway, etc.)</div>
+        <div class="check-note"><input placeholder="Add note…"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+    <div class="check-item" data-id="s5">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">Notifications / alerts disabled on test environment</div>
+        <div class="check-desc">SMS / push / email notifications suppressed to avoid spamming during load run</div>
+        <div class="check-note"><input placeholder="Add note…"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Section 5: Test Data ── -->
+<div class="section">
+  <div class="sec-title">
+    <div class="sec-num">5</div>
+    <h2>Test Data Preparation</h2>
+    <span class="sec-sub">Data must be ready before execution starts</span>
+  </div>
+  <div class="checklist">
+    <div class="check-item">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">Test data created or migrated from production</div>
+        <div class="check-desc">ETA: 22 Jun — MSISDN lists, account numbers, PINs for all 22 services</div>
+        <div class="check-note"><input placeholder="Add note or ETA…"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+    <div class="check-item">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">Client confirmation on test data received</div>
+        <div class="check-desc">Owner: Tapan — confirmation to be taken from client side</div>
+        <div class="check-note"><input placeholder="Add note…"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+    <div class="check-item">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">CSV files uploaded to Load Testing Platform</div>
+        <div class="check-desc">All 22 service CSV files present in <code style="background:var(--surface3);padding:1px 6px;border-radius:4px;font-size:11px;">clients/BTC/testdata/</code></div>
+        <div class="check-note"><input placeholder="Add note…"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+    <div class="check-item">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">DB indexes rebuilt &amp; statistics analysed</div>
+        <div class="check-desc">Owner: Balaji — run REBUILD INDEX + ANALYZE before Day 1</div>
+        <div class="check-note"><input placeholder="Add note…"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Section 6: Grafana / AWR ── -->
+<div class="section">
+  <div class="sec-title">
+    <div class="sec-num">6</div>
+    <h2>Grafana Access &amp; AWR Collection</h2>
+    <span class="sec-sub">Observability must be enabled before the run</span>
+  </div>
+  <div class="checklist">
+    <div class="check-item">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">Grafana dashboards accessible and panels healthy</div>
+        <div class="check-note"><input placeholder="Grafana URL…" id="grafana-url"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+    <div class="check-item">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">AWR snapshot collection enabled on DB</div>
+        <div class="check-desc">Confirm AWR interval set, begin snapshot taken before run start</div>
+        <div class="check-note"><input placeholder="Add note…"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+    <div class="check-item">
+      <div class="check-toggle" onclick="toggleCheck(this)"></div>
+      <div class="check-body">
+        <div class="check-title">JMeter listener / reporting configured</div>
+        <div class="check-desc">Results file path set, backend listener active if real-time Grafana feed needed</div>
+        <div class="check-note"><input placeholder="Add note…"></div>
+      </div>
+      <div class="check-actions"><span class="status-pill pending" onclick="cycleStatus(this)">Pending</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Section 7: Channels ── -->
+<div class="section">
+  <div class="sec-title">
+    <div class="sec-num">7</div>
+    <h2>Channels to be Covered</h2>
+    <span class="sec-sub">Click to toggle which channels are in scope for this run</span>
+  </div>
+  <div class="channel-grid">
+    <div class="channel-card active" onclick="this.classList.toggle('active')"><div class="ch-icon">📱</div><div class="ch-name">USSD</div><div class="ch-badge">In scope</div></div>
+    <div class="channel-card" onclick="this.classList.toggle('active')"><div class="ch-icon">🌐</div><div class="ch-name">API</div><div class="ch-badge">Click to add</div></div>
+    <div class="channel-card" onclick="this.classList.toggle('active')"><div class="ch-icon">💻</div><div class="ch-name">Web</div><div class="ch-badge">Click to add</div></div>
+    <div class="channel-card" onclick="this.classList.toggle('active')"><div class="ch-icon">📲</div><div class="ch-name">Mobile App</div><div class="ch-badge">Click to add</div></div>
+    <div class="channel-card" onclick="this.classList.toggle('active')"><div class="ch-icon">🏧</div><div class="ch-name">Agent</div><div class="ch-badge">Click to add</div></div>
+  </div>
+
+  <div style="margin-top:20px;display:flex;gap:16px;flex-wrap:wrap;">
+    <div class="plan-item">
+      <div class="plan-label">No. of Iterations</div>
+      <input class="plan-input" id="p-iterations" type="number" placeholder="—" style="font-size:28px;">
+    </div>
+    <div class="plan-item">
+      <div class="plan-label">Total Hours to Run</div>
+      <input class="plan-input" id="p-hours" type="number" placeholder="—" style="font-size:28px;">
+    </div>
+  </div>
+</div>
+
+<!-- ── Activity Tracker ── -->
+<div class="section">
+  <div class="sec-title">
+    <div class="sec-num" style="background:linear-gradient(135deg,var(--warn),#e07b00);">▶</div>
+    <h2>Activity Tracker</h2>
+    <span class="sec-sub">Daily execution plan and status</span>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <button onclick="addActRow()" style="background:none;border:1px solid var(--border);border-radius:7px;padding:5px 12px;color:var(--muted);font-size:11px;cursor:pointer;">+ Add Row</button>
+    </div>
+  </div>
+  <div class="act-table-wrap">
+    <table class="act-table">
+      <thead>
+        <tr>
+          <th>Activity</th>
+          <th>Status</th>
+          <th>Day</th>
+          <th>Duration</th>
+          <th>Owner</th>
+          <th>Pre-requisites</th>
+          <th>AWR Analysis</th>
+          <th>Remarks / Customer Confirmation</th>
+          <th>Reference</th>
+        </tr>
+      </thead>
+      <tbody id="act-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ── Default activity data ──
+const DEFAULT_ACTIVITIES = [
+  {activity:'Script preparations', status:'Completed', day:'0', duration:'—', owner:['Gaurav'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Pre-requisites — Tools readiness', status:'Completed', day:'0', duration:'—', owner:['Gaurav','Akshay'], prereq:'JMeter, Grafana', awr:'', remarks:'', ref:''},
+  {activity:'Environment preparation\n• Enable all nodes\n• Server readiness', status:'Pending', day:'1', duration:'—', owner:['Gaurav','Akshay'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Data preparations', status:'Pending', day:'1', duration:'—', owner:['Gaurav','Akshay'], prereq:'ETA - 22 Jun', awr:'', remarks:'', ref:''},
+  {activity:'Data confirmation from client', status:'Pending', day:'1', duration:'—', owner:['Tapan'], prereq:'Data confirmation to be taken from Client', awr:'', remarks:'', ref:''},
+  {activity:'Services mocked', status:'Pending', day:'1', duration:'—', owner:['Mayank'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Notifications disabled', status:'Pending', day:'1', duration:'—', owner:['Mayank'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Rebuild indexes & analyse for DB', status:'Pending', day:'1', duration:'—', owner:['Balaji'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Load execution at 25 TPS — Run 1', status:'Pending', day:'1', duration:'30 mins', owner:['Gaurav'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Load execution at 25 TPS — Run 2', status:'Pending', day:'1', duration:'2 Hrs', owner:['Gaurav'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Load execution at 25 TPS — Run 3', status:'Pending', day:'1', duration:'4 Hrs', owner:['Gaurav'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Load execution at 25 TPS — Run 4', status:'Pending', day:'2', duration:'8 Hrs', owner:['Gaurav'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Load execution at 35 TPS — Run 1', status:'Pending', day:'3', duration:'4 Hrs', owner:['Gaurav'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Load execution at 35 TPS — Run 2', status:'Pending', day:'3', duration:'8 Hrs', owner:['Gaurav'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Load execution at 40 TPS — Run 1', status:'Pending', day:'4', duration:'4 Hrs', owner:['Gaurav'], prereq:'', awr:'', remarks:'', ref:''},
+  {activity:'Load execution at 40 TPS — Run 2', status:'Pending', day:'4', duration:'8 Hrs', owner:['Gaurav'], prereq:'', awr:'', remarks:'', ref:''},
+];
+
+const DEFAULT_SERVICES = [
+  {name:'P2P Transfer',channel:'USSD',pct:'',threads:'',status:'Pending'},
+  {name:'Balance Enquiry',channel:'USSD',pct:'',threads:'',status:'Pending'},
+  {name:'Airtime Top-up (Self)',channel:'USSD',pct:'',threads:'',status:'Pending'},
+  {name:'Airtime Top-up (Others)',channel:'USSD',pct:'',threads:'',status:'Pending'},
+  {name:'Data Bundles (Self)',channel:'USSD',pct:'',threads:'',status:'Pending'},
+  {name:'Data Bundles (Others)',channel:'USSD',pct:'',threads:'',status:'Pending'},
+  {name:'Cash In',channel:'USSD',pct:'',threads:'',status:'Pending'},
+  {name:'Cash Out',channel:'USSD',pct:'',threads:'',status:'Pending'},
+  {name:'Wallet to Bank',channel:'USSD',pct:'',threads:'',status:'Pending'},
+  {name:'Last 5 Transactions',channel:'USSD',pct:'',threads:'',status:'Pending'},
+];
+
+// ── Status helpers ──
+const STATUSES = ['Pending','In-Progress','Completed','Blocked','N/A'];
+const STATUS_CLS = {'Completed':'st-completed','Pending':'st-pending','In-Progress':'st-inprogress','Blocked':'st-blocked','N/A':'st-na'};
+
+function statusSelect(val, onchange){
+  const cls = STATUS_CLS[val] || 'st-pending';
+  const opts = STATUSES.map(s=>`<option value="${s}" ${s===val?'selected':''}>${s}</option>`).join('');
+  return `<select class="stat-sel ${cls}" onchange="this.className='stat-sel '+( {'Completed':'st-completed','Pending':'st-pending','In-Progress':'st-inprogress','Blocked':'st-blocked','N/A':'st-na'}[this.value]||'');${onchange||''}updateSummary()">${opts}</select>`;
+}
+
+// ── Activity table ──
+function renderActTable(){
+  const acts = loadActs();
+  const tbody = document.getElementById('act-tbody');
+  tbody.innerHTML = acts.map((a,i)=>`
+    <tr>
+      <td class="activity">
+        <textarea class="act-inline" rows="${(a.activity.match(/\n/g)||[]).length+1}" onchange="updateAct(${i},'activity',this.value)">${esc(a.activity)}</textarea>
+      </td>
+      <td style="min-width:110px;">${statusSelect(a.status,`updateAct(${i},'status',this.value)`)}</td>
+      <td><input class="act-inline" value="${esc(a.day)}" placeholder="Day" style="width:50px;text-align:center;font-weight:700;" onchange="updateAct(${i},'day',this.value)"></td>
+      <td><input class="act-inline" value="${esc(a.duration)}" placeholder="e.g. 4 Hrs" style="width:80px;" onchange="updateAct(${i},'duration',this.value)"></td>
+      <td style="min-width:120px;"><div class="act-owner">${(a.owner||[]).map(o=>`<span class="owner-chip">${esc(o)}</span>`).join('')}</div><input class="act-inline" placeholder="Add owner…" style="margin-top:4px;font-size:11px;" onkeydown="if(event.key==='Enter'){addOwner(${i},this.value);this.value='';}"></td>
+      <td><input class="act-inline" value="${esc(a.prereq)}" placeholder="—" style="min-width:120px;" onchange="updateAct(${i},'prereq',this.value)"></td>
+      <td><input class="act-inline" value="${esc(a.awr)}" placeholder="—" style="min-width:80px;" onchange="updateAct(${i},'awr',this.value)"></td>
+      <td><input class="act-inline" value="${esc(a.remarks)}" placeholder="—" style="min-width:140px;" onchange="updateAct(${i},'remarks',this.value)"></td>
+      <td style="display:flex;gap:4px;align-items:center;">
+        <input class="act-inline" value="${esc(a.ref)}" placeholder="—" style="min-width:80px;" onchange="updateAct(${i},'ref',this.value)">
+        <button onclick="removeAct(${i})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:15px;padding:0 4px;opacity:.5;" title="Remove row">✕</button>
+      </td>
+    </tr>`).join('');
+  updateSummary();
+}
+
+function loadActs(){ return JSON.parse(localStorage.getItem('prereq_acts')||'null') || DEFAULT_ACTIVITIES; }
+function saveActs(acts){ localStorage.setItem('prereq_acts', JSON.stringify(acts)); }
+function updateAct(i,key,val){ const acts=loadActs(); acts[i][key]=val; saveActs(acts); updateSummary(); }
+function addOwner(i,name){ if(!name.trim()) return; const acts=loadActs(); acts[i].owner=[...(acts[i].owner||[]),name.trim()]; saveActs(acts); renderActTable(); }
+function removeAct(i){ const acts=loadActs(); acts.splice(i,1); saveActs(acts); renderActTable(); }
+function addActRow(){
+  const acts=loadActs();
+  acts.push({activity:'New Activity',status:'Pending',day:'',duration:'',owner:[],prereq:'',awr:'',remarks:'',ref:''});
+  saveActs(acts); renderActTable();
+}
+
+// ── Service rows ──
+function loadSvcs(){ return JSON.parse(localStorage.getItem('prereq_svcs')||'null') || DEFAULT_SERVICES; }
+function saveSvcs(s){ localStorage.setItem('prereq_svcs', JSON.stringify(s)); }
+
+function renderSvcTable(){
+  const svcs = loadSvcs();
+  const tbody = document.getElementById('svc-tbody');
+  tbody.innerHTML = svcs.map((s,i)=>`
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:8px 12px;color:var(--muted);font-size:11px;">${i+1}</td>
+      <td style="padding:8px 12px;"><input class="act-inline" value="${esc(s.name)}" style="font-weight:700;" onchange="updateSvc(${i},'name',this.value)"></td>
+      <td style="padding:8px 12px;">
+        <select class="stat-sel" onchange="updateSvc(${i},'channel',this.value)" style="min-width:90px;">
+          ${['USSD','API','Web','Mobile','Agent'].map(c=>`<option ${c===s.channel?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </td>
+      <td style="padding:8px 12px;text-align:right;"><input class="act-inline" type="number" value="${esc(s.pct)}" placeholder="%" style="width:60px;text-align:right;" onchange="updateSvc(${i},'pct',this.value)"></td>
+      <td style="padding:8px 12px;text-align:right;"><input class="act-inline" type="number" value="${esc(s.threads)}" placeholder="—" style="width:60px;text-align:right;" onchange="updateSvc(${i},'threads',this.value)"></td>
+      <td style="padding:8px 12px;text-align:center;display:flex;gap:4px;align-items:center;justify-content:center;">
+        ${statusSelect(s.status||'Pending',`updateSvc(${i},'status',this.value)`)}
+        <button onclick="removeSvc(${i})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;opacity:.4;">✕</button>
+      </td>
+    </tr>`).join('');
+}
+function updateSvc(i,k,v){ const s=loadSvcs(); s[i][k]=v; saveSvcs(s); }
+function removeSvc(i){ const s=loadSvcs(); s.splice(i,1); saveSvcs(s); renderSvcTable(); }
+function addSvcRow(){ const s=loadSvcs(); s.push({name:'New Service',channel:'USSD',pct:'',threads:'',status:'Pending'}); saveSvcs(s); renderSvcTable(); }
+
+// ── Check toggles ──
+function toggleCheck(el){
+  if(el.classList.contains('checked')){ el.classList.remove('checked'); el.closest('.check-item').classList.remove('done'); }
+  else { el.classList.add('checked'); el.closest('.check-item').classList.add('done'); }
+  updateSummary();
+}
+function cycleStatus(el){
+  const cycles=['Pending','In-Progress','Completed','Blocked','N/A'];
+  const cur = el.textContent.trim();
+  const next = cycles[(cycles.indexOf(cur)+1)%cycles.length];
+  const cls = {'Pending':'pending','In-Progress':'pending','Completed':'ok','Blocked':'blocked','N/A':'na'};
+  el.textContent = next; el.className='status-pill '+(cls[next]||'pending');
+  updateSummary();
+}
+
+// ── Summary counter ──
+function updateSummary(){
+  const rows = document.querySelectorAll('#act-tbody .stat-sel');
+  let done=0,pending=0,blocked=0;
+  rows.forEach(s=>{ if(s.value==='Completed') done++; else if(s.value==='Blocked') blocked++; else if(s.value!=='N/A') pending++; });
+  document.getElementById('sum-total').textContent   = rows.length;
+  document.getElementById('sum-done').textContent    = done;
+  document.getElementById('sum-pending').textContent = pending;
+  document.getElementById('sum-blocked').textContent = blocked;
+}
+
+// ── Persist form fields ──
+function saveFields(){
+  const ids=['meta-project','meta-author','meta-date','meta-ver',
+    't-tps','t-avg-sla','t-peak','t-dur','t-err','t-p90',
+    'e-env','e-endpoint','e-build','e-jmeter','e-db','e-servers','e-tools',
+    'p-iterations','p-hours','grafana-url'];
+  const data={};
+  ids.forEach(id=>{ const el=document.getElementById(id); if(el) data[id]=el.value; });
+  localStorage.setItem('prereq_fields', JSON.stringify(data));
+}
+function loadFields(){
+  const data=JSON.parse(localStorage.getItem('prereq_fields')||'{}');
+  Object.entries(data).forEach(([id,val])=>{ const el=document.getElementById(id); if(el) el.value=val; });
+}
+
+function resetAll(){
+  if(!confirm('Reset all data to defaults?')) return;
+  localStorage.removeItem('prereq_acts');
+  localStorage.removeItem('prereq_svcs');
+  localStorage.removeItem('prereq_fields');
+  location.reload();
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded',()=>{
+  // set today's date
+  const d = document.getElementById('meta-date');
+  if(d && !d.value) d.value = new Date().toISOString().split('T')[0];
+
+  loadFields();
+  renderActTable();
+  renderSvcTable();
+
+  // persist on every change
+  document.body.addEventListener('change', saveFields);
+  document.body.addEventListener('input',  saveFields);
+});
+</script>
+</body>
+</html>

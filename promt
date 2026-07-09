@@ -1,0 +1,312 @@
+# Load Testing Project Dashboard – Development Requirements
+
+## Objective
+
+Develop a modern, visually appealing, and interactive web application that serves as a centralized dashboard for the Load Testing Project. The dashboard should provide complete visibility into all load-testing assets, including JMeter scripts, test data files, execution reports, project structure, and execution history, all accessible from a single interface.
+
+## Existing Environment
+
+### Application URL
+
+http://172.16.50.100:5000/
+
+### Login Credentials
+
+* Username: gauravjain
+* Password: 0987654321
+
+### Available Resources
+
+All project files are already available within the existing project directory.
+
+#### Load Testing Scripts
+
+* Main JMeter Script:
+
+  * BTC_USSD_LOADINFTESTING_0TPS.jmx
+
+#### Test Data
+
+* All CSV files are stored under:
+
+  * TestData/
+
+#### Reports
+
+* All execution reports are stored under:
+
+  * reportPath/
+
+The application should automatically scan these folders and dynamically display their contents.
+
+---
+
+# Dashboard Features
+
+## 1. Home Dashboard
+
+Create a modern landing page displaying:
+
+* Total JMeter Scripts
+* Total Test Data Files
+* Total Reports Available
+* Latest Execution Details
+* Project Health Overview
+* Quick Navigation Cards
+* Interactive Statistics and Charts
+
+Use a professional UI with:
+
+* Responsive Design
+* Dark/Light Theme Support
+* Glassmorphism or Modern Dashboard Styling
+* Interactive Cards
+* Smooth Animations
+* Search and Filter Functionality
+
+---
+
+## 2. Project Structure Explorer
+
+Display the complete project structure in a collapsible tree view similar to:
+
+Project Root
+│
+├── JMX Scripts
+│ └── BTC_USSD_LOADINFTESTING_0TPS.jmx
+│
+├── TestData
+│ ├── File1.csv
+│ ├── File2.csv
+│ └── ...
+│
+├── Reports
+│ ├── Report_1
+│ ├── Report_2
+│ └── ...
+│
+└── Other Resources
+
+Features:
+
+* Expand/Collapse folders
+* File counts
+* Search files
+* File metadata
+* Download/View options
+
+---
+
+## 3. JMeter Script Management
+
+Display:
+
+* Script Name
+* Script Location
+* Last Modified Date
+* Number of Thread Groups
+* Number of Requests
+* Referenced CSV Files
+* Description
+
+Provide:
+
+* View Script
+* Download Script
+* Dependency Mapping
+
+---
+
+## 4. Test Data Repository
+
+Display all CSV files available under the TestData folder.
+
+For each CSV:
+
+* File Name
+* File Size
+* Row Count
+* Column Count
+* Last Modified Date
+
+Include:
+
+* CSV Preview
+* Search Records
+* Sort Columns
+* Download Option
+* Data Statistics
+
+Display relationships between:
+
+CSV File → JMX Script → Reports
+
+---
+
+## 5. Reports Dashboard
+
+Automatically fetch reports from the reportPath directory.
+
+Display:
+
+* Report Name
+* Execution Date
+* Duration
+* TPS
+* Error Percentage
+* Pass/Fail Status
+
+Include visualizations:
+
+* Response Time Trends
+* TPS Graphs
+* Error Trends
+* Throughput Analysis
+* Execution Comparison Charts
+
+---
+
+## 6. Dependency Mapping
+
+Create a visual flow diagram showing:
+
+Test Data Files
+↓
+JMeter Scripts
+↓
+Execution Reports
+
+Users should easily understand:
+
+* Which CSV files are used by which scripts
+* Which reports were generated from which scripts
+
+---
+
+## 7. Search Center
+
+Global search across:
+
+* Scripts
+* CSV Files
+* Reports
+* Folder Structure
+
+Provide:
+
+* Advanced Filters
+* Quick Navigation
+* File Location Tracking
+
+---
+
+# User Roles
+
+
+## Admin Portal
+
+Admin users should be able to:
+
+* Upload JMX Scripts
+* Upload CSV Files
+* Upload Reports
+* Edit Metadata
+* Manage Users
+* Manage Dashboard Settings
+* Generate Summary Reports
+* Configure Project Information
+
+Admin Dashboard should include:
+
+* Activity Logs
+* Upload History
+* User Management
+* System Health
+
+---
+
+## User Portal
+
+Read-only access:
+
+* View Scripts
+* View CSV Files
+* View Reports
+* Download Authorized Files
+* Search Assets
+* View Analytics
+
+Users should not be allowed to modify project content.
+
+---
+
+# Database Requirement
+
+Use Microsoft Excel as the backend data repository.
+
+Create structured sheets for:
+
+## Users
+
+* User ID
+* Name
+* Email
+* Role
+* Status
+
+## Scripts
+
+* Script Name
+* Path
+* Description
+* Last Updated
+
+## Test Data
+
+* File Name
+* Path
+* Row Count
+* Column Count
+
+## Reports
+
+* Report Name
+* Execution Date
+* Metrics
+
+The application should read and update Excel dynamically.
+
+---
+
+# Additional Creative Features
+
+Include:
+
+* Interactive Dashboard Widgets
+* KPI Cards
+* Execution Timeline
+* File Relationship Graphs
+* Recent Activity Feed
+* Notifications Panel
+* Project Documentation Section
+* Export to PDF/Excel
+* Mobile Responsive Design
+* Dark Mode Toggle
+* Animated Statistics Counters
+* Professional Icons and Visual Elements
+
+---
+
+# Expected Outcome
+
+Build a centralized Load Testing Management Portal that provides complete visibility into:
+
+* JMeter Scripts
+* Test Data Files
+* Reports
+* Project Structure
+* Execution Analytics
+* Dependencies
+* User Management
+
+The portal should be modern, highly interactive, visually impressive, and suitable for presentation to management, QA teams, performance engineers, and stakeholders.

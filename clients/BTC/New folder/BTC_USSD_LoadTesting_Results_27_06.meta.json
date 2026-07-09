@@ -1,0 +1,11 @@
+{
+  "score": 53,
+  "grade": "F",
+  "color": "#ef4444",
+  "err_score": 0,
+  "p90_score": 18,
+  "sla_score": 15,
+  "tps_score": 20,
+  "narrative": "The load test results for the BTC Botswana USSD application indicate a total sample size of 11, with a throughput of 1.22 transactions per second (TPS) over a duration of 9 seconds. The average response time was recorded at 1413.55 ms, with P90 and P95 response times significantly higher at 3308 ms and 4467 ms, respectively. The test failed to meet the Service Level Agreement (SLA) due to a high error rate of 36.36%, particularly in the top-performing transactions, where the \"Wallet to Bank\" transaction reached a P90 of 4467 ms. To enhance performance, it is recommended that immediate optimizations be made to both the application infrastructure and transaction processing logic to reduce latency and error rates.",
+  "narrative_ts": "27 Jun 2026 18:17"
+}

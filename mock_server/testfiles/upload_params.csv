@@ -1,0 +1,6 @@
+jmx_file,csv_file,jtl_file,client_code
+sample_plan_small.jmx,sample_data_50rows.csv,sample_report_upload.jtl,BTC
+sample_plan_small.jmx,sample_data_p2p_50rows.csv,sample_report_upload.jtl,BTC
+sample_plan_small.jmx,sample_data_50rows.csv,sample_report_upload.jtl,BTC
+sample_plan_small.jmx,sample_data_p2p_50rows.csv,sample_report_upload.jtl,BTC
+sample_plan_small.jmx,sample_data_50rows.csv,sample_report_upload.jtl,BTC

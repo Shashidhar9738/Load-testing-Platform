@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BTC Mobiquity Pay — USSD P2P Load Test Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #080c14;
+  --surface: #0d1421;
+  --surface2: #131d2e;
+  --surface3: #192438;
+  --border: #1e2d45;
+  --accent: #00d4ff;
+  --accent2: #00ff9d;
+  --accent3: #7c3aed;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --text: #e2eaf5;
+  --muted: #64748b;
+  --radius: 12px;
+  --glow: 0 0 20px rgba(0,212,255,0.15);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Animated background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 10% 20%, rgba(0,212,255,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 80%, rgba(124,58,237,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(0,255,157,0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── HEADER ─── */
+header {
+  background: linear-gradient(135deg, #0d1421 0%, #0f1e35 50%, #0d1421 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+}
+.header-inner {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.logo-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.logo-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 20px rgba(0,212,255,0.3);
+}
+.logo-text h1 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(90deg, #fff 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.logo-text .subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.meta-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.meta-chip strong { color: var(--text); }
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(0,255,157,0.1);
+  border: 1px solid rgba(0,255,157,0.3);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent2);
+  letter-spacing: 0.5px;
+}
+.pulse-dot {
+  width: 8px; height: 8px;
+  background: var(--accent2);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(0,255,157,0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(0,255,157,0); }
+}
+
+/* ─── LAYOUT ─── */
+main {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 28px 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── SECTION HEADERS ─── */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  margin-top: 8px;
+}
+.section-head h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+}
+.section-icon {
+  font-size: 18px;
+}
+
+/* ─── KPI ROW ─── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.kpi::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.kpi.ok::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+.kpi.info::before { background: linear-gradient(90deg, var(--accent), transparent); }
+.kpi.warn::before { background: linear-gradient(90deg, var(--warn), transparent); }
+.kpi.danger::before { background: linear-gradient(90deg, var(--danger), transparent); }
+.kpi.purple::before { background: linear-gradient(90deg, var(--accent3), transparent); }
+.kpi:hover { transform: translateY(-2px); box-shadow: var(--glow); }
+.kpi-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+  display: block;
+}
+.kpi-label {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.kpi-val {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+.kpi.ok .kpi-val { color: var(--accent2); }
+.kpi.info .kpi-val { color: var(--accent); }
+.kpi.warn .kpi-val { color: var(--warn); }
+.kpi.danger .kpi-val { color: var(--danger); }
+.kpi.purple .kpi-val { color: #a78bfa; }
+.kpi-sub {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* ─── USSD FLOW ─── */
+.flow-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 28px;
+  overflow-x: auto;
+}
+.flow-track {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  min-width: 900px;
+}
+.flow-step {
+  flex: 1;
+  position: relative;
+}
+.flow-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 28px;
+  right: -1px;
+  width: 2px;
+  height: 14px;
+  background: var(--border);
+  z-index: 1;
+}
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  color: var(--accent);
+  font-size: 18px;
+  opacity: 0.5;
+}
+.flow-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 12px;
+  margin: 0 6px;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: default;
+}
+.flow-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(0,212,255,0.1);
+  transform: translateY(-2px);
+}
+.flow-num {
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px;
+}
+.flow-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.flow-avg {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+.flow-avg.fast { color: var(--accent2); }
+.flow-avg.med { color: var(--accent); }
+.flow-avg.slow { color: var(--warn); }
+.flow-avg.very-slow { color: var(--danger); }
+.flow-err {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-top: 4px;
+}
+.flow-err.ok { background: rgba(0,255,157,0.1); color: var(--accent2); }
+.flow-err.warn { background: rgba(239,68,68,0.1); color: var(--danger); }
+.flow-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  padding-top: 14px;
+}
+.flow-connector svg { opacity: 0.4; }
+
+/* ─── CHARTS GRID ─── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.chart-card.full { grid-column: 1 / -1; }
+.chart-card.third { grid-column: span 1; }
+.chart-title {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chart-title-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+.chart-wrap { position: relative; height: 220px; }
+.chart-wrap.tall { height: 280px; }
+.chart-wrap.short { height: 160px; }
+
+/* ─── PERCENTILE BAND ─── */
+.perc-band {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.perc-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+.perc-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+}
+.perc-val {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  font-variant-numeric: tabular-nums;
+}
+.perc-val.p50 { color: var(--accent2); }
+.perc-val.p90 { color: var(--accent); }
+.perc-val.p95 { color: var(--warn); }
+.perc-val.p99 { color: var(--danger); }
+.perc-unit {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.perc-bar {
+  height: 4px;
+  border-radius: 2px;
+  margin-top: 10px;
+  background: var(--surface2);
+}
+.perc-bar-fill { height: 4px; border-radius: 2px; }
+
+/* ─── TABLE ─── */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 12px 14px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+thead th:hover { color: var(--accent); }
+thead th:first-child { text-align: left; }
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+tbody td {
+  padding: 12px 14px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+tbody td:first-child { text-align: left; font-weight: 600; max-width: 280px; }
+.tx-name { font-weight: 700; }
+.tx-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+.pill-ok { background: rgba(0,255,157,0.12); color: var(--accent2); }
+.pill-warn { background: rgba(245,158,11,0.12); color: var(--warn); }
+.pill-danger { background: rgba(239,68,68,0.12); color: var(--danger); }
+.bar-bg { background: var(--surface2); border-radius: 4px; height: 6px; min-width: 80px; }
+.bar-fill { height: 6px; border-radius: 4px; }
+.bar-fill.fast { background: var(--accent2); }
+.bar-fill.med { background: var(--accent); }
+.bar-fill.slow { background: var(--warn); }
+.bar-fill.very-slow { background: var(--danger); }
+td.num { font-variant-numeric: tabular-nums; }
+
+/* ─── ERRORS / RC SECTION ─── */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.info-card h3 {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.info-row:last-child { border-bottom: none; }
+.info-label { color: var(--text); }
+.info-val { font-weight: 700; color: var(--accent); }
+.rc-badge {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(0,255,157,0.12);
+  color: var(--accent2);
+}
+
+/* ─── HISTOGRAM ─── */
+.hist-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.hist-label { font-size: 11px; color: var(--muted); width: 80px; flex-shrink: 0; }
+.hist-bar-wrap { flex: 1; height: 18px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+.hist-bar { height: 100%; border-radius: 4px; transition: width 1s ease; display: flex; align-items: center; padding-left: 8px; }
+.hist-bar span { font-size: 10px; font-weight: 700; color: #000; white-space: nowrap; }
+
+/* ─── FOOTER ─── */
+footer {
+  text-align: center;
+  padding: 24px;
+  color: var(--muted);
+  font-size: 11px;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+  position: relative;
+  z-index: 1;
+  background: var(--surface);
+}
+footer span { color: var(--accent); }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1200px) {
+  .kpi-row { grid-template-columns: repeat(4, 1fr); }
+  .charts-grid { grid-template-columns: 1fr; }
+  .chart-card.full { grid-column: 1; }
+  .perc-band { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .info-grid { grid-template-columns: 1fr; }
+  .header-inner { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header>
+  <div class="header-inner">
+    <div class="logo-block">
+      <div class="logo-icon">📡</div>
+      <div class="logo-text">
+        <h1>BTC Mobiquity Pay — USSD P2P</h1>
+        <div class="subtitle">Load Test Performance Dashboard &nbsp;|&nbsp; smegapreprod.btc.bw</div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div class="meta-chip">📅 <strong>17-Jun-2026</strong></div>
+      <div class="meta-chip">🕙 <strong>21:54 – 22:04 UTC+2</strong></div>
+      <div class="meta-chip">⏱ <strong>10m 01s</strong></div>
+      <div class="meta-chip">👥 <strong>10 Threads</strong></div>
+      <div class="status-badge">
+        <div class="pulse-dot"></div>
+        COMPLETED
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ─── KPI ROW ─── -->
+<div class="kpi-row">
+  <div class="kpi info">
+    <span class="kpi-icon">📊</span>
+    <div class="kpi-label">Total Requests</div>
+    <div class="kpi-val" id="kpi-total">6,807</div>
+    <div class="kpi-sub">Across 7 USSD steps</div>
+  </div>
+  <div class="kpi ok">
+    <span class="kpi-icon">✅</span>
+    <div class="kpi-label">Success Rate</div>
+    <div class="kpi-val">99.85%</div>
+    <div class="kpi-sub">6,797 passed</div>
+  </div>
+  <div class="kpi info">
+    <span class="kpi-icon">⚡</span>
+    <div class="kpi-label">Throughput</div>
+    <div class="kpi-val">11.33</div>
+    <div class="kpi-sub">Requests / second</div>
+  </div>
+  <div class="kpi purple">
+    <span class="kpi-icon">👥</span>
+    <div class="kpi-label">Peak Threads</div>
+    <div class="kpi-val">10</div>
+    <div class="kpi-sub">Concurrent users</div>
+  </div>
+  <div class="kpi warn">
+    <span class="kpi-icon">⏱</span>
+    <div class="kpi-label">Avg Response</div>
+    <div class="kpi-val">1,391</div>
+    <div class="kpi-sub">ms overall avg</div>
+  </div>
+  <div class="kpi danger">
+    <span class="kpi-icon">❌</span>
+    <div class="kpi-label">Total Errors</div>
+    <div class="kpi-val">10</div>
+    <div class="kpi-sub">0.15% error rate</div>
+  </div>
+  <div class="kpi info">
+    <span class="kpi-icon">🏷</span>
+    <div class="kpi-label">TC Avg RT</div>
+    <div class="kpi-val">5,542</div>
+    <div class="kpi-sub">ms end-to-end</div>
+  </div>
+</div>
+
+<!-- ─── PERCENTILE BAND ─── -->
+<div class="section-head">
+  <span class="section-icon">📈</span>
+  <h2>Response Time Percentiles (Overall)</h2>
+  <div class="section-line"></div>
+</div>
+<div class="perc-band">
+  <div class="perc-card">
+    <div class="perc-label">P50 — Median</div>
+    <div class="perc-val p50">879</div>
+    <div class="perc-unit">milliseconds</div>
+    <div class="perc-bar"><div class="perc-bar-fill" style="width:14%; background:var(--accent2);"></div></div>
+  </div>
+  <div class="perc-card">
+    <div class="perc-label">P90</div>
+    <div class="perc-val p90">5,096</div>
+    <div class="perc-unit">milliseconds</div>
+    <div class="perc-bar"><div class="perc-bar-fill" style="width:79%; background:var(--accent);"></div></div>
+  </div>
+  <div class="perc-card">
+    <div class="perc-label">P95</div>
+    <div class="perc-val p95">5,591</div>
+    <div class="perc-unit">milliseconds</div>
+    <div class="perc-bar"><div class="perc-bar-fill" style="width:87%; background:var(--warn);"></div></div>
+  </div>
+  <div class="perc-card">
+    <div class="perc-label">P99</div>
+    <div class="perc-val p99">6,410</div>
+    <div class="perc-unit">milliseconds</div>
+    <div class="perc-bar"><div class="perc-bar-fill" style="width:100%; background:var(--danger);"></div></div>
+  </div>
+</div>
+
+<!-- ─── USSD FLOW ─── -->
+<div class="section-head">
+  <span class="section-icon">📱</span>
+  <h2>USSD Transaction Flow — P2P Transfer (*1239#)</h2>
+  <div class="section-line"></div>
+</div>
+<div class="flow-section">
+  <div class="flow-track" id="flowTrack"></div>
+</div>
+
+<!-- ─── CHARTS ─── -->
+<div class="section-head">
+  <span class="section-icon">📉</span>
+  <h2>Performance Charts</h2>
+  <div class="section-line"></div>
+</div>
+<div class="charts-grid">
+  <div class="chart-card full">
+    <div class="chart-title"><div class="chart-title-dot"></div>Throughput Over Time (req/s — 10s buckets)</div>
+    <div class="chart-wrap tall"><canvas id="tpsChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title"><div class="chart-title-dot" style="background:var(--warn)"></div>Avg Response Time by Step (ms)</div>
+    <div class="chart-wrap"><canvas id="rtBarChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title"><div class="chart-title-dot" style="background:var(--accent3)"></div>Response Time Distribution (Histogram)</div>
+    <div class="chart-wrap"><canvas id="histChart"></canvas></div>
+  </div>
+  <div class="chart-card full">
+    <div class="chart-title"><div class="chart-title-dot" style="background:var(--accent2)"></div>Response Time Over Time — Per Step (avg ms, 10s buckets)</div>
+    <div class="chart-wrap tall"><canvas id="rtLineChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title"><div class="chart-title-dot" style="background:var(--warn)"></div>P90 / P95 / P99 by Transaction Step (ms)</div>
+    <div class="chart-wrap"><canvas id="percChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title"><div class="chart-title-dot" style="background:var(--danger)"></div>Error Distribution by Step</div>
+    <div class="chart-wrap"><canvas id="errChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ─── TRANSACTION TABLE ─── -->
+<div class="section-head">
+  <span class="section-icon">📋</span>
+  <h2>Transaction Summary</h2>
+  <div class="section-line"></div>
+</div>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Transaction Step</th>
+        <th>Samples</th>
+        <th>Avg (ms)</th>
+        <th>Median (ms)</th>
+        <th>P90 (ms)</th>
+        <th>P95 (ms)</th>
+        <th>P99 (ms)</th>
+        <th>Min (ms)</th>
+        <th>Max (ms)</th>
+        <th>TPS</th>
+        <th>Errors</th>
+        <th>Error %</th>
+        <th>Response Bar</th>
+      </tr>
+    </thead>
+    <tbody id="statsBody"></tbody>
+  </table>
+</div>
+
+<!-- ─── INFO CARDS ─── -->
+<div class="section-head">
+  <span class="section-icon">🔍</span>
+  <h2>Test Details</h2>
+  <div class="section-line"></div>
+</div>
+<div class="info-grid">
+  <div class="info-card">
+    <h3>🌐 Response Code Distribution</h3>
+    <div class="info-row">
+      <span class="info-label">HTTP 200 (OK)</span>
+      <span><span class="rc-badge">200</span> &nbsp;<strong>6,807</strong></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Overall Error Rate</span>
+      <span class="info-val">0.1469%</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Target Environment</span>
+      <span class="info-val">smegapreprod.btc.bw</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Protocol</span>
+      <span class="info-val">HTTPS / USSD</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Service</span>
+      <span class="info-val">menu-manager/RequestReceiver</span>
+    </div>
+  </div>
+  <div class="info-card">
+    <h3>📊 Overall Statistics</h3>
+    <div class="info-row">
+      <span class="info-label">Test Start</span>
+      <span class="info-val">2026-06-17 21:54:49</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Test End</span>
+      <span class="info-val">2026-06-17 22:04:50</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Duration</span>
+      <span class="info-val">601 seconds</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Std Deviation</span>
+      <span class="info-val">1,639.77 ms</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Min / Max RT</span>
+      <span class="info-val">339 ms / 8,767 ms</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─── HISTOGRAM VISUAL ─── -->
+<div class="section-head">
+  <span class="section-icon">⏱</span>
+  <h2>Response Time Breakdown</h2>
+  <div class="section-line"></div>
+</div>
+<div class="info-card" style="margin-bottom:28px;" id="histBars"></div>
+
+</main>
+
+<footer>
+  Generated from <span>BTC_USSD_LoadTesting_Results P2P_17_06_10pm.jtl</span> &nbsp;|&nbsp;
+  BTC Mobiquity Pay USSD Load Test &nbsp;|&nbsp;
+  <span>2026-06-19</span> &nbsp;|&nbsp;
+  JMeter 5.6.3 &nbsp;|&nbsp; Tool: BTC Load Testing
+</footer>
+
+<script>
+const S = {"total": 6807, "passed": 6797, "failed": 10, "error_rate": 0.1469, "throughput": 11.33, "avg_rt": 1390.88, "min_rt": 339, "max_rt": 8767, "p50": 879, "p90": 5096, "p95": 5591, "p99": 6410, "std_dev": 1639.77, "start_time": "2026-06-17 21:54:49", "end_time": "2026-06-17 22:04:50", "duration_s": 601, "test_duration": "0h 10m 1s", "label_stats": [{"label": "P2P 001 - Dial *1239# - Open USSD session", "samples": 855, "failures": 0, "error_rate": 0.0, "avg": 830.29, "median": 779, "min": 615, "max": 2510, "p90": 961, "p95": 1204, "p99": 1747, "tps": 1.423}, {"label": "P2P 002 - Step 2 - Input: 1359", "samples": 852, "failures": 0, "error_rate": 0.0, "avg": 1235.95, "median": 1183.5, "min": 940, "max": 3445, "p90": 1475, "p95": 1589, "p99": 2130, "tps": 1.418}, {"label": "P2P 003 - Step 3 - Input: 3", "samples": 852, "failures": 0, "error_rate": 0.0, "avg": 398.87, "median": 354.0, "min": 339, "max": 1932, "p90": 460, "p95": 587, "p99": 1078, "tps": 1.418}, {"label": "P2P 004 - Step 4 - Input: 1", "samples": 851, "failures": 0, "error_rate": 0.0, "avg": 400.32, "median": 355, "min": 340, "max": 1807, "p90": 469, "p95": 561, "p99": 1128, "tps": 1.416}, {"label": "P2P 005 - Step 5 - Input: Reciever Msisdn", "samples": 850, "failures": 0, "error_rate": 0.0, "avg": 398.88, "median": 355.0, "min": 339, "max": 1945, "p90": 464, "p95": 567, "p99": 1080, "tps": 1.414}, {"label": "P2P 006 - Step 6 - Input: amount", "samples": 848, "failures": 3, "error_rate": 0.35, "avg": 968.9, "median": 925.5, "min": 725, "max": 3847, "p90": 1110, "p95": 1252, "p99": 1675, "tps": 1.411}, {"label": "P2P 007 - Step 7 - Input: 1 confirm The transactions", "samples": 844, "failures": 2, "error_rate": 0.24, "avg": 1333.21, "median": 1284.0, "min": 962, "max": 3596, "p90": 1553, "p95": 1757, "p99": 2275, "tps": 1.404}, {"label": "TC - P2P", "samples": 855, "failures": 5, "error_rate": 0.58, "avg": 5541.98, "median": 5425, "min": 689, "max": 8767, "p90": 6297, "p95": 6737, "p99": 7648, "tps": 1.423}], "rc_dist": {"200": 6807}, "tps_over_time": [{"time_offset": 0, "tps": 6.4}, {"time_offset": 10, "tps": 11.6}, {"time_offset": 20, "tps": 11.7}, {"time_offset": 30, "tps": 11.2}, {"time_offset": 40, "tps": 11.8}, {"time_offset": 50, "tps": 11.4}, {"time_offset": 60, "tps": 11.2}, {"time_offset": 70, "tps": 11.5}, {"time_offset": 80, "tps": 11.5}, {"time_offset": 90, "tps": 11.5}, {"time_offset": 100, "tps": 11.3}, {"time_offset": 110, "tps": 11.6}, {"time_offset": 120, "tps": 11.3}, {"time_offset": 130, "tps": 11.5}, {"time_offset": 140, "tps": 11.6}, {"time_offset": 150, "tps": 11.4}, {"time_offset": 160, "tps": 11.6}, {"time_offset": 170, "tps": 10.9}, {"time_offset": 180, "tps": 11.7}, {"time_offset": 190, "tps": 11.4}, {"time_offset": 200, "tps": 11.2}, {"time_offset": 210, "tps": 11.6}, {"time_offset": 220, "tps": 11.6}, {"time_offset": 230, "tps": 11.2}, {"time_offset": 240, "tps": 11.4}, {"time_offset": 250, "tps": 11.4}, {"time_offset": 260, "tps": 11.4}, {"time_offset": 270, "tps": 11.8}, {"time_offset": 280, "tps": 11.2}, {"time_offset": 290, "tps": 11.6}, {"time_offset": 300, "tps": 11.3}, {"time_offset": 310, "tps": 11.3}, {"time_offset": 320, "tps": 11.6}, {"time_offset": 330, "tps": 11.4}, {"time_offset": 340, "tps": 11.6}, {"time_offset": 350, "tps": 11.2}, {"time_offset": 360, "tps": 11.3}, {"time_offset": 370, "tps": 11.6}, {"time_offset": 380, "tps": 11.4}, {"time_offset": 390, "tps": 11.2}, {"time_offset": 400, "tps": 11.8}, {"time_offset": 410, "tps": 11.0}, {"time_offset": 420, "tps": 11.6}, {"time_offset": 430, "tps": 11.6}, {"time_offset": 440, "tps": 11.5}, {"time_offset": 450, "tps": 11.2}, {"time_offset": 460, "tps": 11.6}, {"time_offset": 470, "tps": 11.5}, {"time_offset": 480, "tps": 11.3}, {"time_offset": 490, "tps": 11.6}, {"time_offset": 500, "tps": 11.3}, {"time_offset": 510, "tps": 11.4}, {"time_offset": 520, "tps": 11.3}, {"time_offset": 530, "tps": 11.7}, {"time_offset": 540, "tps": 10.7}, {"time_offset": 550, "tps": 11.6}, {"time_offset": 560, "tps": 11.0}, {"time_offset": 570, "tps": 12.1}, {"time_offset": 580, "tps": 11.4}, {"time_offset": 590, "tps": 11.1}], "rt_data": {"TC - P2P": [{"time_offset": 0, "avg_ms": 7355.9}, {"time_offset": 10, "avg_ms": 6449.4}, {"time_offset": 20, "avg_ms": 5990.0}, {"time_offset": 30, "avg_ms": 5969.1}, {"time_offset": 40, "avg_ms": 5725.9}, {"time_offset": 50, "avg_ms": 5940.2}, {"time_offset": 60, "avg_ms": 6019.2}, {"time_offset": 70, "avg_ms": 5411.1}, {"time_offset": 80, "avg_ms": 5456.1}, {"time_offset": 90, "avg_ms": 5263.4}, {"time_offset": 100, "avg_ms": 5455.2}, {"time_offset": 110, "avg_ms": 5401.2}, {"time_offset": 120, "avg_ms": 5630.8}, {"time_offset": 130, "avg_ms": 5401.9}, {"time_offset": 140, "avg_ms": 5168.6}, {"time_offset": 150, "avg_ms": 5207.5}, {"time_offset": 160, "avg_ms": 5352.7}, {"time_offset": 170, "avg_ms": 5374.1}, {"time_offset": 180, "avg_ms": 5720.6}, {"time_offset": 190, "avg_ms": 5103.1}, {"time_offset": 200, "avg_ms": 5528.5}, {"time_offset": 210, "avg_ms": 5497.4}, {"time_offset": 220, "avg_ms": 5489.4}, {"time_offset": 230, "avg_ms": 5608.2}, {"time_offset": 240, "avg_ms": 5871.9}, {"time_offset": 250, "avg_ms": 5272.1}, {"time_offset": 260, "avg_ms": 5318.7}, {"time_offset": 270, "avg_ms": 5486.1}, {"time_offset": 280, "avg_ms": 5274.6}, {"time_offset": 290, "avg_ms": 5143.7}, {"time_offset": 300, "avg_ms": 5708.5}, {"time_offset": 310, "avg_ms": 5861.0}, {"time_offset": 320, "avg_ms": 5760.0}, {"time_offset": 330, "avg_ms": 5729.1}, {"time_offset": 340, "avg_ms": 6025.7}, {"time_offset": 350, "avg_ms": 6029.0}, {"time_offset": 360, "avg_ms": 6458.1}, {"time_offset": 370, "avg_ms": 5349.7}, {"time_offset": 380, "avg_ms": 5043.7}, {"time_offset": 390, "avg_ms": 5193.5}, {"time_offset": 400, "avg_ms": 5228.5}, {"time_offset": 410, "avg_ms": 5348.0}, {"time_offset": 420, "avg_ms": 5738.6}, {"time_offset": 430, "avg_ms": 5211.3}, {"time_offset": 440, "avg_ms": 5049.6}, {"time_offset": 450, "avg_ms": 4937.4}, {"time_offset": 460, "avg_ms": 5035.5}, {"time_offset": 470, "avg_ms": 5090.5}, {"time_offset": 480, "avg_ms": 5683.1}, {"time_offset": 490, "avg_ms": 5545.0}, {"time_offset": 500, "avg_ms": 5306.5}, {"time_offset": 510, "avg_ms": 5638.5}, {"time_offset": 520, "avg_ms": 5806.6}, {"time_offset": 530, "avg_ms": 5773.5}, {"time_offset": 540, "avg_ms": 7245.4}, {"time_offset": 550, "avg_ms": 5622.8}, {"time_offset": 560, "avg_ms": 5267.2}, {"time_offset": 570, "avg_ms": 5260.4}, {"time_offset": 580, "avg_ms": 5127.9}, {"time_offset": 590, "avg_ms": 3951.7}], "P2P 001 - Dial *1239# - Open USSD session": [{"time_offset": 0, "avg_ms": 1832.5}, {"time_offset": 10, "avg_ms": 919.1}, {"time_offset": 20, "avg_ms": 934.3}, {"time_offset": 30, "avg_ms": 927.8}, {"time_offset": 40, "avg_ms": 849.2}, {"time_offset": 50, "avg_ms": 853.6}, {"time_offset": 60, "avg_ms": 912.5}, {"time_offset": 70, "avg_ms": 802.8}, {"time_offset": 80, "avg_ms": 783.8}, {"time_offset": 90, "avg_ms": 756.5}, {"time_offset": 100, "avg_ms": 790.7}, {"time_offset": 110, "avg_ms": 777.6}, {"time_offset": 120, "avg_ms": 792.1}, {"time_offset": 130, "avg_ms": 797.5}, {"time_offset": 140, "avg_ms": 775.1}, {"time_offset": 150, "avg_ms": 758.5}, {"time_offset": 160, "avg_ms": 768.3}, {"time_offset": 170, "avg_ms": 812.1}, {"time_offset": 180, "avg_ms": 888.9}, {"time_offset": 190, "avg_ms": 715.0}, {"time_offset": 200, "avg_ms": 926.2}, {"time_offset": 210, "avg_ms": 805.1}, {"time_offset": 220, "avg_ms": 854.2}, {"time_offset": 230, "avg_ms": 741.0}, {"time_offset": 240, "avg_ms": 824.0}, {"time_offset": 250, "avg_ms": 761.9}, {"time_offset": 260, "avg_ms": 747.1}, {"time_offset": 270, "avg_ms": 843.1}, {"time_offset": 280, "avg_ms": 760.3}, {"time_offset": 290, "avg_ms": 742.3}, {"time_offset": 300, "avg_ms": 707.1}, {"time_offset": 310, "avg_ms": 860.8}, {"time_offset": 320, "avg_ms": 892.2}, {"time_offset": 330, "avg_ms": 834.6}, {"time_offset": 340, "avg_ms": 849.5}, {"time_offset": 350, "avg_ms": 923.4}, {"time_offset": 360, "avg_ms": 1073.5}, {"time_offset": 370, "avg_ms": 851.9}, {"time_offset": 380, "avg_ms": 741.9}, {"time_offset": 390, "avg_ms": 750.2}, {"time_offset": 400, "avg_ms": 759.2}, {"time_offset": 410, "avg_ms": 773.4}, {"time_offset": 420, "avg_ms": 782.3}, {"time_offset": 430, "avg_ms": 847.2}, {"time_offset": 440, "avg_ms": 741.1}, {"time_offset": 450, "avg_ms": 723.2}, {"time_offset": 460, "avg_ms": 717.8}, {"time_offset": 470, "avg_ms": 733.3}, {"time_offset": 480, "avg_ms": 775.1}, {"time_offset": 490, "avg_ms": 921.7}, {"time_offset": 500, "avg_ms": 757.2}, {"time_offset": 510, "avg_ms": 780.1}, {"time_offset": 520, "avg_ms": 925.4}, {"time_offset": 530, "avg_ms": 829.4}, {"time_offset": 540, "avg_ms": 1110.8}, {"time_offset": 550, "avg_ms": 810.1}, {"time_offset": 560, "avg_ms": 764.9}, {"time_offset": 570, "avg_ms": 830.6}, {"time_offset": 580, "avg_ms": 745.9}, {"time_offset": 590, "avg_ms": 728.3}], "P2P 002 - Step 2 - Input: 1359": [{"time_offset": 0, "avg_ms": 1352.0}, {"time_offset": 10, "avg_ms": 1509.4}, {"time_offset": 20, "avg_ms": 1446.9}, {"time_offset": 30, "avg_ms": 1432.4}, {"time_offset": 40, "avg_ms": 1309.1}, {"time_offset": 50, "avg_ms": 1333.6}, {"time_offset": 60, "avg_ms": 1245.8}, {"time_offset": 70, "avg_ms": 1262.1}, {"time_offset": 80, "avg_ms": 1259.9}, {"time_offset": 90, "avg_ms": 1182.7}, {"time_offset": 100, "avg_ms": 1182.8}, {"time_offset": 110, "avg_ms": 1209.7}, {"time_offset": 120, "avg_ms": 1108.2}, {"time_offset": 130, "avg_ms": 1216.9}, {"time_offset": 140, "avg_ms": 1096.0}, {"time_offset": 150, "avg_ms": 1119.2}, {"time_offset": 160, "avg_ms": 1176.4}, {"time_offset": 170, "avg_ms": 1128.2}, {"time_offset": 180, "avg_ms": 1223.9}, {"time_offset": 190, "avg_ms": 1271.6}, {"time_offset": 200, "avg_ms": 1169.4}, {"time_offset": 210, "avg_ms": 1232.8}, {"time_offset": 220, "avg_ms": 1195.9}, {"time_offset": 230, "avg_ms": 1184.8}, {"time_offset": 240, "avg_ms": 1224.7}, {"time_offset": 250, "avg_ms": 1151.2}, {"time_offset": 260, "avg_ms": 1194.4}, {"time_offset": 270, "avg_ms": 1200.4}, {"time_offset": 280, "avg_ms": 1144.8}, {"time_offset": 290, "avg_ms": 1105.9}, {"time_offset": 300, "avg_ms": 1074.3}, {"time_offset": 310, "avg_ms": 1536.8}, {"time_offset": 320, "avg_ms": 1378.3}, {"time_offset": 330, "avg_ms": 1409.4}, {"time_offset": 340, "avg_ms": 1403.5}, {"time_offset": 350, "avg_ms": 1491.9}, {"time_offset": 360, "avg_ms": 1583.5}, {"time_offset": 370, "avg_ms": 1203.1}, {"time_offset": 380, "avg_ms": 1128.5}, {"time_offset": 390, "avg_ms": 1140.4}, {"time_offset": 400, "avg_ms": 1169.2}, {"time_offset": 410, "avg_ms": 1154.7}, {"time_offset": 420, "avg_ms": 1288.8}, {"time_offset": 430, "avg_ms": 1165.8}, {"time_offset": 440, "avg_ms": 1058.2}, {"time_offset": 450, "avg_ms": 1055.3}, {"time_offset": 460, "avg_ms": 1065.7}, {"time_offset": 470, "avg_ms": 1173.1}, {"time_offset": 480, "avg_ms": 1167.8}, {"time_offset": 490, "avg_ms": 1360.9}, {"time_offset": 500, "avg_ms": 1135.9}, {"time_offset": 510, "avg_ms": 1182.3}, {"time_offset": 520, "avg_ms": 1382.3}, {"time_offset": 530, "avg_ms": 1256.5}, {"time_offset": 540, "avg_ms": 1571.6}, {"time_offset": 550, "avg_ms": 1378.1}, {"time_offset": 560, "avg_ms": 1110.1}, {"time_offset": 570, "avg_ms": 1074.4}, {"time_offset": 580, "avg_ms": 1110.9}, {"time_offset": 590, "avg_ms": 1077.5}], "P2P 003 - Step 3 - Input: 3": [{"time_offset": 0, "avg_ms": 408.8}, {"time_offset": 590, "avg_ms": 380.3}], "P2P 004 - Step 4 - Input: 1": [{"time_offset": 0, "avg_ms": 562.4}, {"time_offset": 590, "avg_ms": 361.1}], "P2P 005 - Step 5 - Input: Reciever Msisdn": [{"time_offset": 0, "avg_ms": 378.7}, {"time_offset": 590, "avg_ms": 361.2}], "P2P 006 - Step 6 - Input: amount": [{"time_offset": 0, "avg_ms": 1029.3}, {"time_offset": 590, "avg_ms": 901.0}], "P2P 007 - Step 7 - Input: 1 confirm The transactions": [{"time_offset": 0, "avg_ms": 1589.0}, {"time_offset": 590, "avg_ms": 1218.6}]}, "hist_data": [{"range": "<100ms", "count": 0}, {"range": "100-200ms", "count": 0}, {"range": "200-500ms", "count": 2355}, {"range": "500ms-1s", "count": 1582}, {"range": "1s-2s", "count": 1978}, {"range": "2s-3s", "count": 36}, {"range": "3s-5s", "count": 113}, {"range": ">5s", "count": 743}], "peak_threads": 10};
+
+const COLORS = ['#00d4ff','#00ff9d','#f59e0b','#ef4444','#a78bfa','#f0883e','#39d353','#79c0ff'];
+const GRID = '#1e2d45';
+const TICK = { color: '#64748b', font: { size: 10 } };
+
+Chart.defaults.color = '#64748b';
+Chart.defaults.font.family = '"Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif';
+
+// ── USSD FLOW ──
+const flowDefs = [
+  { step: 1, name: 'Dial *1239#', input: 'Open USSD', key: 'P2P 001 - Dial *1239# - Open USSD session' },
+  { step: 2, name: 'Select P2P', input: '1359', key: 'P2P 002 - Step 2 - Input: 1359' },
+  { step: 3, name: 'Transfer Type', input: '3', key: 'P2P 003 - Step 3 - Input: 3' },
+  { step: 4, name: 'Account Type', input: '1', key: 'P2P 004 - Step 4 - Input: 1' },
+  { step: 5, name: 'Receiver MSISDN', input: 'MSISDN', key: 'P2P 005 - Step 5 - Input: Reciever Msisdn' },
+  { step: 6, name: 'Enter Amount', input: 'Amount', key: 'P2P 006 - Step 6 - Input: amount' },
+  { step: 7, name: 'Confirm', input: '1 = Confirm', key: 'P2P 007 - Step 7 - Input: 1 confirm The transactions' },
+];
+
+function rtClass(ms) {
+  if (ms < 500) return 'fast';
+  if (ms < 1000) return 'med';
+  if (ms < 2000) return 'slow';
+  return 'very-slow';
+}
+
+const flowTrack = document.getElementById('flowTrack');
+flowDefs.forEach((def, i) => {
+  const stat = S.label_stats.find(s => s.label === def.key);
+  if (!stat) return;
+  const errHtml = stat.failures > 0
+    ? `<span class="flow-err warn">${stat.error_rate}% err</span>`
+    : `<span class="flow-err ok">0 errors</span>`;
+  const div = document.createElement('div');
+  div.className = 'flow-step';
+  div.innerHTML = `
+    <div class="flow-card">
+      <div class="flow-num">${def.step}</div>
+      <div class="flow-name">${def.name}</div>
+      <div class="flow-avg ${rtClass(stat.avg)}">${stat.avg.toLocaleString()} ms</div>
+      <div class="flow-sub" style="font-size:10px;color:var(--muted);margin-top:2px;">Input: ${def.input}</div>
+      ${errHtml}
+    </div>`;
+  flowTrack.appendChild(div);
+  if (i < flowDefs.length - 1) {
+    const arrow = document.createElement('div');
+    arrow.className = 'flow-connector';
+    arrow.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    flowTrack.appendChild(arrow);
+  }
+});
+
+// ── TPS CHART ──
+const tpsCtx = document.getElementById('tpsChart');
+new Chart(tpsCtx, {
+  type: 'line',
+  data: {
+    labels: S.tps_over_time.map(d => d.time_offset + 's'),
+    datasets: [{
+      label: 'TPS',
+      data: S.tps_over_time.map(d => d.tps),
+      borderColor: '#00d4ff',
+      backgroundColor: 'rgba(0,212,255,0.08)',
+      borderWidth: 2,
+      pointRadius: 0,
+      fill: true,
+      tension: 0.4
+    }, {
+      label: 'Target (11.33)',
+      data: S.tps_over_time.map(() => 11.33),
+      borderColor: 'rgba(0,255,157,0.4)',
+      borderWidth: 1,
+      borderDash: [4, 4],
+      pointRadius: 0,
+      fill: false,
+      tension: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: '#64748b', font: { size: 11 } } },
+      tooltip: { mode: 'index', intersect: false }
+    },
+    scales: {
+      x: { ticks: { ...TICK, maxTicksLimit: 15 }, grid: { color: GRID } },
+      y: { ticks: TICK, grid: { color: GRID }, beginAtZero: true, min: 0, max: 14 }
+    }
+  }
+});
+
+// ── RT BAR CHART (steps only, no TC) ──
+const stepStats = S.label_stats.filter(s => !s.label.startsWith('TC -'));
+const SHORT = stepStats.map(s => {
+  const m = s.label.match(/Step (\d+)/);
+  return m ? `Step ${m[1]}` : s.label.replace(/P2P \d+ - /,'').split(' - ')[0];
+});
+new Chart(document.getElementById('rtBarChart'), {
+  type: 'bar',
+  data: {
+    labels: SHORT,
+    datasets: [{
+      label: 'Avg (ms)',
+      data: stepStats.map(s => s.avg),
+      backgroundColor: stepStats.map(s =>
+        s.avg < 500 ? 'rgba(0,255,157,0.7)' :
+        s.avg < 1000 ? 'rgba(0,212,255,0.7)' :
+        s.avg < 2000 ? 'rgba(245,158,11,0.7)' : 'rgba(239,68,68,0.7)'),
+      borderRadius: 6,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: TICK, grid: { display: false } },
+      y: { ticks: TICK, grid: { color: GRID }, beginAtZero: true }
+    }
+  }
+});
+
+// ── HISTOGRAM CHART ──
+new Chart(document.getElementById('histChart'), {
+  type: 'bar',
+  data: {
+    labels: S.hist_data.map(h => h.range),
+    datasets: [{
+      label: 'Requests',
+      data: S.hist_data.map(h => h.count),
+      backgroundColor: ['#00ff9d','#00d4ff','#00d4ff','#00d4ff','#f59e0b','#f59e0b','#ef4444','#ef4444'],
+      borderRadius: 5,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: TICK, grid: { display: false } },
+      y: { ticks: TICK, grid: { color: GRID }, beginAtZero: true }
+    }
+  }
+});
+
+// ── RT LINE CHART (all steps over time) ──
+const rtLineKeys = Object.keys(S.rt_data);
+const rtDatasets = rtLineKeys.map((lbl, i) => ({
+  label: lbl.replace(/P2P \d+ - /,'').split(' - ')[0].replace('TC - ','TC: '),
+  data: S.rt_data[lbl].map(p => ({ x: p.time_offset, y: p.avg_ms })),
+  borderColor: COLORS[i % COLORS.length],
+  backgroundColor: 'transparent',
+  borderWidth: 1.5,
+  pointRadius: 0,
+  tension: 0.4
+}));
+new Chart(document.getElementById('rtLineChart'), {
+  type: 'line',
+  data: { datasets: rtDatasets },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    parsing: false,
+    plugins: { legend: { labels: { color: '#64748b', font: { size: 10 }, boxWidth: 12 } } },
+    scales: {
+      x: { type: 'linear', ticks: { ...TICK, callback: v => v + 's', maxTicksLimit: 15 }, grid: { color: GRID } },
+      y: { ticks: TICK, grid: { color: GRID } }
+    }
+  }
+});
+
+// ── PERCENTILE CHART ──
+new Chart(document.getElementById('percChart'), {
+  type: 'bar',
+  data: {
+    labels: SHORT,
+    datasets: [
+      { label: 'P90', data: stepStats.map(s => s.p90), backgroundColor: 'rgba(0,212,255,0.65)', borderRadius: 3 },
+      { label: 'P95', data: stepStats.map(s => s.p95), backgroundColor: 'rgba(245,158,11,0.65)', borderRadius: 3 },
+      { label: 'P99', data: stepStats.map(s => s.p99), backgroundColor: 'rgba(239,68,68,0.65)', borderRadius: 3 }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#64748b', font: { size: 11 } } } },
+    scales: {
+      x: { ticks: TICK, grid: { display: false } },
+      y: { ticks: TICK, grid: { color: GRID } }
+    }
+  }
+});
+
+// ── ERROR CHART ──
+new Chart(document.getElementById('errChart'), {
+  type: 'doughnut',
+  data: {
+    labels: S.label_stats.filter(s => s.failures > 0).map(s => s.label.replace(/P2P \d+ - /,'').split(':')[0]),
+    datasets: [{
+      data: S.label_stats.filter(s => s.failures > 0).map(s => s.failures),
+      backgroundColor: ['#ef4444', '#f59e0b', '#a78bfa'],
+      borderColor: '#0d1421',
+      borderWidth: 3
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right', labels: { color: '#64748b', font: { size: 10 }, boxWidth: 12 } }
+    }
+  }
+});
+
+// ── STATS TABLE ──
+const tbody = document.getElementById('statsBody');
+const maxAvg = Math.max(...S.label_stats.map(s => s.avg));
+S.label_stats.forEach(s => {
+  const errClass = s.error_rate === 0 ? 'pill-ok' : s.error_rate < 1 ? 'pill-warn' : 'pill-danger';
+  const pct = Math.round(s.avg / maxAvg * 100);
+  const bc = s.avg < 500 ? 'fast' : s.avg < 1000 ? 'med' : s.avg < 2000 ? 'slow' : 'very-slow';
+  const isTC = s.label.startsWith('TC -');
+  tbody.innerHTML += `<tr style="${isTC ? 'background:rgba(0,212,255,0.04);font-style:italic;' : ''}">
+    <td>
+      <div class="tx-name">${s.label.replace(/P2P \d+ - /,'').replace('TC - ','')}</div>
+      <div class="tx-sub">${s.label}</div>
+    </td>
+    <td class="num">${s.samples.toLocaleString()}</td>
+    <td class="num">${s.avg.toLocaleString()}</td>
+    <td class="num">${s.median.toLocaleString()}</td>
+    <td class="num">${s.p90.toLocaleString()}</td>
+    <td class="num">${s.p95.toLocaleString()}</td>
+    <td class="num">${s.p99.toLocaleString()}</td>
+    <td class="num">${s.min.toLocaleString()}</td>
+    <td class="num">${s.max.toLocaleString()}</td>
+    <td class="num">${s.tps}</td>
+    <td class="num">${s.failures}</td>
+    <td><span class="pill ${errClass}">${s.error_rate}%</span></td>
+    <td><div class="bar-bg"><div class="bar-fill ${bc}" style="width:${pct}%"></div></div></td>
+  </tr>`;
+});
+
+// ── HISTOGRAM BARS ──
+const histWrap = document.getElementById('histBars');
+const maxCount = Math.max(...S.hist_data.map(h => h.count));
+const histColors = ['#00ff9d','#00d4ff','#00d4ff','#00d4ff','#f59e0b','#f59e0b','#ef4444','#ef4444'];
+histWrap.innerHTML = S.hist_data.map((h, i) => `
+  <div class="hist-row">
+    <div class="hist-label">${h.range}</div>
+    <div class="hist-bar-wrap">
+      <div class="hist-bar" style="width:${Math.round(h.count/maxCount*100)}%; background:${histColors[i]}">
+        ${h.count > 50 ? `<span>${h.count.toLocaleString()}</span>` : ''}
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);width:60px;text-align:right;flex-shrink:0;">${h.count.toLocaleString()}</div>
+  </div>`).join('');
+
+// ── COUNTER ANIMATION ──
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('kpi-total');
+  let start = 0;
+  const target = S.total;
+  const step = Math.ceil(target / 60);
+  const timer = setInterval(() => {
+    start = Math.min(start + step, target);
+    el.textContent = start.toLocaleString();
+    if (start >= target) clearInterval(timer);
+  }, 16);
+});
+</script>
+</body>
+</html>

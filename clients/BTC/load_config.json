@@ -1,0 +1,224 @@
+{
+  "services": [
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Balance Enquiry",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Last 5 Transactions",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Hollard Insurance",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "P2P",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "P2P For Non- registered Number",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Wallet to Bank",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Airtimw top up Self",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "recharge others",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "data bundles self",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "data bundles others",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Eletricity",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Motlamedi Funds",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Betway",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Saving Circle Creation",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "SAving circle Withdrawal",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "SAving circle deposit",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Micro Loan",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "IMT Mobile number",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "IMT Bank Account",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Micro Loan Accept",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Cashin",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    },
+    {
+      "duration": 1800,
+      "enabled": true,
+      "load_pct": 1,
+      "ramp_up": 60,
+      "service_name": "Cashout",
+      "target_tps": 1,
+      "threads": 1,
+      "txn_count": 1
+    }
+  ]
+}
