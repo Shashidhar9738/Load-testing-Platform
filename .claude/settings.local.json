@@ -96,7 +96,24 @@
       "Bash(node --check \"/c/Users/SHASHI~1.YAD/AppData/Local/Temp/claude/C--Users-shashidhar-yadala-Videos-Load-Testing-Platform/2971ef64-bf0f-4e4a-9615-835af46fcb6b/scratchpad/inline_now.js\")",
       "Bash(npm ls *)",
       "Bash(npm view *)",
-      "Bash(powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter \\\\\"Name='python.exe'\\\\\" | Select-Object ProcessId,CommandLine\")"
+      "Bash(powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter \\\\\"Name='python.exe'\\\\\" | Select-Object ProcessId,CommandLine\")",
+      "Bash(awk *)",
+      "Bash(python --version)",
+      "Bash(py --version)",
+      "Bash(sed -i 's/\\\\xe2\\\\x88\\\\xa9/ INT /g; s/\\\\xe2\\\\x8a\\\\x86/ subset= /g; s/->/->/g' link_sc.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python link_sc.py)",
+      "Bash(PYTHONIOENCODING=utf-8 python link_sc.py --commit)",
+      "Bash(PYTHONIOENCODING=utf-8 python *)",
+      "Skill(artifact-design)",
+      "Artifact",
+      "Bash(curl -s -o /dev/null -w \"  /api/report/x.jtl/samples -> HTTP %{http_code}\\\\n\" \"http://127.0.0.1:5000/api/report/test.jtl/samples\")",
+      "Bash(curl -s -o /dev/null -w \"  /api/report/test.jtl/errors  -> HTTP %{http_code}\\\\n\" \"http://127.0.0.1:5000/api/report/test.jtl/errors\")",
+      "Bash(curl -s \"http://127.0.0.1:5000/admin\" -o /dev/null -w \"  /admin -> HTTP %{http_code} \\(302 = redirect to login, expected when not authed\\)\\\\n\")",
+      "Bash(curl -s -w \"\\\\n  -> HTTP %{http_code}\\\\n\" \"http://127.0.0.1:5000/api/ci-cd/suites\")",
+      "Bash(curl -s -o /dev/null -w \"  bad Bearer -> HTTP %{http_code}\\\\n\" -H \"Authorization: Bearer lt_bogus\" \"http://127.0.0.1:5000/api/ci-cd/suites\")",
+      "Bash(curl -s -o /dev/null -w \"  /api/api-tokens -> HTTP %{http_code}\\\\n\" \"http://127.0.0.1:5000/api/api-tokens\")",
+      "Bash(curl -s -o /dev/null -w \"  /admin -> HTTP %{http_code}\\\\n\" \"http://127.0.0.1:5000/admin\")",
+      "PowerShell(python -c \"import playwright; print\\('playwright OK'\\)\" 2>$null; python -c \"import selenium; print\\('selenium OK'\\)\" 2>$null; Write-Output \"---port 5000---\"; \\(Test-NetConnection -ComputerName localhost -Port 5000 -WarningAction SilentlyContinue\\).TcpTestSucceeded; Write-Output \"---chrome---\"; $c = @\\(\"C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\"C:\\\\Program Files \\(x86\\)\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\"${env:LocalAppData}\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\"\\) | Where-Object { Test-Path $_ }; if\\($c\\){$c[0]}else{\"no chrome\"}; Write-Output \"---edge---\"; $e=\"C:\\\\Program Files \\(x86\\)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\"; if\\(Test-Path $e\\){$e}else{\"no edge\"})"
     ]
   }
 }

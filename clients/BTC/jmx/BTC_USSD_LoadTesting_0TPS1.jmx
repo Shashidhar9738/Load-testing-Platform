@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="BTC USSD Load Testing - 0TPS (All 22 Services)">
@@ -66,7 +66,7 @@
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Balance Enquiry" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/Balance Enquiry.csv</stringProp>
+          <stringProp name="filename">../testdata/Balance Enquiry.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -409,7 +409,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Last 5 Transactions" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/Last 5 Transactions.csv</stringProp>
+          <stringProp name="filename">../testdata/Last 5 Transactions.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -752,7 +752,7 @@ if (actual.trim() != expected) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Hollard Insurance" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/Hollard Insurance.csv</stringProp>
+          <stringProp name="filename">../testdata/Hollard Insurance.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -1095,7 +1095,7 @@ if (actual.trim() != expected) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - P2P" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/P2P.csv</stringProp>
+          <stringProp name="filename">../testdata/P2P.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -1661,7 +1661,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - P2P For Non- registered Number" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/P2P For Non- registered Number.csv</stringProp>
+          <stringProp name="filename">../testdata/P2P For Non- registered Number.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -2229,7 +2229,7 @@ if (actual.trim() != expected) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Wallet to Bank " enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/Wallet to Bank .csv</stringProp>
+          <stringProp name="filename">../testdata/Wallet to Bank .csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -2872,7 +2872,7 @@ if (actual.trim() != expected) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Airtimw top up Self" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/Airtimw top up Self.csv</stringProp>
+          <stringProp name="filename">../testdata/Airtimw top up Self.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -3440,7 +3440,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - recharge others " enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/recharge others .csv</stringProp>
+          <stringProp name="filename">../testdata/recharge others .csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -4083,7 +4083,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - data bundles self" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/data bundles self.csv</stringProp>
+          <stringProp name="filename">../testdata/data bundles self.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -4801,7 +4801,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - data bundles others" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/data bundles others.csv</stringProp>
+          <stringProp name="filename">../testdata/data bundles others.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -5594,7 +5594,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Eletricity" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/Eletricity.csv</stringProp>
+          <stringProp name="filename">../testdata/Eletricity.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -6237,7 +6237,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Motlamedi Funds" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/testdata/Motlamedi Funds.csv</stringProp>
+          <stringProp name="filename">../testdata/Motlamedi Funds.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -6655,7 +6655,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Betway " enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">C:/Users/shashidhar.yadala/OneDrive - Comviva Technologies LTD/Desktop/Load Testing BTC/clients/BTC/TestData/Betway.csv</stringProp>
+          <stringProp name="filename">../testdata/Betway.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -7223,7 +7223,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Saving Circle Creation " enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">C:\Users\shashidhar.yadala\OneDrive - Comviva Technologies LTD\Desktop\Load Testing BTC\clients\BTC\testdata\Saving Circle Creation.csv</stringProp>
+          <stringProp name="filename">../testdata/Saving Circle Creation.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -7791,7 +7791,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - SAving circle deposit" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/SAving circle deposit.csv</stringProp>
+          <stringProp name="filename">../testdata/SAving circle deposit.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -8434,7 +8434,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - SAving circle Withdrawal" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/SAving circle Withdrawal.csv</stringProp>
+          <stringProp name="filename">../testdata/SAving circle Withdrawal.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -9002,7 +9002,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Micro Loan " enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/Micro Loan .csv</stringProp>
+          <stringProp name="filename">../testdata/Micro Loan .csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -9870,7 +9870,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - IMT Mobile number" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/IMT Mobile number.csv</stringProp>
+          <stringProp name="filename">../testdata/IMT Mobile number.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -10738,7 +10738,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - IMT Bank Account " enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/IMT Bank Account .csv</stringProp>
+          <stringProp name="filename">../testdata/IMT Bank Account .csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -11606,7 +11606,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Micro Loan Accept " enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/Micro Loan Accept .csv</stringProp>
+          <stringProp name="filename">../testdata/Micro Loan Accept .csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -11874,7 +11874,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Cashin " enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/Cashin .csv</stringProp>
+          <stringProp name="filename">../testdata/Cashin .csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -12367,7 +12367,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Cashout" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/Cashout.csv</stringProp>
+          <stringProp name="filename">../testdata/Cashout.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -12914,7 +12914,7 @@ if (!actual.contains(expected)) {
             <connectTime>true</connectTime>
           </value>
         </objProp>
-        <stringProp name="filename">C:\Users\shashidhar.yadala\OneDrive - Comviva Technologies LTD\Desktop\Load Testing BTC\clients\BTC\reports\BTC_USSD_LoadTesting_Results_27_06.jtl</stringProp>
+        <stringProp name="filename">../reports/BTC_USSD_LoadTesting_Results_27_06.jtl</stringProp>
       </ResultCollector>
       <hashTree/>
       <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
@@ -12973,7 +12973,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - Botswana Life" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/Botswana Life.csv</stringProp>
+          <stringProp name="filename">../testdata/Botswana Life.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -13691,7 +13691,7 @@ if (!actual.contains(expected)) {
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set - FSG" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">/TestData/FSG.csv</stringProp>
+          <stringProp name="filename">../testdata/FSG.csv</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>

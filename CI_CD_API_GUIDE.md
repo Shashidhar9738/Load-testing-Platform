@@ -12,14 +12,23 @@ The Load Testing Platform exposes REST API endpoints that allow Jenkins (or any 
 
 ## Authentication
 
-**Current:** No authentication (TODO: add Bearer token support)
+**Bearer token** via the `Authorization` header. The CI/CD endpoints accept
+either a valid admin browser session **or** an API token, so Jenkins/GitLab/etc.
+can call them without logging in through the UI.
 
-**Planned:** Bearer token via `Authorization: Bearer <API_TOKEN>` header
+**Create a token:** Admin UI → **Settings → API Tokens — CI/CD automation** →
+enter a name → **Generate Token**. The token is shown **once** — copy it
+immediately (only a hash is stored). A token acts on the client it was created for.
 
 ```bash
-# For now, just call the endpoints directly
-# Future: add token validation
+# Send the token on every CI/CD API call
+curl -X GET "http://localhost:5000/api/ci-cd/suites" \
+     -H "Authorization: Bearer lt_your_token_here"
 ```
+
+Missing/invalid token → `401`. Disabled/revoked token → `401`. Tokens can be
+disabled or revoked at any time from the same Settings panel; `last used` time
+and caller IP are tracked per token.
 
 ---
 
@@ -165,11 +174,65 @@ curl -X GET "http://localhost:5000/api/ci-cd/runs/${RUN_ID}" \
     "error_count": 150,
     "avg_rt_ms": 125.5,
     "p95_rt_ms": 450.2,
-    "report_path": "/download/report/run_a1b2c3d4e5f6g7h8.html",
-    "triggered_by": "jenkins"
-  }
+    "report_path": "run_a1b2c3d4e5f6g7h8.jtl",
+    "triggered_by": "jenkins",
+    "gate_status": "pass",
+    "gate_reasons": []
+  },
+  "gate": "pass",
+  "done": true,
+  "report": "/api/report/run_a1b2c3d4e5f6g7h8.jtl/html"
 }
 ```
+
+The run actually executes the suite's JMX files, combines results, computes
+metrics, and evaluates the **release gate**. Poll `GET /api/ci-cd/runs/<id>`
+until `done` is `true`, then check `gate`:
+
+- `"gate": "pass"` → release is clear
+- `"gate": "fail"` → `gate_reasons` lists why (e.g. `"error rate 5.0% (limit <=2%)"`,
+  `"P95 +50% vs baseline 1000ms (limit <=10%)"`, `"SLA breached"`) — your pipeline
+  should fail the build.
+- `status` is `passed`, `gate_failed`, or `error`.
+
+---
+
+## Release Gates
+
+Gate thresholds are evaluated automatically on every run. Defaults: error rate
+≤ 2% and P95 regression ≤ 10% vs the client's baseline. Override per suite at
+creation, or per run:
+
+```bash
+# Per suite (stored) — add "gate" to the create-suite body
+curl -X POST "$PLATFORM/api/ci-cd/suites" -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -d '{
+    "name": "BTC Regression",
+    "jmx_files": ["BTC_USSD_LoadTesting_5TPS_5min.jmx"],
+    "gate": {
+      "require_sla_pass": true,
+      "max_error_pct": 1.0,
+      "max_p95_ms": 2000,
+      "min_tps": 25,
+      "max_p95_regression_pct": 10
+    }
+  }'
+
+# Per run — override just for this execution
+curl -X POST "$PLATFORM/api/ci-cd/suites/$SUITE_ID/run" -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -d '{"duration": 300, "gate": {"max_error_pct": 0.5}}'
+```
+
+| Gate field | Fails the release when… |
+|------------|--------------------------|
+| `max_error_pct` | error rate exceeds this % |
+| `max_p95_ms` | absolute P95 exceeds this (ms) |
+| `min_tps` | throughput falls below this |
+| `require_sla_pass` | the client's SLA config is breached |
+| `max_p95_regression_pct` | P95 regressed more than this % vs baseline |
+
+Set a baseline via **Reports → Set as Baseline** (or `POST /api/baseline`) for
+regression checks to apply.
 
 ---
 
@@ -208,27 +271,32 @@ while [ $ELAPSED -lt $TIMEOUT_SECS ]; do
       -H "Authorization: Bearer ${API_TOKEN}")
     
     STATUS=$(echo $STATUS_RESPONSE | jq -r '.run.status')
+    DONE=$(echo $STATUS_RESPONSE | jq -r '.done')
     ERRORS=$(echo $STATUS_RESPONSE | jq -r '.run.error_count // "—"')
     REQUESTS=$(echo $STATUS_RESPONSE | jq -r '.run.total_requests // "—"')
     AVG_RT=$(echo $STATUS_RESPONSE | jq -r '.run.avg_rt_ms // "—"')
-    
+
     printf "[%2d:%02d] Status: %-12s | Requests: %6s | Errors: %4s | Avg RT: %7s ms\n" \
         $((ELAPSED / 60)) $((ELAPSED % 60)) "$STATUS" "$REQUESTS" "$ERRORS" "$AVG_RT"
-    
-    if [ "$STATUS" = "completed" ]; then
-        echo "✅ Test completed"
-        break
-    elif [ "$STATUS" = "failed" ]; then
-        echo "❌ Test failed"
-        exit 1
-    fi
-    
+
+    if [ "$DONE" = "true" ]; then break; fi
+
     sleep $POLL_INTERVAL
     ELAPSED=$((ELAPSED + POLL_INTERVAL))
 done
 
-if [ $ELAPSED -ge $TIMEOUT_SECS ]; then
+if [ "$DONE" != "true" ]; then
     echo "❌ Test timed out"
+    exit 1
+fi
+
+# ── Release gate: fail the build if the gate did not pass ──
+GATE=$(echo $STATUS_RESPONSE | jq -r '.gate')
+if [ "$GATE" = "pass" ]; then
+    echo "✅ Release gate PASSED"
+else
+    echo "❌ Release gate FAILED:"
+    echo $STATUS_RESPONSE | jq -r '.run.gate_reasons[]' | sed 's/^/   - /'
     exit 1
 fi
 

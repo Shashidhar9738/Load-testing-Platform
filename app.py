@@ -32,9 +32,9 @@ except ImportError:
 # ─────────────────────────────────────────────────────────────────────────────
 
 from flask import (Flask, render_template, request, redirect,
-                   url_for, session, jsonify, send_file)
+                   url_for, session, jsonify, send_file, g)
 from werkzeug.security import generate_password_hash, check_password_hash
-import os, subprocess, threading, json, csv, statistics, glob, sqlite3, uuid
+import os, subprocess, threading, json, csv, statistics, glob, sqlite3, uuid, hashlib, secrets
 import xml.etree.ElementTree as ET
 import re, tempfile, shutil, io, zipfile, platform as _platform
 import urllib.request as _urllib_req2, urllib.error as _urllib_err2
@@ -181,6 +181,19 @@ def init_db():
             details    TEXT,
             ip_address TEXT,
             timestamp  TEXT DEFAULT (datetime('now','localtime'))
+        );
+
+        CREATE TABLE IF NOT EXISTS api_tokens (
+            id           TEXT PRIMARY KEY,
+            name         TEXT NOT NULL,
+            token_hash   TEXT NOT NULL UNIQUE,
+            token_prefix TEXT NOT NULL,
+            client       TEXT,
+            created_by   TEXT,
+            created_at   TEXT DEFAULT (datetime('now','localtime')),
+            last_used_at TEXT,
+            last_used_ip TEXT,
+            enabled      INTEGER DEFAULT 1
         );
 
         CREATE TABLE IF NOT EXISTS recurring_schedules (
@@ -362,6 +375,14 @@ def init_db():
             db.commit()
         except Exception:
             pass
+        # Release-gate columns for CI/CD
+        for _mig in ("ALTER TABLE ci_cd_suites ADD COLUMN gate_config TEXT DEFAULT '{}'",
+                     "ALTER TABLE ci_cd_run_history ADD COLUMN gate_status TEXT",
+                     "ALTER TABLE ci_cd_run_history ADD COLUMN gate_reasons TEXT"):
+            try:
+                db.execute(_mig); db.commit()
+            except Exception:
+                pass
         db.commit()
 
 def audit(action, details='', username=None, ip=None):
@@ -411,13 +432,21 @@ def ensure_client_dirs(c):
     return dirs
 
 def active_client():
-    """Return the currently selected client dict, defaulting to first client."""
-    code = session.get('client')
+    """Return the currently selected client dict, defaulting to first client.
+    API-token requests resolve to the token's bound client (g.api_client)."""
+    code = None
+    try:
+        code = g.get('api_client')
+    except Exception:
+        code = None
+    if not code:
+        code = session.get('client')
     c = get_client(code) if code else None
     if not c:
         clients = get_all_clients()
         c = clients[0] if clients else None
-        if c:
+        # Only persist the default into a real browser session, never for tokens.
+        if c and 'user' in session:
             session['client'] = c['code']
     return c
 
@@ -760,6 +789,66 @@ def csrf_protect(f):
         if request.method in ('POST', 'PUT', 'DELETE'):
             if not _check_csrf_token():
                 return jsonify(error='CSRF token invalid or missing'), 403
+        return f(*a, **k)
+    return w
+
+
+# ── API token auth (for CI/CD orchestrators, e.g. Jenkins) ─────────────────────
+def _hash_token(raw):
+    return hashlib.sha256(raw.encode('utf-8')).hexdigest()
+
+def _generate_api_token():
+    """Return (plaintext, prefix, hash). Plaintext is shown to the user once."""
+    raw = 'lt_' + secrets.token_urlsafe(32)
+    return raw, raw[:11], _hash_token(raw)
+
+def _authenticate_api_token():
+    """Return the api_tokens row (dict) for a valid Bearer token, else None."""
+    auth = request.headers.get('Authorization', '')
+    if not auth.startswith('Bearer '):
+        return None
+    raw = auth[7:].strip()
+    if not raw:
+        return None
+    try:
+        with get_db() as db:
+            row = db.execute(
+                "SELECT * FROM api_tokens WHERE token_hash=? AND enabled=1",
+                (_hash_token(raw),)).fetchone()
+        return dict(row) if row else None
+    except Exception:
+        return None
+
+def api_auth(f):
+    """Allow a valid API Bearer token OR an authenticated admin browser session.
+
+    Token requests are CSRF-exempt (no cookie/session is involved) and set
+    g.api_client so active_client() resolves the token's bound client. Session
+    requests keep the existing admin + CSRF requirements. This lets Jenkins call
+    the CI/CD endpoints with `Authorization: Bearer <token>` while the browser UI
+    keeps working unchanged."""
+    @wraps(f)
+    def w(*a, **k):
+        tok = _authenticate_api_token()
+        if tok:
+            g.api_token  = tok
+            g.api_client = tok.get('client') or None
+            try:
+                with get_db() as db:
+                    db.execute("UPDATE api_tokens SET last_used_at=?, last_used_ip=? WHERE id=?",
+                               (datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                request.remote_addr or '', tok['id']))
+                    db.commit()
+            except Exception:
+                pass
+            return f(*a, **k)
+        # Fall back to browser session (admin) with CSRF on writes.
+        if 'user' not in session:
+            return jsonify(error='Authentication required: log in, or send Authorization: Bearer <token>'), 401
+        if session.get('role') != 'admin':
+            return jsonify(error='Admin privilege or API token required'), 403
+        if request.method in ('POST', 'PUT', 'DELETE') and not _check_csrf_token():
+            return jsonify(error='CSRF token invalid or missing'), 403
         return f(*a, **k)
     return w
 
@@ -1239,11 +1328,16 @@ def api_start():
 
     cmd = [jbin, '-n', '-t', working_jmx, '-l', jtl_path,
            f'-Jtest.duration={duration}',
-           # Capture URL, latency, connect time always; response body only on failure
+           # Capture URL, latency, connect time, and the full request + response
+           # body for EVERY sample (not just failures) so the platform's
+           # request/response viewer can show each call individually.
            '-Jjmeter.save.saveservice.url=true',
            '-Jjmeter.save.saveservice.latency=true',
            '-Jjmeter.save.saveservice.connect_time=true',
-           '-Jjmeter.save.saveservice.response_data.on_error=true',
+           '-Jjmeter.save.saveservice.response_data=true',
+           '-Jjmeter.save.saveservice.samplerData=true',
+           '-Jjmeter.save.saveservice.requestHeaders=true',
+           '-Jjmeter.save.saveservice.responseHeaders=true',
            '-Jjmeter.save.saveservice.assertion_results_failure_message=true',
            '-Jjmeter.save.saveservice.bytes=true',
            '-Jjmeter.save.saveservice.sent_bytes=true',
@@ -1351,19 +1445,28 @@ def api_start():
                     _t2.sleep(0.3)
                 with _req_log_lock:
                     _req_log.clear()
+                import csv as _csv, io as _io
                 hdr = []
+                buf = ''
                 with open(jtl_path, 'r', encoding='utf-8', errors='ignore') as _f:
                     while _state.get('running') or proc.poll() is None:
                         line = _f.readline()
                         if not line:
                             _t2.sleep(0.15); continue
-                        line = line.rstrip()
-                        if not line: continue
+                        buf += line
+                        # JMeter quotes multi-line response bodies; a CSV record
+                        # is complete only when quote chars are balanced and the
+                        # buffered text ends on a newline.
+                        if buf.count('"') % 2 != 0 or not buf.endswith('\n'):
+                            continue
+                        record = buf.rstrip('\r\n'); buf = ''
+                        if not record: continue
+                        try:
+                            parts = next(_csv.reader(_io.StringIO(record)))
+                        except Exception:
+                            continue
                         if not hdr:
-                            import csv as _csv
-                            hdr = [h.strip() for h in next(_csv.reader([line]))]; continue
-                        import csv as _csv
-                        parts = next(_csv.reader([line]))
+                            hdr = [h.strip() for h in parts]; continue
                         if len(parts) < 4: continue
                         row = dict(zip(hdr, parts))
                         entry = {
@@ -1428,7 +1531,7 @@ def api_start():
             _state['sla'] = sla_result
             # Notification
             result = 'done' if _state.get('rc') == 0 else 'failed'
-            _notify_test_complete(c, jmx_name, result, sla_result)
+            _notify_test_complete(c, jmx_name, result, sla_result, jtl_name=_state.get('jtl'))
             # Post-test hook
             if post_hook:
                 try:
@@ -2517,6 +2620,20 @@ def api_ai_chat():
     except Exception as ex:
         return jsonify(error=str(ex)), 500
 
+def _read_jtl_csv(path):
+    """Parse a JMeter CSV JTL tolerating multi-line quoted fields.
+
+    Once full response capture is enabled, response bodies can contain embedded
+    newlines, so a record may span several physical lines. Reading via
+    csv.reader over the file object correctly re-joins those quoted fields —
+    unlike splitting the file line-by-line. Returns (header, rows)."""
+    with open(path, 'r', newline='', encoding='utf-8', errors='ignore') as f:
+        rows = list(csv.reader(f))
+    if not rows:
+        return [], []
+    return [h.strip() for h in rows[0]], rows[1:]
+
+
 # ── API: Live Stats ────────────────────────────────────────────────────────────
 @app.route('/api/live-stats')
 @login_req
@@ -2533,19 +2650,15 @@ def api_live_stats():
     if not jtl_path:
         return jsonify(running=False, samples=[])
     try:
-        with open(jtl_path, 'r', encoding='utf-8', errors='ignore') as f:
-            lines = f.readlines()
-        if not lines:
+        header, rows = _read_jtl_csv(jtl_path)
+        if not header:
             return jsonify(running=_state['running'], samples=[])
-        import csv as _csv
-        header = [h.strip() for h in next(_csv.reader([lines[0]]))]
         ts_idx      = header.index('timeStamp') if 'timeStamp' in header else 0
         elapsed_idx = header.index('elapsed')   if 'elapsed'   in header else 1
         success_idx = header.index('success')   if 'success'   in header else 7
         window  = 5000
         buckets = {}
-        for line in lines[1:]:
-            parts = next(_csv.reader([line.strip()]))
+        for parts in rows:
             if len(parts) <= max(ts_idx, elapsed_idx, success_idx):
                 continue
             try:
@@ -2717,19 +2830,15 @@ def api_live_stats_labels():
         from datetime import datetime as _dt2
         now_ms  = int(_dt2.now().timestamp() * 1000)
         cutoff  = now_ms - 60000  # last 60 s
-        with open(jtl_path, 'r', encoding='utf-8', errors='ignore') as f:
-            lines = f.readlines()
-        if not lines:
+        header, rows = _read_jtl_csv(jtl_path)
+        if not header:
             return jsonify(running=_state['running'], labels=[])
-        import csv as _csv
-        header      = [h.strip() for h in next(_csv.reader([lines[0]]))]
         ts_idx      = header.index('timeStamp') if 'timeStamp' in header else 0
         elapsed_idx = header.index('elapsed')   if 'elapsed'   in header else 1
         success_idx = header.index('success')   if 'success'   in header else 7
         label_idx   = header.index('label')     if 'label'     in header else 2
         by_label = defaultdict(lambda: {'count': 0, 'errors': 0, 'total_elapsed': 0})
-        for line in lines[1:]:
-            parts = next(_csv.reader([line.strip()]))
+        for parts in rows:
             need  = max(ts_idx, elapsed_idx, success_idx, label_idx)
             if len(parts) <= need:
                 continue
@@ -2792,12 +2901,9 @@ def api_live_stats_tree():
     if not jtl_path or not os.path.exists(jtl_path):
         return jsonify(running=_state['running'], tree=[])
     try:
-        with open(jtl_path, 'r', encoding='utf-8', errors='ignore') as f:
-            lines = f.readlines()
-        if not lines:
+        hdr, rows = _read_jtl_csv(jtl_path)
+        if not hdr:
             return jsonify(running=_state['running'], tree=[])
-        import csv as _csv
-        hdr   = [h.strip() for h in next(_csv.reader([lines[0]]))]
         def _hi(name): return hdr.index(name) if name in hdr else -1
         lb_i = _hi('label')
         ok_i  = _hi('success');     rc_i = _hi('responseCode')
@@ -2806,8 +2912,7 @@ def api_live_stats_tree():
             'total':0,'pass':0,'fail':0,
             'rc':defaultdict(int),'reasons':defaultdict(int)
         })
-        for line in lines[1:]:
-            parts = next(_csv.reader([line.strip()]))
+        for parts in rows:
             if lb_i < 0 or ok_i < 0 or len(parts) <= max(lb_i, ok_i):
                 continue
             try:
@@ -2969,6 +3074,90 @@ def api_baseline_compare(fname):
         return jsonify(error=str(ex)), 500
 
 # ── API: Error breakdown ───────────────────────────────────────────────────────
+@app.route('/api/report/<path:fname>/samples')
+@login_req
+def api_report_samples(fname):
+    """View Results Tree-style browser: every sample of a run with its request
+    and response, paginated and filterable by label / status / search text.
+    Reads the full JTL (multi-line safe) rather than the capped live buffer."""
+    c = active_client()
+    if not c: return jsonify(error='No client'), 400
+    path = os.path.join(client_dirs(c)['reports'], fname)
+    if not os.path.exists(path): return jsonify(error='Not found'), 404
+    label_f  = request.args.get('label', '').strip().lower()
+    status_f = request.args.get('status', '').strip().lower()   # '', 'pass', 'fail'
+    q        = request.args.get('q', '').strip().lower()
+    try:
+        offset = max(int(request.args.get('offset', 0)), 0)
+        limit  = min(max(int(request.args.get('limit', 100)), 1), 500)
+    except ValueError:
+        offset, limit = 0, 100
+    try:
+        header, rows = _read_jtl_csv(path)
+        if not header:
+            return jsonify(samples=[], total=0, labels=[], offset=0, limit=limit)
+        def hi(n): return header.index(n) if n in header else -1
+        li, rci, rmi, si = hi('label'), hi('responseCode'), hi('responseMessage'), hi('success')
+        tsi, eli, tni    = hi('timeStamp'), hi('elapsed'), hi('threadName')
+        ui, fmi          = hi('URL'), hi('failureMessage')
+        sdi, rdi         = hi('samplerData'), hi('responseData')
+        def cell(parts, idx): return parts[idx] if 0 <= idx < len(parts) else ''
+        labels_set, matched, total_matched = set(), [], 0
+        for parts in rows:
+            if si < 0 or len(parts) <= si:
+                continue
+            label = cell(parts, li)
+            labels_set.add(label)
+            ok = cell(parts, si).strip().lower() == 'true'
+            if status_f == 'pass' and not ok:      continue
+            if status_f == 'fail' and ok:          continue
+            if label_f and label_f not in label.lower(): continue
+            if q:
+                hay = (label + ' ' + cell(parts, rci) + ' ' + cell(parts, tni)
+                       + ' ' + cell(parts, rdi)).lower()
+                if q not in hay:
+                    continue
+            total_matched += 1
+            if total_matched <= offset or len(matched) >= limit:
+                continue
+            matched.append({
+                'i':            total_matched - 1,
+                'label':        label,
+                'rc':           cell(parts, rci).strip(),
+                'rm':           cell(parts, rmi).strip(),
+                'ok':           ok,
+                'ts':           cell(parts, tsi),
+                'elapsed':      cell(parts, eli),
+                'thread':       cell(parts, tni).strip(),
+                'url':          cell(parts, ui).strip(),
+                'fm':           cell(parts, fmi).strip(),
+                'sampler_data': cell(parts, sdi)[:8000],
+                'resp_data':    cell(parts, rdi)[:8000],
+            })
+        return jsonify(samples=matched, total=total_matched, offset=offset, limit=limit,
+                       labels=sorted(l for l in labels_set if l))
+    except Exception as ex:
+        return jsonify(error=str(ex)), 500
+
+
+@app.route('/api/report/<path:fname>/trend')
+@login_req
+def api_report_trend(fname):
+    """P95 / error% / TPS across recent runs for the trend dashboard."""
+    c = active_client()
+    if not c: return jsonify(error='No client'), 400
+    path = os.path.join(client_dirs(c)['reports'], fname)
+    if not os.path.exists(path): return jsonify(error='Not found'), 404
+    try:
+        n = min(max(int(request.args.get('n', 8)), 2), 30)
+    except ValueError:
+        n = 8
+    try:
+        return jsonify(trend=_recent_trend(c, path, n=n))
+    except Exception as ex:
+        return jsonify(error=str(ex)), 500
+
+
 @app.route('/api/report/<path:fname>/errors')
 @login_req
 def api_report_errors(fname):
@@ -3102,7 +3291,8 @@ def _fire_recurring(r):
             proc.wait()
             sla_r = _evaluate_sla(jtl_path, client)
             audit('RECURRING_RUN', f"id={sid} rc={proc.returncode}", username='system')
-            _notify_test_complete(client, r['jmx'], 'done' if proc.returncode == 0 else 'failed', sla_r)
+            _notify_test_complete(client, r['jmx'], 'done' if proc.returncode == 0 else 'failed', sla_r,
+                                  jtl_name=os.path.basename(jtl_path))
         finally:
             shutil.rmtree(tmp_dir, ignore_errors=True)
     except Exception as ex:
@@ -3137,7 +3327,7 @@ def _start_recurring_checker():
 # ── Notifications ──────────────────────────────────────────────────────────────
 import urllib.request as _urllib_req
 
-def _notify_test_complete(c, jmx, result, sla_result=None):
+def _notify_test_complete(c, jmx, result, sla_result=None, jtl_name=None):
     cfg       = load_cfg()
     teams_url = cfg.get('teams_webhook', '')
     summary   = (f"Test: {jmx} | Client: {c['name']} | "
@@ -3170,14 +3360,31 @@ def _notify_test_complete(c, jmx, result, sla_result=None):
         try:
             import smtplib
             from email.mime.text import MIMEText
+            from email.mime.multipart import MIMEMultipart
+            from email.mime.application import MIMEApplication
             smtp_user = cfg.get('smtp_user', '')
             smtp_pass = cfg.get('smtp_pass', '')
-            msg = MIMEText(summary)
+            msg = MIMEMultipart()
             msg['Subject'] = f'[Load Test] {c["name"]} — {"PASS" if result=="done" else "FAIL"}'
             msg['From']    = smtp_user or 'loadtest@localhost'
             msg['To']      = notify_to
+            body = summary + ('\n\nExecutive summary, capacity/headroom, trend and full '
+                              'request/response are in the attached HTML report.' if jtl_name else '')
+            msg.attach(MIMEText(body, 'plain'))
+            # Attach the shareable HTML report (exec banner + request/response).
+            if jtl_name:
+                try:
+                    rpath = os.path.join(client_dirs(c)['reports'], jtl_name)
+                    if os.path.exists(rpath):
+                        report_html = _report_html(rpath, c)
+                        att = MIMEApplication(report_html.encode('utf-8'), _subtype='html')
+                        att.add_header('Content-Disposition', 'attachment',
+                                       filename=jtl_name.replace('.jtl', '_report.html'))
+                        msg.attach(att)
+                except Exception as ex:
+                    print(f'[notify] report attach failed: {ex}')
             port = int(cfg.get('smtp_port', 587))
-            with smtplib.SMTP(smtp_host, port, timeout=10) as s:
+            with smtplib.SMTP(smtp_host, port, timeout=20) as s:
                 s.starttls()
                 if smtp_user and smtp_pass:
                     s.login(smtp_user, smtp_pass)
@@ -3921,7 +4128,8 @@ def api_create_schedule():
             proc.wait()
             sla_r = _evaluate_sla(jtl_path, client)
             _set_sched_status(sid, 'done' if proc.returncode == 0 else 'failed')
-            _notify_test_complete(client, entry['jmx'], 'done' if proc.returncode == 0 else 'failed', sla_r)
+            _notify_test_complete(client, entry['jmx'], 'done' if proc.returncode == 0 else 'failed', sla_r,
+                                  jtl_name=os.path.basename(jtl_path))
         except Exception:
             _set_sched_status(sid, 'failed')
         finally:
@@ -4383,8 +4591,61 @@ def api_upload_test_features():
     return jsonify(ok=True, saved=saved, errors=errors)
 
 # ── CI/CD TEST SUITE MANAGEMENT ───────────────────────────────────────────────
-@app.route('/api/ci-cd/suites', methods=['GET'])
+# ── API Token management (browser-admin only) ──────────────────────────────────
+@app.route('/api/api-tokens', methods=['GET'])
 @admin_req
+def api_list_tokens():
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT id,name,token_prefix,client,created_by,created_at,last_used_at,last_used_ip,enabled "
+            "FROM api_tokens ORDER BY created_at DESC").fetchall()
+    return jsonify(tokens=[dict(r) for r in rows])
+
+@app.route('/api/api-tokens', methods=['POST'])
+@admin_req
+@csrf_protect
+def api_create_token():
+    d = request.json or {}
+    name = (d.get('name') or '').strip()
+    if not name:
+        return jsonify(error='A token name is required'), 400
+    client = (d.get('client') or '').strip() or (active_client() or {}).get('code')
+    raw, prefix, thash = _generate_api_token()
+    tid = str(uuid.uuid4())[:8]
+    with get_db() as db:
+        db.execute("INSERT INTO api_tokens(id,name,token_hash,token_prefix,client,created_by) "
+                   "VALUES(?,?,?,?,?,?)",
+                   (tid, name, thash, prefix, client, session.get('user', 'admin')))
+        db.commit()
+    audit('API_TOKEN_CREATED', f"id={tid} name={name} client={client}")
+    # Plaintext is returned exactly once and never stored.
+    return jsonify(ok=True, id=tid, token=raw, prefix=prefix, client=client,
+                   note='Copy this token now — it is shown only once and cannot be retrieved later.')
+
+@app.route('/api/api-tokens/<tid>/toggle', methods=['POST'])
+@admin_req
+@csrf_protect
+def api_toggle_token(tid):
+    enabled = bool((request.json or {}).get('enabled', True))
+    with get_db() as db:
+        db.execute("UPDATE api_tokens SET enabled=? WHERE id=?", (1 if enabled else 0, tid))
+        db.commit()
+    audit('API_TOKEN_TOGGLE', f"id={tid} enabled={enabled}")
+    return jsonify(ok=True)
+
+@app.route('/api/api-tokens/<tid>', methods=['DELETE'])
+@admin_req
+@csrf_protect
+def api_delete_token(tid):
+    with get_db() as db:
+        db.execute("DELETE FROM api_tokens WHERE id=?", (tid,))
+        db.commit()
+    audit('API_TOKEN_REVOKED', f"id={tid}")
+    return jsonify(ok=True)
+
+
+@app.route('/api/ci-cd/suites', methods=['GET'])
+@api_auth
 def api_list_ci_suites():
     """List all CI/CD test suites for active client"""
     c = active_client()
@@ -4399,8 +4660,7 @@ def api_list_ci_suites():
     return jsonify(suites=[dict(s) for s in suites])
 
 @app.route('/api/ci-cd/suites', methods=['POST'])
-@admin_req
-@csrf_protect
+@api_auth
 def api_create_ci_suite():
     """Create a new CI/CD test suite"""
     c = active_client()
@@ -4420,15 +4680,16 @@ def api_create_ci_suite():
         return jsonify(error='Suite name and at least one JMX file required'), 400
     
     suite_id = f"{c['code']}_suite_{uuid.uuid4().hex[:8]}"
-    
+    gate_config = json.dumps(data.get('gate') or {})   # release-gate thresholds
+
     try:
         with get_db() as db:
             db.execute(
-                """INSERT INTO ci_cd_suites 
-                   (id,client,name,description,jmx_files,feature_file,schedule,retry_count,notify_on_fail,created_by,enabled)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,1)""",
+                """INSERT INTO ci_cd_suites
+                   (id,client,name,description,jmx_files,feature_file,schedule,retry_count,notify_on_fail,created_by,enabled,gate_config)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,1,?)""",
                 (suite_id, c['code'], name, description, json.dumps(jmx_files), feature_file,
-                 schedule, retry_count, notify_on_fail, session.get('user', 'system'))
+                 schedule, retry_count, notify_on_fail, session.get('user', 'system'), gate_config)
             )
             db.commit()
         
@@ -4437,49 +4698,242 @@ def api_create_ci_suite():
     except Exception as e:
         return jsonify(error=str(e)), 500
 
-@app.route('/api/ci-cd/suites/<suite_id>/run', methods=['POST'])
+@app.route('/api/ci-cd/suites/<suite_id>/toggle', methods=['POST'])
 @admin_req
 @csrf_protect
+def api_toggle_ci_suite(suite_id):
+    enabled = bool((request.json or {}).get('enabled', True))
+    with get_db() as db:
+        db.execute("UPDATE ci_cd_suites SET enabled=? WHERE id=?", (1 if enabled else 0, suite_id))
+        db.commit()
+    audit('CI_CD_SUITE_TOGGLE', f'{suite_id} enabled={enabled}')
+    return jsonify(ok=True)
+
+@app.route('/api/ci-cd/suites/<suite_id>', methods=['DELETE'])
+@admin_req
+@csrf_protect
+def api_delete_ci_suite(suite_id):
+    with get_db() as db:
+        db.execute("DELETE FROM ci_cd_suites WHERE id=?", (suite_id,))
+        db.execute("DELETE FROM ci_cd_run_history WHERE suite_id=?", (suite_id,))
+        db.commit()
+    audit('CI_CD_SUITE_DELETE', suite_id)
+    return jsonify(ok=True)
+
+@app.route('/api/ci-cd/suites/<suite_id>/runs', methods=['GET'])
+@login_req
+def api_ci_suite_runs(suite_id):
+    """Recent run history for one suite, with gate verdicts, for the UI."""
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT * FROM ci_cd_run_history WHERE suite_id=? ORDER BY start_time DESC LIMIT 20",
+            (suite_id,)).fetchall()
+    runs = []
+    for r in rows:
+        d = dict(r)
+        try:
+            d['gate_reasons'] = json.loads(d.get('gate_reasons') or '[]')
+        except Exception:
+            d['gate_reasons'] = []
+        runs.append(d)
+    return jsonify(runs=runs)
+
+
+# ── Release gates ──────────────────────────────────────────────────────────────
+_GATE_DEFAULTS = {
+    'require_sla_pass':       False,   # fail if SLA config is breached
+    'max_error_pct':          2.0,     # fail if error rate exceeds this
+    'max_p95_ms':             None,    # fail if absolute P95 exceeds this
+    'min_tps':                None,    # fail if throughput below this
+    'max_p95_regression_pct': 10.0,    # fail if P95 regressed >X% vs baseline
+}
+
+def _evaluate_gate(metrics, sla_result, baseline, gate_cfg=None):
+    """Return {passed, reasons, checks, config}. A gate turns raw metrics +
+    SLA + baseline regression into a single release verdict Jenkins can act on."""
+    cfg = {**_GATE_DEFAULTS, **(gate_cfg or {})}
+    checks, reasons, passed = [], [], True
+    def chk(name, ok, detail):
+        nonlocal passed
+        checks.append({'name': name, 'passed': bool(ok), 'detail': detail})
+        if not ok:
+            passed = False; reasons.append(detail)
+    err = float(metrics.get('err', 0) or 0)
+    p95 = float(metrics.get('p95', 0) or 0)
+    tps = float(metrics.get('tps', 0) or 0)
+    if cfg.get('max_error_pct') is not None:
+        chk('Error rate', err <= cfg['max_error_pct'], f"error rate {err}% (limit <={cfg['max_error_pct']}%)")
+    if cfg.get('max_p95_ms'):
+        chk('P95 absolute', p95 <= cfg['max_p95_ms'], f"P95 {int(p95)}ms (limit <={cfg['max_p95_ms']}ms)")
+    if cfg.get('min_tps'):
+        chk('Min throughput', tps >= cfg['min_tps'], f"throughput {tps} TPS (floor >={cfg['min_tps']})")
+    if cfg.get('require_sla_pass') and sla_result is not None:
+        chk('SLA', bool(sla_result.get('passed')), 'SLA ' + ('passed' if sla_result.get('passed') else 'breached'))
+    base_p95 = ((baseline or {}).get('metrics') or {}).get('p95')
+    if cfg.get('max_p95_regression_pct') is not None and base_p95:
+        reg = (p95 - base_p95) / base_p95 * 100
+        chk('P95 regression', reg <= cfg['max_p95_regression_pct'],
+            f"P95 {reg:+.0f}% vs baseline {int(base_p95)}ms (limit <={cfg['max_p95_regression_pct']}%)")
+    return {'passed': passed, 'reasons': reasons, 'checks': checks, 'config': cfg}
+
+
+def _combine_jtls(jtls, out_path):
+    """Concatenate JTLs into one (single header). Preserves multi-line rows by
+    copying every non-header physical line verbatim."""
+    header_written = False
+    with open(out_path, 'w', newline='', encoding='utf-8') as out:
+        for j in jtls:
+            if not os.path.exists(j):
+                continue
+            with open(j, 'r', encoding='utf-8', errors='ignore') as f:
+                first = f.readline()
+                if not first:
+                    continue
+                if not header_written:
+                    out.write(first); header_written = True
+                for line in f:
+                    out.write(line)
+    return header_written
+
+
+def _execute_ci_suite(suite, run_id, gate_cfg, duration=60):
+    """Actually run a suite's JMX files, combine results, evaluate the release
+    gate, and persist metrics + verdict to ci_cd_run_history."""
+    start = datetime.now()
+    c = get_client(suite['client'])
+    try:
+        if not c:
+            raise RuntimeError(f"client {suite['client']} not found")
+        dirs = client_dirs(c)
+        try:
+            jmx_files = json.loads(suite['jmx_files'])
+        except Exception:
+            jmx_files = [s.strip() for s in (suite['jmx_files'] or '').split(',') if s.strip()]
+        jbin = _find_jmeter_bin()
+        combined = os.path.join(dirs['reports'], f"{run_id}.jtl")
+        part_jtls = []
+        for i, jmx in enumerate(jmx_files):
+            jmx_path = os.path.join(dirs['jmx'], jmx)
+            if not os.path.exists(jmx_path):
+                continue
+            jtl_i = os.path.join(dirs['reports'], f"{run_id}_{i}.jtl")
+            cmd = [jbin, '-n', '-t', jmx_path, '-l', jtl_i,
+                   f'-Jtest.duration={duration}',
+                   '-Jjmeter.save.saveservice.url=true',
+                   '-Jjmeter.save.saveservice.response_data=true',
+                   '-Jjmeter.save.saveservice.samplerData=true',
+                   '-Jjmeter.save.saveservice.requestHeaders=true',
+                   '-Jjmeter.save.saveservice.responseHeaders=true',
+                   '-Jjmeter.save.saveservice.assertion_results_failure_message=true']
+            try:
+                subprocess.run(cmd, capture_output=True, text=True, timeout=duration + 900)
+            except Exception as ex:
+                print(f'[ci-cd] {jmx} run error: {ex}')
+            if os.path.exists(jtl_i):
+                part_jtls.append(jtl_i)
+        _combine_jtls(part_jtls, combined)
+        metrics  = _quick_metrics(combined) or {'p95': 0, 'err': 0, 'tps': 0, 'total': 0, 'avg': 0}
+        total    = int(metrics.get('total', 0))
+        err_cnt  = round(metrics.get('err', 0) / 100 * total) if total else 0
+        sla      = _evaluate_sla(combined, c) if total else None
+        baseline = _read_json(_baseline_path(c)) or {}
+        gate     = _evaluate_gate(metrics, sla, baseline, gate_cfg)
+        if total == 0:
+            status = 'error'
+            gate['passed'] = False
+            gate['reasons'].insert(0, 'No samples produced — JMeter execution failed or JMX missing.')
+        else:
+            status = 'passed' if gate['passed'] else 'gate_failed'
+        dur = int((datetime.now() - start).total_seconds())
+        with get_db() as db:
+            db.execute("""UPDATE ci_cd_run_history SET status=?, end_time=?, duration_s=?,
+                          total_requests=?, success_count=?, error_count=?, avg_rt_ms=?, p95_rt_ms=?,
+                          report_path=?, gate_status=?, gate_reasons=? WHERE id=?""",
+                       (status, datetime.now().isoformat(), dur, total, total - err_cnt, err_cnt,
+                        metrics.get('avg', 0), metrics.get('p95', 0),
+                        os.path.basename(combined) if total else None,
+                        'pass' if gate['passed'] else 'fail', json.dumps(gate['reasons']), run_id))
+            db.execute("UPDATE ci_cd_suites SET last_run=? WHERE id=?",
+                       (datetime.now().isoformat(), suite['id']))
+            db.commit()
+        try:
+            _notify_test_complete(c, f"Suite: {suite['name']}",
+                                  'done' if gate['passed'] else 'failed', sla,
+                                  jtl_name=os.path.basename(combined) if total else None)
+        except Exception:
+            pass
+        for j in part_jtls:
+            try: os.remove(j)
+            except OSError: pass
+    except Exception as ex:
+        try:
+            with get_db() as db:
+                db.execute("UPDATE ci_cd_run_history SET status=?, end_time=?, gate_status=?, gate_reasons=? WHERE id=?",
+                           ('error', datetime.now().isoformat(), 'fail',
+                            json.dumps([f'Execution error: {ex}']), run_id))
+                db.commit()
+        except Exception:
+            pass
+
+
+@app.route('/api/ci-cd/suites/<suite_id>/run', methods=['POST'])
+@api_auth
 def api_run_ci_suite(suite_id):
-    """Manually trigger a CI/CD suite execution"""
+    """Trigger a real CI/CD suite execution and evaluate the release gate.
+    Body (optional): {"duration": <secs>, "gate": {<overrides>}}."""
     try:
         with get_db() as db:
             suite = db.execute("SELECT * FROM ci_cd_suites WHERE id=?", (suite_id,)).fetchone()
-        
         if not suite:
             return jsonify(error='Suite not found'), 404
-        
         suite = dict(suite)
+        try:
+            suite_gate = json.loads(suite.get('gate_config') or '{}')
+        except Exception:
+            suite_gate = {}
+        body = request.json or {}
+        gate_cfg = {**suite_gate, **(body.get('gate') or {})}
+        try:
+            duration = max(10, min(int(body.get('duration', 60)), 7200))
+        except (ValueError, TypeError):
+            duration = 60
         run_id = f"run_{uuid.uuid4().hex[:12]}"
-        start_time = datetime.now().isoformat()
-        
-        # Record the run in history
+        trg = session.get('user') or 'manual'
+        if getattr(g, 'api_token', None):
+            trg = 'token:' + (g.api_token.get('name') or '')
         with get_db() as db:
-            db.execute(
-                """INSERT INTO ci_cd_run_history 
-                   (id,suite_id,client,status,start_time,triggered_by)
-                   VALUES (?,?,?,?,?,?)""",
-                (run_id, suite_id, suite['client'], 'running', start_time, session.get('user', 'manual'))
-            )
+            db.execute("""INSERT INTO ci_cd_run_history (id,suite_id,client,status,start_time,triggered_by)
+                          VALUES (?,?,?,?,?,?)""",
+                       (run_id, suite_id, suite['client'], 'running', datetime.now().isoformat(), trg))
             db.commit()
-        
-        audit('CI_CD_SUITE_RUN', f'Triggered suite run: {suite["name"]} (ID: {suite_id})')
-        return jsonify(ok=True, run_id=run_id, suite_name=suite['name'], status='started')
+        audit('CI_CD_SUITE_RUN', f'Suite run started: {suite["name"]} ({suite_id}) run={run_id} by={trg}')
+        threading.Thread(target=_execute_ci_suite, args=(suite, run_id, gate_cfg, duration),
+                         daemon=True).start()
+        return jsonify(ok=True, run_id=run_id, suite_name=suite['name'], status='started',
+                       poll=f'/api/ci-cd/runs/{run_id}')
     except Exception as e:
         return jsonify(error=str(e)), 500
 
 @app.route('/api/ci-cd/runs/<run_id>', methods=['GET'])
-@admin_req
+@api_auth
 def api_get_ci_run_status(run_id):
-    """Get status and results of a CI/CD run"""
+    """Get status, metrics and release-gate verdict of a CI/CD run.
+
+    Jenkins polls this and checks `gate` == 'pass'. `done` is true once the run
+    has finished (passed / gate_failed / error)."""
     try:
         with get_db() as db:
             run = db.execute("SELECT * FROM ci_cd_run_history WHERE id=?", (run_id,)).fetchone()
-        
         if not run:
             return jsonify(error='Run not found'), 404
-        
-        return jsonify(run=dict(run))
+        run = dict(run)
+        try:
+            run['gate_reasons'] = json.loads(run.get('gate_reasons') or '[]')
+        except Exception:
+            run['gate_reasons'] = []
+        done = run.get('status') in ('passed', 'gate_failed', 'completed', 'error')
+        return jsonify(run=run, gate=run.get('gate_status'), done=done,
+                       report=(f"/api/report/{run['report_path']}/html" if run.get('report_path') else None))
     except Exception as e:
         return jsonify(error=str(e)), 500
 
@@ -4646,7 +5100,7 @@ def api_download_html(fname):
     if not os.path.exists(p): p = os.path.join(_reports_dir(), fname)
     if not os.path.exists(p): return 'File not found', 404
     try:
-        html = _generate_report_html(_parse_jtl(p))
+        html = _report_html(p, c)
         resp = app.response_class(html, mimetype='text/html')
         safe = re.sub(r'[^a-zA-Z0-9_.-]', '_', fname.replace('.jtl',''))
         resp.headers['Content-Disposition'] = f'attachment; filename="Report_{safe}.html"'
@@ -4663,7 +5117,7 @@ def api_report_html_view(fname):
     p = os.path.join(client_dirs(c)['reports'] if c else _reports_dir(), fname)
     if not os.path.exists(p): return 'File not found', 404
     try:
-        html = _generate_report_html(_parse_jtl(p))
+        html = _report_html(p, c)
         audit('VIEW_HTML', f'HTML view: {fname}')
         return app.response_class(html, mimetype='text/html')
     except Exception as ex:
@@ -4693,6 +5147,7 @@ def api_download_bundle(fname):
     if not os.path.exists(p): return 'File not found', 404
     try:
         data = _parse_jtl(p)
+        _enrich_report(data, p, active_client())
         html = _generate_report_html(data)
         buf  = io.BytesIO()
         with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as z:
@@ -4724,6 +5179,7 @@ def api_download_all_reports():
             z.write(path, f'jtl/{fname}')
             try:
                 data = _parse_jtl(path)
+                _enrich_report(data, path, active_client())
                 z.writestr(f'html/{fname.replace(".jtl","_report.html")}', _generate_report_html(data))
             except Exception as ex:
                 skipped.append(f'{fname}: {ex}')
@@ -4801,6 +5257,9 @@ def _parse_jtl(path):
     by_label_bytes = defaultdict(lambda: [0, 0])   # [recv_bytes, sent_bytes]
     label_url      = {}                             # first URL seen per label
     label_fail_details = defaultdict(list)          # up to 3 failure samples per label
+    samples_io = []                                 # bounded per-sample request/response for the shareable report
+    io_ok_per_label = defaultdict(int)
+    _IO_MAX_TOTAL, _IO_OK_PER_LABEL = 500, 5
     for r in rows:
         lbl = r['label']
         by_label[lbl].append(int(r['elapsed']))
@@ -4812,7 +5271,8 @@ def _parse_jtl(path):
         url = (r.get('URL') or '').strip()
         if lbl not in label_url and url and url.lower() != 'null':
             label_url[lbl] = url
-        if r.get('success') != 'true' and len(label_fail_details[lbl]) < 3:
+        is_ok = r.get('success') == 'true'
+        if not is_ok and len(label_fail_details[lbl]) < 3:
             label_fail_details[lbl].append({
                 'url':     url if url and url.lower() != 'null' else '',
                 'rc':      (r.get('responseCode') or '').strip(),
@@ -4820,6 +5280,25 @@ def _parse_jtl(path):
                 'fm':      (r.get('failureMessage') or '').strip(),
                 'thread':  (r.get('threadName') or '').strip(),
                 'elapsed': (r.get('elapsed') or '0').strip(),
+            })
+        # Bounded per-sample request/response: every failure (capped) + a few
+        # successes per label, so the shared HTML stays a reasonable size.
+        keep_io = False
+        if not is_ok:
+            keep_io = len(samples_io) < _IO_MAX_TOTAL
+        elif io_ok_per_label[lbl] < _IO_OK_PER_LABEL and len(samples_io) < _IO_MAX_TOTAL:
+            io_ok_per_label[lbl] += 1; keep_io = True
+        if keep_io:
+            samples_io.append({
+                'label':   lbl, 'ok': is_ok,
+                'rc':      (r.get('responseCode') or '').strip(),
+                'rm':      (r.get('responseMessage') or '').strip(),
+                'thread':  (r.get('threadName') or '').strip(),
+                'elapsed': (r.get('elapsed') or '0').strip(),
+                'url':     url if url and url.lower() != 'null' else '',
+                'fm':      (r.get('failureMessage') or '').strip(),
+                'req':     (r.get('samplerData') or '').strip()[:4000],
+                'resp':    (r.get('responseData') or '').strip()[:4000],
             })
 
     # Pre-group failure rows by label for efficiency
@@ -4966,7 +5445,294 @@ def _parse_jtl(path):
         peak_threads=max(int(r.get('allThreads',1)) for r in rows),
         label_stats=label_stats, service_groups=service_groups,
         rc_dist=dict(rc), tps_over_time=tps_ot, hist_data=hist,
+        samples_io=samples_io,
     )
+
+
+def _render_samples_io(d):
+    """Collapsible Request/Response section for the shareable HTML report so the
+    team can debug each call without logging into the platform. Data is bounded
+    (all failures capped + a few successes per label) by _parse_jtl."""
+    samples = d.get('samples_io') or []
+    if not samples:
+        return ''
+    import html as _h
+    def esc(s): return _h.escape(s or '', quote=False)
+    fails = sum(1 for s in samples if not s['ok'])
+    rows = []
+    for s in samples:
+        badge  = 'PASS' if s['ok'] else 'FAIL'
+        color  = '#22c55e' if s['ok'] else '#ef4444'
+        search = esc((s['label'] + ' ' + s['rc'] + ' ' + badge).lower())
+        url_html = (f'<div style="font-family:monospace;font-size:11px;color:#3b82f6;'
+                    f'word-break:break-all;margin-bottom:6px;">{esc(s["url"])}</div>') if s['url'] else ''
+        assertion = (f'<div style="margin:6px 0;padding:7px 11px;background:rgba(239,68,68,.1);'
+                     f'border:1px solid rgba(239,68,68,.3);border-radius:6px;font-size:12px;color:#fca5a5;">'
+                     f'<b style="color:#ef4444;">Assertion:</b> {esc(s["fm"])}</div>') if s['fm'] else ''
+        req_pre  = (f'<pre style="background:#0d1117;border:1px solid #1f2d44;border-radius:6px;padding:9px 11px;'
+                    f'margin:0 0 4px;font-size:11px;color:#d6e2ff;white-space:pre-wrap;word-break:break-word;'
+                    f'max-height:240px;overflow:auto;">{esc(s["req"])}</pre>') if s['req'] else \
+                   '<div style="color:#64748b;font-size:11px;">No request data captured.</div>'
+        resp_pre = (f'<pre style="background:#0d1117;border:1px solid #1f2d44;border-radius:6px;padding:9px 11px;'
+                    f'margin:0;font-size:11px;color:#d6e2ff;white-space:pre-wrap;word-break:break-word;'
+                    f'max-height:240px;overflow:auto;">{esc(s["resp"])}</pre>') if s['resp'] else \
+                   '<div style="color:#64748b;font-size:11px;">No response body captured.</div>'
+        rows.append(
+            f'<details class="rr-item" data-s="{search}" style="background:#0b1220;border:1px solid #1f2d44;'
+            f'border-left:3px solid {color};border-radius:8px;margin-bottom:7px;">'
+            f'<summary style="cursor:pointer;padding:9px 12px;list-style:none;display:flex;gap:9px;'
+            f'align-items:center;flex-wrap:wrap;">'
+            f'<span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:{color};'
+            f'color:#04121f;">{badge}</span>'
+            f'<span style="font-weight:600;font-size:13px;color:#e2e8f0;">{esc(s["label"])}</span>'
+            f'<span style="color:#64748b;font-size:11px;">code {esc(s["rc"])} &middot; {esc(s["elapsed"])} ms '
+            f'&middot; {esc(s["thread"])}</span></summary>'
+            f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 12px 12px;">'
+            f'<div><div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;'
+            f'color:#3b82f6;margin-bottom:5px;">Request</div>{url_html}{req_pre}</div>'
+            f'<div><div style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;'
+            f'color:#22c55e;margin-bottom:5px;">Response</div>{assertion}{resp_pre}</div></div></details>'
+        )
+    return (
+        '<div style="margin-top:26px;background:#111827;border:1px solid #1f2d44;border-radius:14px;padding:20px 22px;">'
+        '<h2 style="margin:0 0 4px;font-size:16px;color:#e2e8f0;">&#127795; Request / Response by sample</h2>'
+        f'<div style="color:#64748b;font-size:12px;margin-bottom:12px;">{len(samples)} samples shown '
+        f'({fails} failed) &middot; all failures plus a few successes per transaction. '
+        'Click a row to expand.</div>'
+        '<input oninput="rrFilter(this.value)" placeholder="filter by label / code / PASS / FAIL…" '
+        'style="width:100%;max-width:360px;margin-bottom:12px;padding:7px 10px;background:#0b1220;'
+        'border:1px solid #1f2d44;border-radius:6px;color:#e2e8f0;font-size:12px;">'
+        f'<div id="rr-wrap">{"".join(rows)}</div>'
+        '<script>function rrFilter(q){q=(q||"").toLowerCase();'
+        'document.querySelectorAll("#rr-wrap .rr-item").forEach(function(el){'
+        'el.style.display=(!q||el.getAttribute("data-s").indexOf(q)>-1)?"":"none";});}</script>'
+        '</div>\n\n'
+    )
+
+def _quick_metrics(path):
+    """Lightweight p95 / error% / tps for a JTL — reads only the needed columns.
+    Used for the trend view across recent runs."""
+    try:
+        elapsed = []; err = 0; total = 0; tmin = tmax = None
+        with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+            reader = csv.reader(f)
+            hdr = [h.strip() for h in next(reader, [])]
+            if not hdr: return None
+            ei = hdr.index('elapsed')   if 'elapsed'   in hdr else 1
+            si = hdr.index('success')   if 'success'   in hdr else 7
+            ti = hdr.index('timeStamp') if 'timeStamp' in hdr else 0
+            for row in reader:
+                if len(row) <= max(ei, si, ti): continue
+                try:
+                    e = int(row[ei]); ts = int(row[ti])
+                except ValueError:
+                    continue
+                elapsed.append(e); total += 1
+                tmin = ts if tmin is None else min(tmin, ts)
+                tmax = ts if tmax is None else max(tmax, ts)
+                if row[si].strip().lower() != 'true': err += 1
+        if not elapsed: return None
+        elapsed.sort()
+        dur = max(1, (tmax - tmin) / 1000) if tmax and tmin else 1
+        p95 = elapsed[min(len(elapsed) - 1, int(len(elapsed) * 95 / 100))]
+        return {'p95': p95, 'err': round(err / total * 100, 2),
+                'tps': round(total / dur, 2), 'total': total,
+                'avg': round(sum(elapsed) / len(elapsed))}
+    except Exception:
+        return None
+
+
+_TREND_CACHE = {}
+def _metrics_cached(path):
+    try:
+        key = (path, os.path.getmtime(path))
+    except OSError:
+        return None
+    if key in _TREND_CACHE:
+        return _TREND_CACHE[key]
+    m = _quick_metrics(path)
+    _TREND_CACHE[key] = m
+    if len(_TREND_CACHE) > 200:
+        _TREND_CACHE.pop(next(iter(_TREND_CACHE)))
+    return m
+
+
+def _recent_trend(c, current_path, n=8):
+    """Metrics for the last n primary reports (excludes *agr* aggregate files),
+    oldest→newest, flagging the current one."""
+    try:
+        rdir = client_dirs(c)['reports'] if c else _reports_dir()
+    except Exception:
+        rdir = os.path.dirname(current_path)
+    files = [f for f in glob.glob(os.path.join(rdir, '*.jtl'))
+             if 'agr' not in os.path.basename(f).lower()]
+    files.sort(key=os.path.getmtime)
+    files = files[-n:]
+    if not any(os.path.abspath(f) == os.path.abspath(current_path) for f in files):
+        files = (files + [current_path])[-n:]
+    out = []
+    for f in files:
+        m = _metrics_cached(f)
+        if m:
+            out.append({'name': os.path.basename(f), 'p95': m['p95'], 'err': m['err'],
+                        'tps': m['tps'],
+                        'current': os.path.abspath(f) == os.path.abspath(current_path)})
+    return out
+
+
+def _capacity_estimate(d):
+    """Conservative capacity indicator from a single run. NOT a measured breaking
+    point (that needs a ramp test) — it projects headroom from the latency margin
+    to the SLA/target P95 while errors stay low."""
+    tps = float(d.get('throughput', 0) or 0)
+    p95 = float(d.get('p95', 0) or 0)
+    err = float(d.get('error_rate', 0) or 0)
+    target_p95 = float(d.get('target_p95') or 2000)
+    stable = err < 1.0 and 0 < p95 <= target_p95
+    if stable:
+        ratio    = min(3.0, max(1.05, target_p95 / p95))
+        max_tps  = round(tps * ratio, 1)
+        headroom = round((max_tps - tps) / max_tps * 100) if max_tps else 0
+        verdict  = 'headroom'
+        note     = ('Estimated from this run\'s latency margin to the P95 target while errors stayed low. '
+                    'Run a ramp/stress test for the true breaking point.')
+    else:
+        max_tps  = round(tps, 1)
+        headroom = 0
+        verdict  = 'saturated'
+        note     = ('At or beyond comfortable capacity for this run (latency near/over target or errors present). '
+                    'A ramp test will pinpoint the ceiling.')
+    return {'current_tps': round(tps, 1), 'max_tps': max_tps, 'headroom_pct': headroom,
+            'verdict': verdict, 'p95': int(p95), 'target_p95': int(target_p95),
+            'err': round(err, 2), 'note': note}
+
+
+def _exec_verdict(d):
+    """Traffic-light PASS/WATCH/FAIL verdict + plain-language summary."""
+    sla = d.get('sla_result')
+    err = float(d.get('error_rate', 0) or 0)
+    p95 = int(d.get('p95', 0) or 0)
+    if sla is not None:
+        status = 'pass' if sla.get('passed') else 'fail'
+    else:
+        if err < 1.0 and p95 <= 2000:   status = 'pass'
+        elif err < 5.0 and p95 <= 4000: status = 'warn'
+        else:                            status = 'fail'
+    color = {'pass': '#22c55e', 'warn': '#f59e0b', 'fail': '#ef4444'}[status]
+    icon  = {'pass': '&#128994;', 'warn': '&#128993;', 'fail': '&#128308;'}[status]
+    word  = {'pass': 'PASS', 'warn': 'WATCH', 'fail': 'FAIL'}[status]
+    label = {'pass': 'Meets targets', 'warn': 'Elevated — review before peak',
+             'fail': 'Action needed before release'}[status]
+    sub   = {'pass': 'System sustained the load within performance targets.',
+             'warn': 'System handled the load but latency or errors were elevated.',
+             'fail': 'System did not meet targets under this load.'}[status]
+    tps = float(d.get('throughput', 0) or 0)
+    headline = f'{tps:,.0f} TPS sustained &middot; P95 {p95:,} ms &middot; errors {err:.2f}%'
+    if sla and sla.get('checks'):
+        failed = [ch['name'] for ch in sla['checks'] if not ch['passed']]
+        if failed:
+            sub += ' Breached: ' + ', '.join(failed[:4]) + ('…' if len(failed) > 4 else '') + '.'
+    return {'status': status, 'color': color, 'icon': icon, 'word': word,
+            'label': label, 'headline': headline, 'sub': sub}
+
+
+def _enrich_report(d, path, c=None):
+    """Attach SLA verdict, trend, capacity and exec-summary to the parsed report
+    dict so _generate_report_html can render the management block."""
+    try:
+        d['sla_result'] = _evaluate_sla(path, c) if c else None
+    except Exception:
+        d['sla_result'] = None
+    try:
+        d['trend'] = _recent_trend(c, path)
+    except Exception:
+        d['trend'] = []
+    d['capacity']     = _capacity_estimate(d)
+    d['exec_verdict'] = _exec_verdict(d)
+    return d
+
+
+def _report_html(path, c=None):
+    """Parse + enrich + render — single entry point used by all report routes."""
+    d = _parse_jtl(path)
+    _enrich_report(d, path, c)
+    return _generate_report_html(d)
+
+
+def _mgmt_block(d):
+    """Executive summary banner + capacity + trend cards for the top of the report."""
+    import html as _h
+    ev  = d.get('exec_verdict')
+    cap = d.get('capacity')
+    trend = d.get('trend') or []
+    if not ev:
+        return ''
+    # Trend arrow (P95 vs previous run)
+    arrow = '<div style="font-size:12px;color:#64748b;">First recorded run</div>'
+    if len(trend) >= 2 and trend[-1]['p95'] and trend[-2]['p95']:
+        cur, prev = trend[-1]['p95'], trend[-2]['p95']
+        pct = (cur - prev) / prev * 100 if prev else 0
+        if abs(pct) < 2:
+            arrow = '<div style="font-size:12px;color:#94a3b8;">&#8596; P95 flat vs previous run</div>'
+        else:
+            better = cur < prev
+            col = '#22c55e' if better else '#ef4444'
+            ar  = '&#9660;' if better else '&#9650;'
+            arrow = (f'<div style="font-size:15px;font-weight:800;color:{col};">{ar} {abs(pct):.0f}%</div>'
+                     f'<div style="font-size:11px;color:#64748b;">P95 {"faster" if better else "slower"} vs previous</div>')
+    banner = (
+        f'<div style="background:linear-gradient(90deg,{ev["color"]}22,transparent);border:1px solid {ev["color"]};'
+        f'border-left:6px solid {ev["color"]};border-radius:14px;padding:18px 22px;margin:0 0 16px;'
+        f'display:flex;gap:18px;align-items:center;flex-wrap:wrap;">'
+        f'<div style="font-size:32px;">{ev["icon"]}</div>'
+        f'<div style="flex:1;min-width:240px;">'
+        f'<div style="font-size:20px;font-weight:800;color:{ev["color"]};letter-spacing:.3px;">{ev["word"]} &mdash; {ev["label"]}</div>'
+        f'<div style="font-size:14px;color:#e2e8f0;margin-top:3px;">{ev["headline"]}</div>'
+        f'<div style="font-size:12.5px;color:#94a3b8;margin-top:3px;">{ev["sub"]}</div></div>'
+        f'<div style="text-align:right;min-width:120px;">{arrow}</div></div>'
+    )
+    # Capacity card
+    cap_html = ''
+    if cap:
+        hc = '#22c55e' if cap['verdict'] == 'headroom' else '#f59e0b'
+        fill = min(100, round(cap['current_tps'] / cap['max_tps'] * 100)) if cap['max_tps'] else 100
+        cap_html = (
+            '<div style="flex:1;min-width:260px;background:#111827;border:1px solid #1f2d44;border-radius:12px;padding:15px 18px;">'
+            '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;font-weight:700;margin-bottom:8px;">Capacity &amp; headroom</div>'
+            '<div style="display:flex;gap:20px;flex-wrap:wrap;">'
+            f'<div><div style="font-size:22px;font-weight:800;color:#e2e8f0;">{cap["current_tps"]:,}</div><div style="font-size:11px;color:#64748b;">current TPS</div></div>'
+            f'<div><div style="font-size:22px;font-weight:800;color:#3b82f6;">{cap["max_tps"]:,}</div><div style="font-size:11px;color:#64748b;">est. max sustainable</div></div>'
+            f'<div><div style="font-size:22px;font-weight:800;color:{hc};">{cap["headroom_pct"]}%</div><div style="font-size:11px;color:#64748b;">headroom</div></div></div>'
+            f'<div style="height:8px;background:#0b1220;border-radius:5px;margin:12px 0 6px;overflow:hidden;"><div style="height:100%;width:{fill}%;background:{hc};"></div></div>'
+            f'<div style="font-size:11px;color:#64748b;line-height:1.5;">{cap["note"]}</div></div>'
+        )
+    # Trend card (inline bars, no JS dependency)
+    trend_html = ''
+    if len(trend) >= 2:
+        mx = max((t['p95'] for t in trend), default=1) or 1
+        bars = ''
+        for t in trend:
+            h = max(6, round(t['p95'] / mx * 60))
+            bc = '#3b82f6' if not t['current'] else '#f59e0b'
+            ttl = _h.escape(f'{t["name"]}  P95 {t["p95"]}ms  err {t["err"]}%  {t["tps"]} TPS', quote=True)
+            bars += (f'<div title="{ttl}" style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;">'
+                     f'<div style="width:70%;height:{h}px;background:{bc};border-radius:3px 3px 0 0;"></div></div>')
+        latest = trend[-1]
+        trend_html = (
+            '<div style="flex:1;min-width:260px;background:#111827;border:1px solid #1f2d44;border-radius:12px;padding:15px 18px;">'
+            f'<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;font-weight:700;margin-bottom:8px;">P95 trend &mdash; last {len(trend)} runs</div>'
+            f'<div style="display:flex;gap:4px;align-items:flex-end;height:66px;">{bars}</div>'
+            f'<div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-top:8px;">'
+            f'<span>latest: <b style="color:#e2e8f0;">{latest["p95"]}ms</b> P95</span>'
+            f'<span>err <b style="color:#e2e8f0;">{latest["err"]}%</b></span>'
+            f'<span><b style="color:#e2e8f0;">{latest["tps"]}</b> TPS</span></div>'
+            '<div style="font-size:11px;color:#64748b;margin-top:2px;">Amber bar = this run.</div></div>'
+        )
+    cards = ''
+    if cap_html or trend_html:
+        cards = f'<div style="display:flex;gap:14px;flex-wrap:wrap;margin:0 0 8px;">{cap_html}{trend_html}</div>'
+    return banner + cards
+
 
 def _generate_report_html(d):
     import re as _re
@@ -5429,6 +6195,7 @@ def _generate_report_html(d):
         'footer{margin-top:52px;text-align:center;font-size:11px;color:var(--muted);padding-bottom:28px;}\n'
         '</style></head><body>\n\n'
         '<div class="hdr"><div class="hdr-icon">&#9889;</div><h1>Load Test Report</h1></div>\n'
+        f'{_mgmt_block(d)}'
         f'<div class="hdr-sub">{d["filename"]} &nbsp;&middot;&nbsp; {d["start_time"]} &rarr; {d["end_time"]} &nbsp;&middot;&nbsp; Duration: {d["test_duration"]} &nbsp;&middot;&nbsp; {d["peak_threads"]} threads</div>\n\n'
         '<div class="kpi-grid">\n'
         f'  <div class="kpi k-blue"><div class="kpi-label">Total Requests</div><div class="kpi-val">{d["total"]:,}</div><div class="kpi-sub">{len(d["label_stats"])} transactions</div></div>\n'
@@ -5500,6 +6267,7 @@ def _generate_report_html(d):
         f'    <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:13px;"><span style="color:#64748b">Max RT</span><strong style="color:#ef4444">{d["max_rt"]:,} ms</strong></div>\n'
         '  </div>\n'
         '</div>\n\n'
+        f'{_render_samples_io(d)}'
         f'<footer>Generated by Load Testing Platform &nbsp;&middot;&nbsp; {datetime.now().strftime("%d %b %Y %H:%M")}</footer>\n\n'
         '<script>\n'
         'function toggleRow(id){var r=document.getElementById(id);r.style.display=r.style.display==="none"?"table-row":"none";}\n'
@@ -5981,6 +6749,7 @@ def shared_report(token):
     if not os.path.exists(path): return 'Report file not found.', 404
     try:
         d = _parse_jtl(path)
+        _enrich_report(d, path, c)
         return _generate_report_html(d)
     except Exception as ex:
         return f'Error generating report: {ex}', 500

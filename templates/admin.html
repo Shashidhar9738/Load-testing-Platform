@@ -502,10 +502,13 @@ tbody td{padding:11px 14px;font-size:13px;font-variant-numeric:tabular-nums;}
   <div class="nav-item" onclick="showPanel('schedules');loadSchedules();loadRecurringList()">
     <span class="nav-icon">🕐</span> Schedule
   </div>
+  <div class="nav-item" onclick="showPanel('cicd');loadCiSuites()">
+    <span class="nav-icon">🚀</span> CI/CD Suites
+  </div>
   <div class="nav-item" onclick="showPanel('heatmap');loadHeatmap()">
     <span class="nav-icon">🔥</span> Heatmap
   </div>
-  <div class="nav-item" onclick="showPanel('settings');loadSettings();loadWebhookConfig()">
+  <div class="nav-item" onclick="showPanel('settings');loadSettings();loadWebhookConfig();loadApiTokens()">
     <span class="nav-icon">⚙</span> Settings
   </div>
   <div class="nav-section">Analytics</div>
@@ -964,6 +967,7 @@ tbody td{padding:11px 14px;font-size:13px;font-variant-numeric:tabular-nums;}
         <button class="btn btn-secondary" id="btn-download-pdf" style="padding:6px 14px;font-size:12px;" onclick="downloadReportPdf()">📄 PDF Report</button>
         <button class="btn btn-secondary" id="btn-download-excel" style="padding:6px 14px;font-size:12px;" onclick="downloadReportExcel()">📊 Excel Export</button>
         <button class="btn btn-secondary" id="btn-download-jtl" style="padding:6px 14px;font-size:12px;" onclick="downloadReportJtl()">⬇ Raw JTL</button>
+        <button class="btn btn-secondary" id="btn-results-tree" style="padding:6px 14px;font-size:12px;" onclick="openResultsTree()">🌳 Results Tree</button>
         <span id="regression-badge" style="display:none;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;"></span>
         <button class="btn btn-secondary" id="btn-download-bundle" style="padding:6px 14px;font-size:12px;" onclick="downloadReportBundle()">📦 ZIP Bundle</button>
         <button id="btn-fav-report" onclick="toggleFavourite(_currentRptFile,this)" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:14px;cursor:pointer;color:var(--text);">☆</button>
@@ -2192,6 +2196,31 @@ tbody td{padding:11px 14px;font-size:13px;font-variant-numeric:tabular-nums;}
       </div>
     </div>
   </div>
+
+  <div class="settings-section" style="margin-top:20px;">
+    <h3>🔑 API Tokens — CI/CD automation</h3>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
+      Bearer tokens let Jenkins or any external orchestrator call the CI/CD API without a browser login —
+      <code>GET/POST /api/ci-cd/suites</code>, <code>POST /api/ci-cd/suites/&lt;id&gt;/run</code>,
+      <code>GET /api/ci-cd/runs/&lt;id&gt;</code>. Send as header
+      <code>Authorization: Bearer &lt;token&gt;</code>. A token acts on the client it was created for.
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;">
+      <div class="form-group" style="flex:1;min-width:220px;">
+        <label>Token name</label>
+        <input type="text" id="tok-name" placeholder="e.g. Jenkins prod">
+      </div>
+      <button class="btn btn-primary" onclick="createApiToken()">➕ Generate Token</button>
+    </div>
+    <div id="tok-new" style="display:none;margin-bottom:14px;padding:12px 14px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.35);border-radius:8px;">
+      <div style="font-size:11px;font-weight:700;color:#22c55e;margin-bottom:6px;">⚠ NEW TOKEN — copy it now, it is shown only once and cannot be retrieved later</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <code id="tok-new-value" style="flex:1;font-size:12px;background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:#e2e8f0;word-break:break-all;"></code>
+        <button class="btn btn-secondary" onclick="copyNewToken()">📋 Copy</button>
+      </div>
+    </div>
+    <div id="tok-list" style="font-size:12px;color:var(--muted);overflow-x:auto;">Loading…</div>
+  </div>
 </div>
 
 <!-- ─── PRE-REQUISITES PANEL ─── -->
@@ -2364,6 +2393,49 @@ tbody td{padding:11px 14px;font-size:13px;font-variant-numeric:tabular-nums;}
 </div>
 
 <!-- ─── SCHEDULES PANEL ─── -->
+<div class="panel" id="panel-cicd">
+  <div class="sec-head">
+    <span>🚀</span><h2>CI/CD Suites</h2>
+    <span class="sec-sub">Automated test suites with release gates — runnable by Jenkins via API token</span>
+    <div class="sec-line"></div>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:12px;" onclick="loadCiSuites()">↻ Refresh</button>
+  </div>
+
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:22px;">
+    <div style="font-weight:700;color:var(--accent);margin-bottom:14px;font-size:14px;">➕ New Suite</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-group">
+        <label>Suite name</label>
+        <input type="text" id="cicd-name" placeholder="e.g. BTC Regression" style="width:100%;">
+        <div style="font-size:11px;color:var(--muted);margin:10px 0 4px;">JMX test plans (select one or more)</div>
+        <div id="cicd-jmx" style="max-height:150px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:var(--surface2);">
+          {% for jmx in jmx_files %}<label style="display:flex;gap:8px;align-items:center;font-size:12px;padding:3px 0;cursor:pointer;"><input type="checkbox" value="{{ jmx }}"> {{ jmx }}</label>{% endfor %}
+        </div>
+        <div style="margin-top:10px;display:flex;gap:10px;">
+          <div class="form-group" style="flex:1;"><label>Run duration (s)</label><input type="number" id="cicd-duration" value="60" min="10" class="env-inp"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label style="color:var(--accent2);">🚦 Release gate thresholds</label>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">A run fails the gate (and the Jenkins build) if any threshold is breached. Blank = ignore that check.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group"><label>Max error %</label><input type="number" id="gate-err" value="2" min="0" step="0.1" class="env-inp"></div>
+          <div class="form-group"><label>Max P95 regression %</label><input type="number" id="gate-reg" value="10" min="0" step="1" class="env-inp"></div>
+          <div class="form-group"><label>Max P95 (ms)</label><input type="number" id="gate-p95" placeholder="—" min="0" class="env-inp"></div>
+          <div class="form-group"><label>Min TPS</label><input type="number" id="gate-tps" placeholder="—" min="0" step="0.1" class="env-inp"></div>
+        </div>
+        <label style="display:flex;gap:8px;align-items:center;font-size:12px;margin-top:8px;cursor:pointer;">
+          <input type="checkbox" id="gate-sla"> Require SLA config to pass
+        </label>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px;">P95 regression compares against the client baseline (Reports → Set as Baseline).</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:14px;" onclick="createCiSuite()">🚀 Create Suite</button>
+  </div>
+
+  <div id="cicd-list"><div style="color:var(--muted);padding:20px;">Loading suites…</div></div>
+</div>
+
 <div class="panel" id="panel-schedules">
   <div class="sec-head">
     <span>🕐</span><h2>Scheduled Tests</h2>
@@ -5165,6 +5237,76 @@ async function previewCsv(fname){
   modal.style.display='flex';
 }
 
+// ── Results Tree — per-sample request/response browser ──────────
+let _rtState={file:'',offset:0,limit:100,status:'',label:'',q:'',total:0,samples:[]};
+let _rtTimer=null;
+function openResultsTree(){
+  const f=_currentRptFile||_currentReportFile;
+  if(!f){ showNotif('Open a report first.','err'); return; }
+  _rtState={file:f,offset:0,limit:100,status:'',label:'',q:'',total:0,samples:[]};
+  document.getElementById('rt-title').textContent='— '+f;
+  document.getElementById('rt-search').value='';
+  document.querySelectorAll('.rt-st').forEach(b=>b.classList.toggle('active',b.dataset.st===''));
+  document.getElementById('rt-detail').innerHTML='<div style="color:var(--muted);font-size:13px;">Select a sample to view its request &amp; response.</div>';
+  document.getElementById('results-tree-modal').style.display='flex';
+  _rtLoad(true);
+}
+function _rtDebounced(){ clearTimeout(_rtTimer); _rtTimer=setTimeout(()=>{ _rtState.q=document.getElementById('rt-search').value.trim(); _rtState.offset=0; _rtLoad(false); },350); }
+function _rtSetStatus(st){ _rtState.status=st; _rtState.offset=0; document.querySelectorAll('.rt-st').forEach(b=>b.classList.toggle('active',b.dataset.st===st)); _rtLoad(false); }
+function _rtReload(){ _rtState.label=document.getElementById('rt-label').value; _rtState.offset=0; _rtLoad(false); }
+function _rtPage(dir){ const no=_rtState.offset+dir*_rtState.limit; if(no<0||no>=_rtState.total) return; _rtState.offset=no; _rtLoad(false); }
+async function _rtLoad(initLabels){
+  const s=_rtState;
+  const p=new URLSearchParams({offset:s.offset,limit:s.limit,status:s.status,label:s.label,q:s.q});
+  const list=document.getElementById('rt-list');
+  list.innerHTML='<div style="padding:14px;color:var(--muted);font-size:12px;">Loading…</div>';
+  try{
+    const r=await fetch(`/api/report/${encodeURIComponent(s.file)}/samples?`+p.toString());
+    const d=await r.json();
+    if(!r.ok||d.error){ list.innerHTML=`<div style="padding:14px;color:var(--danger);font-size:12px;">${escHtml(d.error||'Failed')}</div>`; return; }
+    s.samples=d.samples||[]; s.total=d.total||0;
+    if(initLabels && d.labels){
+      const sel=document.getElementById('rt-label');
+      sel.innerHTML='<option value="">All labels</option>'+d.labels.map(l=>`<option value="${escAttr(l)}">${escHtml(l)}</option>`).join('');
+    }
+    _rtRenderList();
+  }catch(e){ list.innerHTML='<div style="padding:14px;color:var(--danger);font-size:12px;">Network error</div>'; }
+}
+function _rtRenderList(){
+  const s=_rtState, list=document.getElementById('rt-list');
+  if(!s.samples.length){ list.innerHTML='<div style="padding:14px;color:var(--muted);font-size:12px;">No samples match.</div>'; }
+  else{
+    list.innerHTML=s.samples.map((x,idx)=>`<div class="rt-item ${x.ok?'pass':'fail'}" onclick="_rtShowDetail(${idx})">
+      <span class="rt-dot" style="background:${x.ok?'var(--accent2)':'var(--danger)'};"></span>
+      <span style="flex:1;min-width:0;"><span style="font-weight:600;font-size:12px;">${escHtml(x.label)}</span>
+      <span style="color:var(--muted);font-size:10px;display:block;">${escHtml(x.thread)} · ${x.elapsed} ms</span></span>
+      <span style="font-family:monospace;font-size:11px;color:${x.ok?'var(--accent2)':'var(--danger)'};">${escHtml(x.rc)}</span>
+    </div>`).join('');
+  }
+  const from=s.total?s.offset+1:0, to=Math.min(s.offset+s.limit,s.total);
+  document.getElementById('rt-count').textContent=`${s.total.toLocaleString()} samples`;
+  document.getElementById('rt-pageinfo').textContent=`${from.toLocaleString()}–${to.toLocaleString()}`;
+}
+function _rtShowDetail(idx){
+  const x=_rtState.samples[idx]; if(!x) return;
+  document.querySelectorAll('#rt-list .rt-item').forEach((el,i)=>el.classList.toggle('sel',i===idx));
+  const clr=x.ok?'var(--accent2)':'var(--danger)';
+  const block=(t,b)=>b?`<div style="margin-bottom:6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);">${t}</div><pre style="background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;color:#e2e8f0;overflow:auto;max-height:240px;white-space:pre-wrap;word-break:break-word;margin:0 0 12px;">${escHtml(b)}</pre>`:'';
+  document.getElementById('rt-detail').innerHTML=`
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+      <span style="font-size:12px;font-weight:800;padding:2px 10px;border-radius:10px;background:${clr};color:#04121f;">${x.ok?'PASS':'FAIL'}</span>
+      <strong style="font-size:14px;">${escHtml(x.label)}</strong>
+      <span style="color:var(--muted);font-size:11px;">code ${escHtml(x.rc)} · ${x.elapsed} ms · ${escHtml(x.thread)}</span>
+    </div>
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#60a5fa;margin-bottom:6px;">📤 Request</div>
+    ${x.url?`<div style="font-size:11px;word-break:break-all;margin-bottom:8px;"><span style="color:var(--muted);">URL: </span><code style="color:#60a5fa;">${escHtml(x.url)}</code></div>`:''}
+    ${block('Request Data',x.sampler_data)||'<div style="color:var(--muted);font-size:11px;margin-bottom:12px;">No request data captured.</div>'}
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#4ade80;margin-bottom:6px;">📥 Response</div>
+    ${x.rm?`<div style="font-size:12px;margin-bottom:6px;">${escHtml(x.rm)}</div>`:''}
+    ${x.fm?`<div style="margin-bottom:8px;padding:8px 12px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:6px;"><div style="font-size:10px;font-weight:800;color:var(--danger);margin-bottom:4px;">ASSERTION FAILURE</div><div style="font-size:12px;color:#fca5a5;word-break:break-word;">${escHtml(x.fm)}</div></div>`:''}
+    ${block('Response Body',x.resp_data)||'<div style="color:var(--muted);font-size:11px;">No response body captured.</div>'}`;
+}
+
 // ── JMX Parameter Editor ────────────────────────────────────────
 let _jmxEditFile='';
 async function openJmxEditor(fname){
@@ -5887,6 +6029,206 @@ async function _csrf(){
   return _csrfTok;
 }
 
+// ── API Tokens (CI/CD) ──────────────────────────────────────────────────────
+let _newTokenVal = '';
+async function loadApiTokens(){
+  const box = document.getElementById('tok-list');
+  if(!box) return;
+  try{
+    const r = await fetch('/api/api-tokens', {credentials:'include'});
+    const d = await r.json();
+    if(!r.ok){ box.innerHTML = `<span style="color:var(--danger);">${escHtml(d.error||'Failed to load')}</span>`; return; }
+    if(!d.tokens || !d.tokens.length){ box.innerHTML = 'No API tokens yet. Generate one above for your CI/CD orchestrator.'; return; }
+    box.innerHTML = `<table style="width:100%;border-collapse:collapse;min-width:640px;">
+      <thead><tr style="border-bottom:1px solid var(--border);color:var(--muted);text-align:left;">
+        <th style="padding:6px 8px;">Name</th><th style="padding:6px 8px;">Token</th><th style="padding:6px 8px;">Client</th>
+        <th style="padding:6px 8px;">Last used</th><th style="padding:6px 8px;">Status</th><th></th></tr></thead>
+      <tbody>${d.tokens.map(t=>`<tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:6px 8px;color:var(--text);font-weight:600;">${escHtml(t.name)}</td>
+        <td style="padding:6px 8px;"><code style="font-size:11px;">${escHtml(t.token_prefix)}…</code></td>
+        <td style="padding:6px 8px;">${escHtml(t.client||'—')}</td>
+        <td style="padding:6px 8px;">${t.last_used_at?escHtml(t.last_used_at):'<span style="color:var(--muted);">never</span>'}</td>
+        <td style="padding:6px 8px;">${t.enabled?'<span style="color:#22c55e;">● active</span>':'<span style="color:var(--muted);">○ disabled</span>'}</td>
+        <td style="padding:6px 8px;text-align:right;white-space:nowrap;">
+          <button class="btn btn-secondary" style="padding:3px 9px;font-size:11px;" onclick="toggleApiToken('${t.id}',${t.enabled?0:1})">${t.enabled?'Disable':'Enable'}</button>
+          <button class="btn" style="padding:3px 9px;font-size:11px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;" onclick="revokeApiToken('${t.id}','${escAttr(t.name)}')">Revoke</button>
+        </td></tr>`).join('')}</tbody></table>`;
+  }catch(e){ box.innerHTML = '<span style="color:var(--danger);">Network error</span>'; }
+}
+async function createApiToken(){
+  const el = document.getElementById('tok-name');
+  const name = (el.value||'').trim();
+  if(!name){ showNotif('Enter a token name','err'); return; }
+  const tok = await _csrf();
+  const r = await fetch('/api/api-tokens',{method:'POST',credentials:'include',
+    headers:{'Content-Type':'application/json','X-CSRF-Token':tok},body:JSON.stringify({name})});
+  const d = await r.json();
+  if(!r.ok){ showNotif(d.error||'Failed','err'); return; }
+  _newTokenVal = d.token;
+  document.getElementById('tok-new-value').textContent = d.token;
+  document.getElementById('tok-new').style.display = 'block';
+  el.value = '';
+  showNotif('Token generated — copy it now','ok');
+  loadApiTokens();
+}
+function copyNewToken(){
+  if(!_newTokenVal) return;
+  navigator.clipboard.writeText(_newTokenVal).then(()=>showNotif('Token copied to clipboard','ok'),
+    ()=>showNotif('Copy failed — select and copy manually','err'));
+}
+async function toggleApiToken(id, enabled){
+  const tok = await _csrf();
+  const r = await fetch(`/api/api-tokens/${id}/toggle`,{method:'POST',credentials:'include',
+    headers:{'Content-Type':'application/json','X-CSRF-Token':tok},body:JSON.stringify({enabled:!!enabled})});
+  if(r.ok) loadApiTokens(); else showNotif('Failed','err');
+}
+async function revokeApiToken(id, name){
+  if(!confirm(`Revoke token "${name}"? Any CI job using it will immediately stop working.`)) return;
+  const tok = await _csrf();
+  const r = await fetch(`/api/api-tokens/${id}`,{method:'DELETE',credentials:'include',headers:{'X-CSRF-Token':tok}});
+  if(r.ok){ showNotif('Token revoked','ok'); loadApiTokens(); } else showNotif('Failed','err');
+}
+
+// ── CI/CD Suites ────────────────────────────────────────────────────────────
+async function loadCiSuites(){
+  const box=document.getElementById('cicd-list');
+  if(!box) return;
+  try{
+    const r=await fetch('/api/ci-cd/suites',{credentials:'include'});
+    const d=await r.json();
+    if(!r.ok){ box.innerHTML=`<div style="color:var(--danger);padding:16px;">${escHtml(d.error||'Failed')}</div>`; return; }
+    if(!d.suites||!d.suites.length){ box.innerHTML='<div style="color:var(--muted);padding:20px;">No suites yet — create one above.</div>'; return; }
+    box.innerHTML=d.suites.map(renderCiSuite).join('');
+  }catch(e){ box.innerHTML='<div style="color:var(--danger);padding:16px;">Network error</div>'; }
+}
+function renderCiSuite(s){
+  let jmx=[]; try{ jmx=JSON.parse(s.jmx_files); }catch(e){ jmx=(s.jmx_files||'').split(','); }
+  let gate={}; try{ gate=JSON.parse(s.gate_config||'{}'); }catch(e){}
+  const bits=[];
+  if(gate.max_error_pct!=null) bits.push(`err ≤${gate.max_error_pct}%`);
+  if(gate.max_p95_regression_pct!=null) bits.push(`P95 reg ≤${gate.max_p95_regression_pct}%`);
+  if(gate.max_p95_ms) bits.push(`P95 ≤${gate.max_p95_ms}ms`);
+  if(gate.min_tps) bits.push(`TPS ≥${gate.min_tps}`);
+  if(gate.require_sla_pass) bits.push('SLA must pass');
+  const gateTxt=bits.length?bits.join(' · '):'defaults (err ≤2%, P95 reg ≤10%)';
+  const on=s.enabled;
+  return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <span style="width:9px;height:9px;border-radius:50%;background:${on?'var(--accent2)':'var(--muted)'};flex:none;"></span>
+      <strong style="font-size:15px;">${escHtml(s.name)}</strong>
+      <span style="font-size:11px;color:var(--muted);">${jmx.length} JMX · ${on?'enabled':'disabled'}${s.last_run?' · last run '+escHtml((s.last_run||'').replace('T',' ').slice(0,16)):''}</span>
+      <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-primary" style="padding:5px 12px;font-size:12px;" onclick="runCiSuite('${s.id}')">▶ Run</button>
+        <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px;" onclick="toggleCiSuite('${s.id}',${on?0:1})">${on?'Disable':'Enable'}</button>
+        <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px;" onclick="loadSuiteRuns('${s.id}')">History</button>
+        <button class="btn" style="padding:5px 10px;font-size:12px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;" onclick="deleteCiSuite('${s.id}','${escAttr(s.name)}')">Delete</button>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;font-family:monospace;">${jmx.map(escHtml).join(', ')}</div>
+    <div style="font-size:11px;margin-top:6px;"><span style="color:var(--accent2);">🚦 Gate:</span> <span style="color:var(--muted);">${escHtml(gateTxt)}</span></div>
+    <div id="run-${s.id}" style="margin-top:10px;"></div>
+    <div id="hist-${s.id}"></div>
+  </div>`;
+}
+async function createCiSuite(){
+  const name=document.getElementById('cicd-name').value.trim();
+  const jmx=Array.from(document.querySelectorAll('#cicd-jmx input:checked')).map(c=>c.value);
+  if(!name){ showNotif('Enter a suite name','err'); return; }
+  if(!jmx.length){ showNotif('Select at least one JMX','err'); return; }
+  const gate={};
+  const gv=(id)=>document.getElementById(id).value;
+  if(gv('gate-err')!=='') gate.max_error_pct=parseFloat(gv('gate-err'));
+  if(gv('gate-reg')!=='') gate.max_p95_regression_pct=parseFloat(gv('gate-reg'));
+  if(gv('gate-p95')!=='') gate.max_p95_ms=parseFloat(gv('gate-p95'));
+  if(gv('gate-tps')!=='') gate.min_tps=parseFloat(gv('gate-tps'));
+  gate.require_sla_pass=document.getElementById('gate-sla').checked;
+  const tok=await _csrf();
+  const r=await fetch('/api/ci-cd/suites',{method:'POST',credentials:'include',
+    headers:{'Content-Type':'application/json','X-CSRF-Token':tok},
+    body:JSON.stringify({name,jmx_files:jmx,gate})});
+  const d=await r.json();
+  if(!r.ok){ showNotif(d.error||'Failed','err'); return; }
+  showNotif('Suite created','ok');
+  document.getElementById('cicd-name').value='';
+  document.querySelectorAll('#cicd-jmx input:checked').forEach(c=>c.checked=false);
+  loadCiSuites();
+}
+async function runCiSuite(id){
+  const dur=parseInt(document.getElementById('cicd-duration').value||'60');
+  const box=document.getElementById('run-'+id);
+  box.innerHTML='<span style="color:var(--muted);font-size:12px;">⏳ Starting run…</span>';
+  const tok=await _csrf();
+  const r=await fetch(`/api/ci-cd/suites/${id}/run`,{method:'POST',credentials:'include',
+    headers:{'Content-Type':'application/json','X-CSRF-Token':tok},body:JSON.stringify({duration:dur})});
+  const d=await r.json();
+  if(!r.ok){ box.innerHTML=`<span style="color:var(--danger);font-size:12px;">${escHtml(d.error||'Failed')}</span>`; return; }
+  pollCiRun(d.run_id,box);
+}
+function pollCiRun(runId,box){
+  box.innerHTML='<span style="color:var(--muted);font-size:12px;">⏳ Running… (run '+escHtml(runId)+')</span>';
+  let tries=0;
+  const t=setInterval(async()=>{
+    tries++;
+    try{
+      const r=await fetch(`/api/ci-cd/runs/${runId}`,{credentials:'include'});
+      const d=await r.json();
+      if(d.done){
+        clearInterval(t);
+        const gate=d.gate, run=d.run||{};
+        const col=gate==='pass'?'var(--accent2)':'var(--danger)';
+        const badge=gate==='pass'?'✅ GATE PASSED':'❌ GATE FAILED';
+        let html=`<div style="border:1px solid ${col};border-radius:8px;padding:10px 12px;background:${gate==='pass'?'rgba(34,197,94,.06)':'rgba(239,68,68,.06)'};">
+          <div style="font-weight:800;color:${col};font-size:13px;">${badge} <span style="color:var(--muted);font-weight:400;">· status ${escHtml(run.status||'')}</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">${(run.total_requests||0).toLocaleString()} reqs · ${run.error_count||0} errors · P95 ${Math.round(run.p95_rt_ms||0)}ms · ${run.duration_s||0}s</div>`;
+        if(run.gate_reasons&&run.gate_reasons.length){
+          html+='<ul style="margin:6px 0 0;padding-left:18px;color:#fca5a5;font-size:11px;">'+run.gate_reasons.map(x=>`<li>${escHtml(x)}</li>`).join('')+'</ul>';
+        }
+        if(d.report){ html+=`<a href="${d.report}" target="_blank" style="font-size:11px;color:var(--accent);">📄 View report</a>`; }
+        html+='</div>';
+        box.innerHTML=html;
+      }
+    }catch(e){}
+    if(tries>900) clearInterval(t);
+  },2000);
+}
+async function toggleCiSuite(id,enabled){
+  const tok=await _csrf();
+  const r=await fetch(`/api/ci-cd/suites/${id}/toggle`,{method:'POST',credentials:'include',
+    headers:{'Content-Type':'application/json','X-CSRF-Token':tok},body:JSON.stringify({enabled:!!enabled})});
+  if(r.ok) loadCiSuites(); else showNotif('Failed','err');
+}
+async function deleteCiSuite(id,name){
+  if(!confirm(`Delete suite "${name}" and its run history?`)) return;
+  const tok=await _csrf();
+  const r=await fetch(`/api/ci-cd/suites/${id}`,{method:'DELETE',credentials:'include',headers:{'X-CSRF-Token':tok}});
+  if(r.ok){ showNotif('Suite deleted','ok'); loadCiSuites(); } else showNotif('Failed','err');
+}
+async function loadSuiteRuns(id){
+  const box=document.getElementById('hist-'+id);
+  if(box.innerHTML){ box.innerHTML=''; return; }
+  box.innerHTML='<div style="color:var(--muted);font-size:12px;margin-top:8px;">Loading history…</div>';
+  try{
+    const r=await fetch(`/api/ci-cd/suites/${id}/runs`,{credentials:'include'});
+    const d=await r.json();
+    if(!d.runs||!d.runs.length){ box.innerHTML='<div style="color:var(--muted);font-size:12px;margin-top:8px;">No runs yet.</div>'; return; }
+    box.innerHTML=`<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:520px;">
+        <thead><tr style="color:var(--muted);text-align:left;"><th style="padding:4px 6px;">Started</th><th>Status</th><th>Gate</th><th>Reqs</th><th>Err</th><th>P95</th><th></th></tr></thead>
+        <tbody>${d.runs.map(rn=>{
+          const gc=rn.gate_status==='pass'?'var(--accent2)':rn.gate_status==='fail'?'var(--danger)':'var(--muted)';
+          return `<tr style="border-top:1px solid var(--border);">
+            <td style="padding:4px 6px;">${escHtml((rn.start_time||'').replace('T',' ').slice(0,16))}</td>
+            <td>${escHtml(rn.status||'')}</td>
+            <td style="color:${gc};font-weight:700;">${rn.gate_status?rn.gate_status.toUpperCase():'—'}</td>
+            <td>${(rn.total_requests||0).toLocaleString()}</td>
+            <td>${rn.error_count||0}</td>
+            <td>${Math.round(rn.p95_rt_ms||0)}ms</td>
+            <td>${rn.report_path?`<a href="/api/report/${encodeURIComponent(rn.report_path)}/html" target="_blank" style="color:var(--accent);">report</a>`:''}</td>
+          </tr>`;
+        }).join('')}</tbody></table></div>`;
+  }catch(e){ box.innerHTML='<div style="color:var(--danger);font-size:12px;">Failed to load history</div>'; }
+}
+
 async function saveClient(){
   const code  = document.getElementById('cl-code').value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g,'');
   const name  = document.getElementById('cl-name').value.trim();
@@ -6253,6 +6595,56 @@ async function loadHeatmap(){
     <div style="overflow:auto;padding:16px;flex:1;" id="csv-modal-body"></div>
   </div>
 </div>
+
+<!-- ─── RESULTS TREE MODAL (per-sample request/response, like JMeter View Results Tree) ─── -->
+<div id="results-tree-modal" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.78);
+  backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:#0d1724;border:1px solid var(--border);border-radius:14px;width:95%;max-width:1200px;
+    height:86vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);gap:12px;">
+      <h3 style="margin:0;color:var(--accent);font-size:15px;">🌳 Results Tree
+        <span id="rt-title" style="color:var(--muted);font-weight:400;font-size:12px;"></span></h3>
+      <button onclick="document.getElementById('results-tree-modal').style.display='none'"
+        style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;">✕</button>
+    </div>
+    <div style="padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border);">
+      <input id="rt-search" placeholder="search label / code / response…" oninput="_rtDebounced()"
+        style="flex:1;min-width:200px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;">
+      <select id="rt-label" onchange="_rtReload()"
+        style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;">
+        <option value="">All labels</option></select>
+      <div style="display:flex;gap:0;">
+        <button class="rt-st active" data-st="" onclick="_rtSetStatus('')">All</button>
+        <button class="rt-st" data-st="pass" onclick="_rtSetStatus('pass')">Pass</button>
+        <button class="rt-st" data-st="fail" onclick="_rtSetStatus('fail')">Fail</button>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;overflow:hidden;">
+      <div id="rt-list" style="width:42%;min-width:280px;overflow:auto;border-right:1px solid var(--border);"></div>
+      <div id="rt-detail" style="flex:1;overflow:auto;padding:16px;">
+        <div style="color:var(--muted);font-size:13px;">Select a sample to view its request &amp; response.</div>
+      </div>
+    </div>
+    <div style="padding:8px 16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);font-size:12px;color:var(--muted);">
+      <span id="rt-count"></span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="btn btn-secondary" style="padding:4px 10px;font-size:12px;" onclick="_rtPage(-1)">‹ Prev</button>
+        <span id="rt-pageinfo"></span>
+        <button class="btn btn-secondary" style="padding:4px 10px;font-size:12px;" onclick="_rtPage(1)">Next ›</button>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  .rt-st{background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:12px;padding:5px 12px;cursor:pointer;}
+  .rt-st:first-child{border-radius:6px 0 0 6px;} .rt-st:last-child{border-radius:0 6px 6px 0;}
+  .rt-st.active{background:var(--accent);color:#04121f;font-weight:700;}
+  .rt-item{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;display:flex;gap:8px;align-items:center;border-left:3px solid transparent;}
+  .rt-item:hover{background:rgba(255,255,255,.03);}
+  .rt-item.sel{background:rgba(0,212,255,.08);border-left-color:var(--accent);}
+  .rt-item.pass{border-left-color:var(--accent2);} .rt-item.fail{border-left-color:var(--danger);}
+  .rt-dot{width:8px;height:8px;border-radius:50%;flex:none;}
+</style>
 
 <!-- ─── JMX EDIT MODAL ─── -->
 <div id="jmx-edit-modal" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.78);
@@ -8540,7 +8932,7 @@ async function refreshReqStream(){
       const clr = ok ? 'var(--accent2)' : 'var(--danger)';
       const rowBg = ok ? '' : 'background:rgba(239,68,68,.04);';
       const shortThread = (req.thread||'').split(/[-\s]/g).slice(-2).join('-').substring(0,28);
-      const hasDetail = req.url || req.fm || req.resp_data;
+      const hasDetail = req.url || req.fm || req.resp_data || req.sampler_data;
       return `<tr style="border-bottom:1px solid var(--border);${rowBg}cursor:pointer;" onclick="_showReqDetail(${ri})" title="Click to see full request/response detail">
         <td style="padding:5px 8px;color:var(--muted);font-size:11px;white-space:nowrap;">${ts}</td>
         <td style="padding:5px 8px;font-size:11px;" title="${escAttr(req.thread)}">${escHtml(shortThread)}</td>
@@ -8607,6 +8999,10 @@ function _showReqDetail(ri){
           <span style="color:var(--muted);">Thread:</span><code style="color:var(--accent);font-size:11px;">${escHtml(req.thread)}</code>
         </div>
         ${req.url?`<div style="margin-top:6px;word-break:break-all;"><span style="color:var(--muted);">URL: </span><code style="color:#60a5fa;font-size:11px;">${escHtml(req.url)}</code></div>`:'<div style="color:var(--muted);font-size:11px;margin-top:4px;">URL not captured — will appear after next test run</div>'}
+        ${req.sampler_data?`<div style="margin-top:8px;">
+          <div style="font-size:10px;font-weight:800;color:var(--muted);margin-bottom:4px;">REQUEST DATA</div>
+          <pre style="background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;color:#e2e8f0;overflow-x:auto;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;">${escHtml(req.sampler_data)}</pre>
+        </div>`:''}
       </div>
     </div>
 
@@ -8623,9 +9019,9 @@ function _showReqDetail(ri){
           <div style="font-size:12px;color:#fca5a5;word-break:break-word;">${escHtml(req.fm)}</div>
         </div>`:''}
         ${req.resp_data?`<div style="margin-top:8px;">
-          <div style="font-size:10px;font-weight:800;color:var(--muted);margin-bottom:4px;">RESPONSE BODY (captured on error)</div>
+          <div style="font-size:10px;font-weight:800;color:var(--muted);margin-bottom:4px;">RESPONSE BODY</div>
           <pre style="background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;color:#e2e8f0;overflow-x:auto;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;">${escHtml(req.resp_data)}</pre>
-        </div>`:`<div style="margin-top:6px;font-size:11px;color:var(--muted);">${ok?'Response body not saved for successful requests.':'Response body will appear here for failed requests — enabled automatically.'}</div>`}
+        </div>`:`<div style="margin-top:6px;font-size:11px;color:var(--muted);">Response body not captured — will appear after the next test run.</div>`}
       </div>
     </div>`;
 
