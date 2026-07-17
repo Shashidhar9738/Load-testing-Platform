@@ -1,7 +1,0 @@
-{
-  "p90_ms": 3000,
-  "p95_ms": 5000,
-  "error_pct": 1,
-  "min_tps": 0,
-  "per_label": {}
-}
