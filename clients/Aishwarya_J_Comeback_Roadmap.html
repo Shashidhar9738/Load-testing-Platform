@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aishwarya J — Automation Learning & Job Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAFBFC;--surface:#FFF;--s2:#F4F6F9;--s3:#EDF0F5;
+  --border:#E2E6ED;--text:#1A1D26;--t2:#4A5068;--t3:#8891A5;
+  --blue:#2563EB;--blue-bg:#EFF6FF;--blue-b:#BFDBFE;
+  --green:#059669;--green-bg:#ECFDF5;--green-b:#A7F3D0;
+  --purple:#7C3AED;--purple-bg:#F5F3FF;--purple-b:#C4B5FD;
+  --orange:#EA580C;--orange-bg:#FFF7ED;--orange-b:#FED7AA;
+  --red:#DC2626;--red-bg:#FEF2F2;--red-b:#FECACA;
+  --cyan:#0891B2;--cyan-bg:#ECFEFF;
+  --r:10px;--sh:0 1px 3px rgba(0,0,0,0.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.65}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+.shell{max-width:1080px;margin:0 auto;padding:20px 20px 80px}
+
+/* Hero */
+.hero{text-align:center;padding:40px 0 24px}
+.hero h1{font-size:1.8rem;font-weight:800;letter-spacing:-.5px}
+.hero h1 span{color:var(--blue)}
+.hero p{color:var(--t2);margin-top:4px;font-size:.92rem}
+
+/* Big Deadline Banner */
+.deadline-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.dl-card{text-align:center;padding:20px;border-radius:var(--r);border:1px solid}
+.dl-card .dl-date{font-size:1.4rem;font-weight:800}
+.dl-card .dl-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+.dl-card .dl-days{font-size:.82rem;margin-top:6px}
+.dl-1{background:var(--cyan-bg);border-color:var(--blue-b)}.dl-1 .dl-date{color:var(--cyan)}.dl-1 .dl-label{color:var(--cyan)}
+.dl-2{background:var(--red-bg);border-color:var(--red-b)}.dl-2 .dl-date{color:var(--red)}.dl-2 .dl-label{color:var(--red)}
+.dl-3{background:var(--green-bg);border-color:var(--green-b)}.dl-3 .dl-date{color:var(--green)}.dl-3 .dl-label{color:var(--green)}
+
+/* Reality Box */
+.reality{background:var(--orange-bg);border:1px solid var(--orange-b);border-radius:var(--r);padding:20px;margin-bottom:24px;font-size:.88rem;color:var(--t2)}
+.reality b{color:var(--orange)}
+
+/* Nav */
+.nav{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px;margin-bottom:24px;overflow-x:auto;box-shadow:var(--sh)}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex-shrink:0;padding:10px 16px;border:none;background:none;font-family:inherit;font-size:.8rem;font-weight:600;color:var(--t3);cursor:pointer;border-radius:8px;transition:all .2s;white-space:nowrap}
+.nav-btn:hover{color:var(--t2);background:var(--s2)}
+.nav-btn.active{color:var(--blue);background:var(--blue-bg)}
+
+/* Panel */
+.panel{display:none;animation:fadeUp .3s ease}.panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Section */
+.sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:16px;box-shadow:var(--sh)}
+.sec h2{font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.sec .desc{font-size:.85rem;color:var(--t2);margin-bottom:16px}
+
+/* Week Block */
+.wk{margin-bottom:20px}
+.wk-title{font-size:.95rem;font-weight:700;padding:14px 18px;border-radius:var(--r) var(--r) 0 0;display:flex;align-items:center;gap:10px;justify-content:space-between}
+.wk-body{border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r)}
+
+/* Day Block */
+.day{border-bottom:1px solid var(--border)}
+.day:last-child{border-bottom:none}
+.day-hdr{display:flex;align-items:center;gap:10px;padding:12px 18px;cursor:pointer;user-select:none;transition:background .15s}
+.day-hdr:hover{background:var(--s2)}
+.day-hdr .d-name{font-weight:700;font-size:.85rem;min-width:36px}
+.day-hdr .d-date{font-size:.78rem;color:var(--t3);min-width:50px}
+.day-hdr .d-focus{font-size:.78rem;color:var(--t2);flex:1}
+.day-hdr .d-hrs{font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--s2);color:var(--t3)}
+.day-hdr .d-arrow{font-size:.65rem;color:var(--t3);transition:transform .2s}
+.day.open .d-arrow{transform:rotate(180deg)}
+.day-body{display:none;padding:8px 18px 16px}
+.day.open .day-body{display:block}
+
+/* Task */
+.tk{display:flex;align-items:flex-start;gap:10px;padding:7px 0}
+.tk-time{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--t3);min-width:58px;padding-top:2px}
+.tk-text{font-size:.84rem;color:var(--t2);flex:1}
+.tk-text b{color:var(--text);font-weight:600}
+.tk-cat{font-size:.6rem;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:3px;flex-shrink:0}
+.c-learn{background:var(--blue-bg);color:var(--blue)}
+.c-code{background:var(--purple-bg);color:var(--purple)}
+.c-job{background:var(--green-bg);color:var(--green)}
+.c-exit{background:var(--orange-bg);color:var(--orange)}
+
+/* Separator in day */
+.tk-sep{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);padding:8px 0 4px;margin-top:4px;border-top:1px dashed var(--border)}
+
+/* Topic Box */
+.topic{background:var(--s2);border-radius:8px;padding:14px 16px;margin:6px 0 10px}
+.topic p{font-size:.82rem;color:var(--t2)}
+.topic ul{font-size:.82rem;color:var(--t2);padding-left:18px;margin-top:6px}
+.topic ul li{margin-bottom:3px}
+
+/* Tip */
+.tip{background:var(--blue-bg);border:1px solid var(--blue-b);border-radius:var(--r);padding:14px 18px;font-size:.84rem;color:var(--t2);margin-top:14px}
+.tip b{color:var(--blue)}
+
+/* Warn */
+.warn{background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--r);padding:14px 18px;font-size:.84rem;color:var(--t2);margin-bottom:14px}
+.warn b{color:var(--red)}
+
+/* Resource */
+.res{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--s2);border-radius:6px;font-size:.82rem;margin:4px 0;transition:all .15s;border:1px solid transparent}
+.res:hover{border-color:var(--blue-b);background:var(--blue-bg);text-decoration:none}
+.res-type{font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--t3);margin-left:auto}
+
+/* Progress tracker */
+.prog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:14px}
+.prog-item{padding:14px;background:var(--s2);border-radius:8px;text-align:center}
+.prog-item .pi-label{font-size:.78rem;font-weight:600;color:var(--t2);margin-bottom:6px}
+.prog-ring{width:60px;height:60px;border-radius:50%;border:5px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:1rem;font-weight:800;color:var(--blue)}
+
+/* Checklist */
+.cl{margin-top:10px}
+.cli{display:flex;align-items:flex-start;gap:10px;padding:6px 0;cursor:pointer;user-select:none}
+.cl-box{width:18px;height:18px;border:2px solid var(--border);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.cli.done .cl-box{background:var(--green);border-color:var(--green)}
+.cli.done .cl-box::after{content:'✓';color:#fff;font-size:.65rem;font-weight:800}
+.cli.done .cl-t{text-decoration:line-through;color:var(--t3)}
+.cl-t{font-size:.84rem;color:var(--t2)}
+
+/* Badge */
+.badge{font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-block}
+.b-crit{background:var(--red-bg);color:var(--red)}
+.b-imp{background:var(--orange-bg);color:var(--orange)}
+.b-nice{background:var(--blue-bg);color:var(--blue)}
+
+/* Interview Q */
+.q details{margin-bottom:10px}
+.q summary{font-size:.86rem;font-weight:600;cursor:pointer;padding:10px 14px;background:var(--s2);border-radius:8px;list-style:none}
+.q summary::-webkit-details-marker{display:none}
+.q summary::before{content:'▸ ';color:var(--t3)}
+.q details[open] summary::before{content:'▾ '}
+.q .ans{padding:10px 14px;font-size:.83rem;color:var(--t2);line-height:1.7;border-left:3px solid var(--blue-b);margin:6px 0 0 14px}
+.q .ans code{font-family:'JetBrains Mono',monospace;font-size:.76rem;background:var(--s2);padding:1px 5px;border-radius:3px}
+
+@media(max-width:640px){
+  .hero h1{font-size:1.35rem}
+  .deadline-bar{grid-template-columns:1fr}
+  .day-hdr .d-focus{display:none}
+  .prog-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="hero">
+  <h1>Aishwarya's <span>Comeback Roadmap</span></h1>
+  <p>Re-learning Automation from Scratch · Course-Aligned · Jul 17 – Sep 8, 2025</p>
+</div>
+
+<div class="deadline-bar">
+  <div class="dl-card dl-1">
+    <div class="dl-date">Jul 17</div>
+    <div class="dl-label">📚 Study Starts Today</div>
+    <div class="dl-days">Course enrollment + learning begins NOW</div>
+  </div>
+  <div class="dl-card dl-2">
+    <div class="dl-date">Aug 15</div>
+    <div class="dl-label">⚠️ Automation Complete</div>
+    <div class="dl-days" id="autoLeft">-- days to finish learning</div>
+  </div>
+  <div class="dl-card dl-3">
+    <div class="dl-date">Aug 31</div>
+    <div class="dl-label">🎯 Job Secured</div>
+    <div class="dl-days" id="jobLeft">-- days to get offer</div>
+  </div>
+</div>
+
+<div class="reality">
+  <b>📌 Aishu's situation:</b> Resigned on Wed, Jul 8. Last working day Sep 8. She learned automation 5 years ago but hasn't practiced since — effectively starting from scratch. She's enrolled in an automation course now. <b>Target: complete automation by Aug 15 AND start applying from Week 3 itself</b> — because hiring takes 3–6 weeks, and early interviews are the best practice. First few interviews will go rough — that's expected and okay. They're free mock interviews.
+</div>
+
+<div class="nav" id="mainNav">
+  <button class="nav-btn active" data-tab="plan">The Plan</button>
+  <button class="nav-btn" data-tab="w1">W1: Java Core</button>
+  <button class="nav-btn" data-tab="w2">W2: Selenium</button>
+  <button class="nav-btn" data-tab="w3">W3: Framework</button>
+  <button class="nav-btn" data-tab="w4">W4: API + SQL</button>
+  <button class="nav-btn" data-tab="w5">W5: CI/CD & Project</button>
+  <button class="nav-btn" data-tab="w6">W6–7: Interviews</button>
+  <button class="nav-btn" data-tab="interview">Interview Prep</button>
+  <button class="nav-btn" data-tab="exit">Exit Checklist</button>
+</div>
+
+<!-- ============ THE PLAN ============ -->
+<div class="panel active" id="plan">
+  <div class="sec">
+    <h2>🗺️ The Honest Game Plan</h2>
+    <div class="desc">5 weeks to learn, 2 weeks to land the job. Here's how it breaks down.</div>
+
+    <div class="warn"><b>Hard truth:</b> You have ~29 days till Aug 15 and you're re-learning from scratch while working full time. This plan focuses ONLY on what SDET interviews actually ask — nothing extra. Follow the course + do daily practice. <b>NEW: Start applying from Week 3 itself.</b> Early interviews will be rough — treat them as free mock interviews that teach you what's really asked.</div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px">
+      <div onclick="switchTab('w1')" style="padding:16px;background:var(--blue-bg);border-radius:var(--r);border:1px solid var(--blue-b);text-align:center;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+        <p style="font-size:.68rem;font-weight:700;color:var(--blue);text-transform:uppercase">Week 1</p>
+        <p style="font-size:.82rem;font-weight:700;margin-top:4px">Java Basics</p>
+        <p style="font-size:.75rem;color:var(--t2)">Jul 17 – Jul 22</p>
+        <p style="font-size:.72rem;color:var(--t3);margin-top:4px">OOPs, Collections, Strings</p>
+        <p style="font-size:.68rem;font-weight:600;color:var(--blue);margin-top:4px">📚 Learn only</p>
+      </div>
+      <div onclick="switchTab('w2')" style="padding:16px;background:var(--blue-bg);border-radius:var(--r);border:1px solid var(--blue-b);text-align:center;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+        <p style="font-size:.68rem;font-weight:700;color:var(--blue);text-transform:uppercase">Week 2</p>
+        <p style="font-size:.82rem;font-weight:700;margin-top:4px">Selenium</p>
+        <p style="font-size:.75rem;color:var(--t2)">Jul 23 – Jul 29</p>
+        <p style="font-size:.72rem;color:var(--t3);margin-top:4px">Locators, Actions, Waits, Windows</p>
+        <p style="font-size:.68rem;font-weight:600;color:var(--blue);margin-top:4px">📚 Learn + setup profiles</p>
+      </div>
+      <div onclick="switchTab('w3')" style="padding:16px;background:var(--green-bg);border-radius:var(--r);border:1px solid var(--green-b);text-align:center;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+        <p style="font-size:.68rem;font-weight:700;color:var(--green);text-transform:uppercase">Week 3 🟢</p>
+        <p style="font-size:.82rem;font-weight:700;margin-top:4px">Framework</p>
+        <p style="font-size:.75rem;color:var(--t2)">Jul 30 – Aug 5</p>
+        <p style="font-size:.72rem;color:var(--t3);margin-top:4px">TestNG, POM, Data-Driven, Reports</p>
+        <p style="font-size:.68rem;font-weight:600;color:var(--green);margin-top:4px">📚 Learn + 🚀 START APPLYING</p>
+      </div>
+      <div onclick="switchTab('w4')" style="padding:16px;background:var(--green-bg);border-radius:var(--r);border:1px solid var(--green-b);text-align:center;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+        <p style="font-size:.68rem;font-weight:700;color:var(--green);text-transform:uppercase">Week 4</p>
+        <p style="font-size:.82rem;font-weight:700;margin-top:4px">API + SQL</p>
+        <p style="font-size:.75rem;color:var(--t2)">Aug 6 – Aug 13</p>
+        <p style="font-size:.72rem;color:var(--t3);margin-top:4px">Rest Assured, Postman, SQL revision</p>
+        <p style="font-size:.68rem;font-weight:600;color:var(--green);margin-top:4px">📚 Learn + 🎯 First interviews</p>
+      </div>
+      <div onclick="switchTab('w5')" style="padding:16px;background:var(--purple-bg);border-radius:var(--r);border:1px solid var(--purple-b);text-align:center;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+        <p style="font-size:.68rem;font-weight:700;color:var(--purple);text-transform:uppercase">Week 5</p>
+        <p style="font-size:.82rem;font-weight:700;margin-top:4px">CI/CD + Project</p>
+        <p style="font-size:.75rem;color:var(--t2)">Aug 14 – Aug 15</p>
+        <p style="font-size:.72rem;color:var(--t3);margin-top:4px">Git, Jenkins, GitHub portfolio</p>
+        <p style="font-size:.68rem;font-weight:600;color:var(--purple);margin-top:4px">📚 Finish + 🎯 Active interviews</p>
+      </div>
+      <div onclick="switchTab('w6')" style="padding:16px;background:var(--orange-bg);border-radius:var(--r);border:1px solid var(--orange-b);text-align:center;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+        <p style="font-size:.68rem;font-weight:700;color:var(--orange);text-transform:uppercase">Week 6–9</p>
+        <p style="font-size:.82rem;font-weight:700;margin-top:4px">Full Job Hunt</p>
+        <p style="font-size:.75rem;color:var(--t2)">Aug 16 – Sep 8</p>
+        <p style="font-size:.72rem;color:var(--t3);margin-top:4px">Interviews, negotiate, accept, exit</p>
+        <p style="font-size:.68rem;font-weight:600;color:var(--orange);margin-top:4px">🔥 100% interviews + exit</p>
+      </div>
+    </div>
+
+    <div style="background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--r);padding:16px;margin-bottom:14px">
+      <p style="font-size:.88rem;font-weight:700;color:var(--green);margin-bottom:8px">🚀 Why Start Applying in Week 3 (not after Aug 15)?</p>
+      <p style="font-size:.84rem;color:var(--t2)"><b>1. Hiring takes time.</b> Apply → screening → 2–3 rounds → offer takes 3–6 weeks. If you apply Aug 16, offers come in late September — after your LWD.</p>
+      <p style="font-size:.84rem;color:var(--t2);margin-top:4px"><b>2. First interviews = free mock interviews.</b> You'll learn what's actually asked, where you're weak, and come back stronger for the next one. Expect the first 3–4 to go rough — that's normal.</p>
+      <p style="font-size:.84rem;color:var(--t2);margin-top:4px"><b>3. Your resume is already strong.</b> 6 years at Allstate + M.Tech + real project stories. You'll get calls. The automation course fills the gap, but don't wait for perfection to start the process.</p>
+      <p style="font-size:.84rem;color:var(--t2);margin-top:4px"><b>4. Target easy companies first.</b> Apply to service companies (Cognizant, LTIMindtree, Mphasis) in Week 3–4. Save product companies for Week 5+ when you're sharper.</p>
+    </div>
+
+    <div class="tip"><b>Daily routine:</b> 🌅 6:00–9:00 AM → Course videos + notes (3 hrs, fresh mind, power slot). ☕ 9:30 AM–12:00 PM → Hands-on coding practice (2.5 hrs). 🍛 12:00–1:00 PM → Lunch + get ready for work. 💼 1:00–9:00 PM → Allstate work. 🌙 9:30–10:00 PM → Job applications + light review (30 min). <b>Total: ~5.5 hrs/day weekdays, ~7.5 hrs/day weekends = ~42–45 hrs/week.</b></div>
+  </div>
+
+  <div class="sec">
+    <h2>📊 What She Must Know by Aug 15 (Interview-Ready Checklist)</h2>
+    <div class="desc">If she can confidently explain and demo all of these, she'll clear 80% of SDET interviews.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div>
+        <p style="font-size:.8rem;font-weight:700;color:var(--red);margin-bottom:8px">🔴 NON-NEGOTIABLE (asked in every interview)</p>
+        <div class="cl">
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Java OOPs — explain & write code using inheritance, polymorphism, abstraction, interfaces</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Java Collections — HashMap, ArrayList, HashSet — when to use which</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">String manipulation — reverse, palindrome, anagram, count characters</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Selenium — all 8 locators, XPath axes, CSS selectors</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Selenium — explicit/implicit/fluent waits, when to use each</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Selenium — handle dropdowns, alerts, iframes, multiple windows, file upload</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">TestNG — annotations, @DataProvider, assertions, parallel execution</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Page Object Model — explain the pattern, build one from scratch</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Framework — explain YOUR framework architecture (tech stack, design, reporting)</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">SQL — JOINs, GROUP BY, subqueries, write queries live</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">REST API basics — GET/POST/PUT/DELETE, status codes, JSON</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Rest Assured — write a basic CRUD test, validate response</span></div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:.8rem;font-weight:700;color:var(--orange);margin-bottom:8px">🟠 IMPORTANT (asked in 60% of interviews)</p>
+        <div class="cl">
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Maven — POM.xml structure, dependencies, build lifecycle</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Git — clone, branch, commit, push, pull, merge, resolve conflict</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">CI/CD — what it is, how Jenkins/GitHub Actions runs your tests</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">ExtentReports / Allure — generate a test report</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Data-driven testing — read test data from Excel or JSON</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Exception handling in Java — try/catch, custom exceptions</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">SQL — window functions (ROW_NUMBER, RANK), CTEs</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">API — auth types (Basic, Bearer, OAuth2 concept)</span></div>
+        </div>
+        <p style="font-size:.8rem;font-weight:700;color:var(--blue);margin:16px 0 8px">🔵 GOOD TO MENTION (shows awareness)</p>
+        <div class="cl">
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Cucumber BDD — what it is, feature file structure</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Docker — basic concept, why containers for testing</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Selenium Grid — concept of hub/node, parallel remote execution</span></div>
+          <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Playwright/Cypress — know they exist, basic comparison with Selenium</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ WEEK 1: JAVA ============ -->
+<div class="panel" id="w1">
+  <div class="sec">
+    <h2>☕ Week 1 — Java from Scratch (Jul 17 – Jul 22)</h2>
+    <div class="desc">Everything starts with Java. If Java is shaky, Selenium & Rest Assured will be impossible. This week is the foundation.</div>
+    <div class="warn"><b>Rule:</b> Don't just watch videos. After every topic, close the video and write the code yourself from memory. If you can't, watch again. Repeat until you can type it without looking.</div>
+  </div>
+
+  <div class="wk">
+    <div class="wk-title" style="background:var(--blue-bg);border:1px solid var(--blue-b);color:var(--blue)">
+      <span>📘 Week 1 Daily Breakdown</span>
+      <span style="font-size:.75rem;font-weight:500;color:var(--t2)">Jul 17 (Thu) – Jul 22 (Tue)</span>
+    </div>
+    <div class="wk-body" id="w1Days"></div>
+  </div>
+</div>
+
+<!-- ============ WEEK 2: SELENIUM ============ -->
+<div class="panel" id="w2">
+  <div class="sec">
+    <h2>🌐 Week 2 — Selenium WebDriver (Jul 16 – Jul 22)</h2>
+    <div class="desc">Now you have Java basics. Time to automate browsers. This is the core of what SDET means.</div>
+    <div class="warn"><b>Practice site:</b> Use <a href="https://www.saucedemo.com/" target="_blank">saucedemo.com</a>, <a href="https://demoqa.com/" target="_blank">demoqa.com</a>, or <a href="https://the-internet.herokuapp.com/" target="_blank">the-internet.herokuapp.com</a> for all your practice. Don't waste time searching for other sites.</div>
+  </div>
+  <div class="wk">
+    <div class="wk-title" style="background:var(--blue-bg);border:1px solid var(--blue-b);color:var(--blue)">
+      <span>📘 Week 2 Daily Breakdown</span>
+      <span style="font-size:.75rem;font-weight:500;color:var(--t2)">Jul 16 (Wed) – Jul 22 (Tue)</span>
+    </div>
+    <div class="wk-body" id="w2Days"></div>
+  </div>
+</div>
+
+<!-- ============ WEEK 3: FRAMEWORK ============ -->
+<div class="panel" id="w3">
+  <div class="sec">
+    <h2>🏗️ Week 3 — Framework Building (Jul 23 – Jul 29)</h2>
+    <div class="desc">This is THE most important interview topic. "Explain your framework" is asked in 90% of SDET interviews. By the end of this week, you must have a working framework you can walk through.</div>
+    <div class="warn"><b>This is where interviews are won or lost.</b> The interviewer doesn't care if you memorized definitions. They want you to open your laptop, show your framework, and explain why you made each design choice. Build it. Own it. Explain it.</div>
+  </div>
+  <div class="wk">
+    <div class="wk-title" style="background:var(--purple-bg);border:1px solid var(--purple-b);color:var(--purple)">
+      <span>📕 Week 3 Daily Breakdown</span>
+      <span style="font-size:.75rem;font-weight:500;color:var(--t2)">Jul 23 (Wed) – Jul 29 (Tue)</span>
+    </div>
+    <div class="wk-body" id="w3Days"></div>
+  </div>
+</div>
+
+<!-- ============ WEEK 4: API + SQL ============ -->
+<div class="panel" id="w4">
+  <div class="sec">
+    <h2>🔌 Week 4 — API Testing + SQL (Jul 30 – Aug 5)</h2>
+    <div class="desc">API testing is asked in every modern SDET interview. SQL you already knew — this week is about bringing it back. Your ETL experience at Allstate is your biggest selling point for SQL.</div>
+    <div class="tip"><b>Good news:</b> You used Rest Assured and SQL at Allstate for 5 years. This week is about re-activating that muscle memory, not learning from zero. It will come back faster than you think.</div>
+  </div>
+  <div class="wk">
+    <div class="wk-title" style="background:var(--purple-bg);border:1px solid var(--purple-b);color:var(--purple)">
+      <span>📕 Week 4 Daily Breakdown</span>
+      <span style="font-size:.75rem;font-weight:500;color:var(--t2)">Jul 30 (Wed) – Aug 5 (Tue)</span>
+    </div>
+    <div class="wk-body" id="w4Days"></div>
+  </div>
+</div>
+
+<!-- ============ WEEK 5: CI/CD + PROJECT ============ -->
+<div class="panel" id="w5">
+  <div class="sec">
+    <h2>🚀 Week 5 — CI/CD, Git & GitHub Portfolio (Aug 6 – Aug 15)</h2>
+    <div class="desc">Last learning week. Learn Git & CI/CD basics, then spend the remaining days polishing your GitHub projects into an interview-ready portfolio. Aug 15 is your cut-off — after this, no more learning, only interviews.</div>
+    <div class="warn"><b>Aug 15 deadline:</b> By end of this week, you must have: 1) A working Selenium framework on GitHub, 2) A REST API test project on GitHub, 3) Ability to explain both in an interview, 4) Resume and LinkedIn fully updated. No exceptions.</div>
+  </div>
+  <div class="wk">
+    <div class="wk-title" style="background:var(--purple-bg);border:1px solid var(--purple-b);color:var(--purple)">
+      <span>📕 Week 5 Daily Breakdown</span>
+      <span style="font-size:.75rem;font-weight:500;color:var(--t2)">Aug 6 (Wed) – Aug 15 (Fri)</span>
+    </div>
+    <div class="wk-body" id="w5Days"></div>
+  </div>
+</div>
+
+<!-- ============ WEEK 6-7: INTERVIEWS ============ -->
+<div class="panel" id="w6">
+  <div class="sec">
+    <h2>🎯 Weeks 6–7 — Full-Time Job Hunt (Aug 16 – Aug 31)</h2>
+    <div class="desc">Learning is done. Now it's all about applying, interviewing, and landing the offer.</div>
+  </div>
+
+  <div class="sec">
+    <h2>📅 Daily Schedule — Interview Phase</h2>
+    <div style="margin-top:10px">
+      <div class="tk"><span class="tk-time">6:00 AM</span><span class="tk-text"><b>Interview revision</b> — review question bank, practice answers aloud for today's interviews.</span><span class="tk-cat c-learn">Prep</span></div>
+      <div class="tk"><span class="tk-time">7:30 AM</span><span class="tk-text"><b>Quick coding</b> — 3 SQL problems + 2 Java problems. Keep skills sharp daily.</span><span class="tk-cat c-code">Code</span></div>
+      <div class="tk"><span class="tk-time">9:00 AM</span><span class="tk-text"><b>Job applications</b> — apply to 5–8 roles, customize resume, follow up on pending. Reply to all recruiter messages.</span><span class="tk-cat c-job">Job</span></div>
+      <div class="tk"><span class="tk-time">10:30 AM</span><span class="tk-text"><b>Attend interviews</b> — most companies schedule morning calls. You're free to take them without work conflict!</span><span class="tk-cat c-job">Interview</span></div>
+      <div class="tk"><span class="tk-time">12:00 PM</span><span class="tk-text">Lunch + get ready for Allstate</span></div>
+      <div class="tk"><span class="tk-time">1–9 PM</span><span class="tk-text">Allstate work + handover tasks</span><span class="tk-cat c-exit">Work</span></div>
+      <div class="tk"><span class="tk-time">9:30 PM</span><span class="tk-text"><b>Post-interview review</b> — write down questions, study weak areas. Light prep only — don't burn out.</span><span class="tk-cat c-learn">Review</span></div>
+    </div>
+
+    <div class="tip"><b>Big advantage of 1–9 PM shift:</b> Most interview calls happen between 10 AM – 1 PM. You can attend them without taking leave or sneaking out. This is a massive convenience most candidates don't have. Use it!</div>
+  </div>
+
+  <div class="sec">
+    <h2>📌 Application Strategy</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px">
+      <div>
+        <p style="font-size:.82rem;font-weight:700;margin-bottom:8px">Where to Apply (daily)</p>
+        <ul style="font-size:.82rem;color:var(--t2);padding-left:16px">
+          <li><b>Naukri</b> — set "Active" status, update resume weekly (refreshes your profile in recruiter searches)</li>
+          <li><b>LinkedIn Jobs</b> — use "Easy Apply" + direct applications. Set "Open to Work"</li>
+          <li><b>Instahyre</b> — curated matches, respond to every relevant match within 24 hrs</li>
+          <li><b>Company career pages</b> — directly apply on target company websites</li>
+          <li><b>Referrals</b> — message ex-colleagues at target companies. This is the #1 channel.</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-size:.82rem;font-weight:700;margin-bottom:8px">Search Keywords</p>
+        <ul style="font-size:.82rem;color:var(--t2);padding-left:16px">
+          <li>"SDET" + Bangalore</li>
+          <li>"QA Automation Engineer" + Selenium + Java</li>
+          <li>"Test Automation Lead" + Bangalore</li>
+          <li>"ETL Tester" / "Data QA Engineer"</li>
+          <li>"Senior QA Engineer" + API Testing</li>
+          <li>"Quality Engineer" + BFSI / Insurance</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip"><b>Target numbers:</b> Apply to 80–100 total positions over 2 weeks. Expect ~15–20 responses, ~8–10 interviews, ~2–3 offers. This is normal conversion. Don't get discouraged by silence — keep applying every single day.</div>
+  </div>
+
+  <div class="sec">
+    <h2>💰 Salary Negotiation Guide</h2>
+    <div style="margin-top:10px">
+      <p style="font-size:.84rem;color:var(--t2)"><b>Step 1:</b> When asked current CTC — give your fixed + variable (not just basic). Include all components.</p>
+      <p style="font-size:.84rem;color:var(--t2);margin-top:6px"><b>Step 2:</b> When asked expected CTC — say a range: "Based on my 6 years of experience and market rates, I'm looking at ₹X to ₹Y." Quote 30–50% above your current CTC as the range.</p>
+      <p style="font-size:.84rem;color:var(--t2);margin-top:6px"><b>Step 3:</b> When you have an offer — if you have multiple offers, let each company know. "I have another offer at ₹X, can you match or improve?" — this is normal and expected.</p>
+      <p style="font-size:.84rem;color:var(--t2);margin-top:6px"><b>Step 4:</b> Beyond CTC — negotiate joining bonus (common for notice period buyouts), flexible work from home, and learning budget.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ INTERVIEW PREP ============ -->
+<div class="panel" id="interview">
+  <div class="sec">
+    <h2>🎤 Interview Question Bank</h2>
+    <div class="desc">The questions that actually get asked. Answers are tailored to Aishu's Allstate experience.</div>
+
+    <p style="font-size:.78rem;font-weight:700;color:var(--t3);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);padding-bottom:6px">Java (asked in 95% of interviews)</p>
+    <div class="q">
+      <details><summary>What are the four pillars of OOPs? Give a real automation example.</summary><div class="ans"><b>Abstraction:</b> BasePage class hides common actions (click, type, wait) — page classes just call them without knowing the implementation. <b>Encapsulation:</b> WebDriver instance is private in BasePage, accessed only via getter. <b>Inheritance:</b> LoginPage extends BasePage — inherits all common methods. <b>Polymorphism:</b> method overloading — click(By locator) and click(WebElement element) — same method name, different params. Always explain with code you've actually written.</div></details>
+      <details><summary>HashMap vs ArrayList — when do you use each in automation?</summary><div class="ans"><b>HashMap:</b> when you need key-value pairs — test data storage (<code>Map&lt;String,String&gt; testData = new HashMap&lt;&gt;();</code> with keys like "username", "password"). Config properties reading. <b>ArrayList:</b> when you need ordered collection — storing a list of WebElements, collecting test results, maintaining execution order. The key difference: HashMap gives O(1) lookup by key, ArrayList gives ordered sequential access.</div></details>
+      <details><summary>Write code to reverse a string without using built-in reverse().</summary><div class="ans"><code>String s = "Selenium"; StringBuilder result = new StringBuilder(); for(int i = s.length()-1; i >= 0; i--) { result.append(s.charAt(i)); } System.out.println(result);</code> — OR using char array swap. Practice this until you can type it in 60 seconds. This exact question appears in ~40% of SDET interviews.</div></details>
+    </div>
+
+    <p style="font-size:.78rem;font-weight:700;color:var(--t3);margin:20px 0 8px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);padding-bottom:6px">Selenium (asked in 100% of SDET interviews)</p>
+    <div class="q">
+      <details><summary>Explain your automation framework architecture.</summary><div class="ans">This is the #1 question. Structure your answer in layers:<br><br><b>1. Tech stack:</b> Java 11 + Selenium 4 + TestNG + Maven + ExtentReports<br><b>2. Design:</b> Page Object Model — BasePage with common methods, individual page classes<br><b>3. Driver management:</b> Singleton pattern or ThreadLocal for parallel execution<br><b>4. Test data:</b> JSON files or Excel (Apache POI) with @DataProvider<br><b>5. Config:</b> config.properties for browser, URL, environment<br><b>6. Reporting:</b> ExtentReports with screenshot on failure<br><b>7. Execution:</b> testng.xml controls suites, groups, parallel threads<br><br>Then say: "I have this project on my GitHub, I can walk you through the code" — this is what separates you from candidates who only memorized theory.</div></details>
+      <details><summary>How do you handle dynamic elements?</summary><div class="ans">1. Use relative XPath: <code>//div[contains(@class,'product')]/button[text()='Add']</code><br>2. CSS selectors with partial attribute: <code>[id^='btn_']</code> (starts with), <code>[class*='active']</code> (contains)<br>3. XPath axes: <code>following-sibling</code>, <code>parent</code>, <code>ancestor</code> to navigate DOM<br>4. Explicit wait with <code>ExpectedConditions.elementToBeClickable()</code><br>5. Custom retry with fluent wait for elements that load unpredictably<br><br>Give a real example from your work.</div></details>
+      <details><summary>Implicit wait vs Explicit wait vs Fluent wait?</summary><div class="ans"><b>Implicit:</b> set once globally, applies to every <code>findElement</code>. Polls DOM for the specified time. <b>Problem:</b> slows down tests when element genuinely doesn't exist.<br><br><b>Explicit:</b> waits for a specific condition (<code>visibilityOf</code>, <code>clickable</code>, <code>titleContains</code>) on a specific element. <b>Best practice.</b> Use <code>WebDriverWait(driver, Duration.ofSeconds(10))</code>.<br><br><b>Fluent:</b> explicit wait + custom polling interval + ignore specific exceptions. Use when element appears intermittently.<br><br><b>What to say in interview:</b> "I never use implicit waits in my framework. I create a custom wait utility with explicit waits — keeps tests fast and reliable."</div></details>
+      <details><summary>How do you handle alerts, iframes, and multiple windows?</summary><div class="ans"><b>Alerts:</b> <code>driver.switchTo().alert().accept() / dismiss() / getText() / sendKeys()</code><br><b>Iframe:</b> <code>driver.switchTo().frame(index / nameOrId / WebElement)</code> then <code>driver.switchTo().defaultContent()</code> to come back<br><b>Windows:</b> <code>String parent = driver.getWindowHandle(); Set&lt;String&gt; all = driver.getWindowHandles();</code> loop through, switch to child, perform action, switch back to parent.<br><br>Write the code for all three until you can do it without looking.</div></details>
+    </div>
+
+    <p style="font-size:.78rem;font-weight:700;color:var(--t3);margin:20px 0 8px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);padding-bottom:6px">API Testing (asked in 80% of interviews)</p>
+    <div class="q">
+      <details><summary>Write a Rest Assured test to create a user and verify the response.</summary><div class="ans"><code>given().contentType(ContentType.JSON).body("{\"name\":\"Aishu\",\"job\":\"SDET\"}").when().post("https://reqres.in/api/users").then().statusCode(201).body("name", equalTo("Aishu"));</code><br><br>Then explain: "I also validate the response schema, check the ID is auto-generated, and verify the timestamp format. In my framework, I store the created ID for subsequent GET/PUT/DELETE tests — this is API chaining."</div></details>
+      <details><summary>What status codes do you validate, and what does each mean?</summary><div class="ans"><b>200</b> OK — GET success. <b>201</b> Created — POST success. <b>204</b> No Content — DELETE success. <b>400</b> Bad Request — invalid input (validate error messages). <b>401</b> Unauthorized — missing/wrong auth. <b>403</b> Forbidden — auth ok but no permission. <b>404</b> Not Found — wrong endpoint/ID. <b>500</b> Internal Server Error — backend bug.<br><br>"In my tests, I always validate both positive (200/201) AND negative (400/401/404) scenarios. Negative testing catches more bugs than happy path."</div></details>
+    </div>
+
+    <p style="font-size:.78rem;font-weight:700;color:var(--t3);margin:20px 0 8px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);padding-bottom:6px">SQL (asked in 85% of interviews)</p>
+    <div class="q">
+      <details><summary>Find employees who earn more than their department average.</summary><div class="ans"><code>SELECT e.name, e.salary, e.dept FROM employees e WHERE e.salary > (SELECT AVG(salary) FROM employees WHERE dept = e.dept);</code><br><br>Or with window function: <code>SELECT * FROM (SELECT *, AVG(salary) OVER(PARTITION BY dept) as dept_avg FROM employees) t WHERE salary > dept_avg;</code><br><br>Mention: "At Allstate, I used similar patterns for data reconciliation — comparing individual record values against aggregate rules to catch transformation errors."</div></details>
+      <details><summary>How do you test a data migration?</summary><div class="ans">This is YOUR strongest answer. Walk through your actual Allstate process:<br>1. <b>Row count match</b> — source total vs target total<br>2. <b>Column-level validation</b> — sample key fields across systems<br>3. <b>Transformation rules</b> — verify business logic applied correctly<br>4. <b>Null/default handling</b> — unmapped fields have correct defaults<br>5. <b>Duplicate check</b> — no records duplicated in migration<br>6. <b>Edge cases</b> — special characters, max-length, boundary dates<br>7. <b>Reconciliation</b> — automated SQL scripts comparing source & target<br><br>"I handled the migration of 5M+ records with zero data loss at Allstate" — this is a powerful statement. Use it.</div></details>
+    </div>
+
+    <p style="font-size:.78rem;font-weight:700;color:var(--t3);margin:20px 0 8px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);padding-bottom:6px">Behavioral (asked in every final round)</p>
+    <div class="q">
+      <details><summary>"Why are you leaving after 5 years?"</summary><div class="ans">"I've had a great 5 years at Allstate — grew from testing individual modules to owning end-to-end QA for data migration and API transformation projects. I recently completed my M.Tech, and now I want to apply what I've learned in a new environment — work with different tech stacks, contribute to QA strategy at a broader level, and continue growing into a senior automation role. I'm grateful to Allstate for the foundation."<br><br>Keep it positive. Never criticize the old company.</div></details>
+      <details><summary>"Tell me about a time you caught a critical bug before release."</summary><div class="ans"><b>S:</b> During the data migration project at Allstate, final reconciliation before go-live.<br><b>T:</b> I was responsible for sign-off on data accuracy.<br><b>A:</b> My SQL validation found a 0.3% mismatch — ~15K records with incorrect transformation. Flagged immediately, set up war room with ETL team, traced the root cause to a mapping rule.<br><b>R:</b> Fixed and re-tested in 8 hours. Deployed on time with zero data loss. Contributed to our 98.6% deployment quality record.<br><br>This is a REAL story from your work. Rehearse it until it flows naturally.</div></details>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EXIT CHECKLIST ============ -->
+<div class="panel" id="exit">
+  <div class="sec">
+    <h2>✅ Allstate Exit Checklist (Sep 1–8)</h2>
+    <div class="desc">Complete all of these before Sep 8.</div>
+
+    <p style="font-size:.8rem;font-weight:700;color:var(--orange);margin-bottom:8px">📋 Documents</p>
+    <div class="cl">
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Experience letter from HR</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Relieving letter (issued on LWD)</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">All payslips downloaded from HRMS</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Form 16 for FY 2024–25</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Full & Final settlement letter</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Gratuity payout confirmed (5+ years eligible)</span></div>
+    </div>
+
+    <p style="font-size:.8rem;font-weight:700;color:var(--orange);margin:16px 0 8px">🏦 Financial</p>
+    <div class="cl">
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Note UAN number, check EPF balance</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Initiate EPF transfer after joining new company</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Health insurance — check continuity or new company coverage</span></div>
+    </div>
+
+    <p style="font-size:.8rem;font-weight:700;color:var(--orange);margin:16px 0 8px">💻 Assets & Access</p>
+    <div class="cl">
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Return laptop, charger, headset, ID card</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Remove personal accounts from work browser</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Download personal files from work machine</span></div>
+    </div>
+
+    <p style="font-size:.8rem;font-weight:700;color:var(--orange);margin:16px 0 8px">🤝 People</p>
+    <div class="cl">
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Send farewell email</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Connect with colleagues on LinkedIn</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Request 2–3 LinkedIn recommendations</span></div>
+      <div class="cli" onclick="this.classList.toggle('done')"><span class="cl-box"></span><span class="cl-t">Complete exit interview</span></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- shell -->
+
+<script>
+// Navigation
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    switchTab(btn.dataset.tab);
+  });
+});
+
+function switchTab(tabId) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const btn = document.querySelector(`.nav-btn[data-tab="${tabId}"]`);
+  if(btn) btn.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+  window.scrollTo({top:200,behavior:'smooth'});
+}
+
+// Countdown
+const aug15 = new Date('2025-08-15');
+const aug31 = new Date('2025-08-31');
+const now = new Date();
+const ad = Math.max(0, Math.ceil((aug15-now)/(1000*60*60*24)));
+const jd = Math.max(0, Math.ceil((aug31-now)/(1000*60*60*24)));
+document.getElementById('autoLeft').textContent = ad + ' days to finish learning';
+document.getElementById('jobLeft').textContent = jd + ' days to get offer';
+
+// Week data
+const W1 = [
+  {day:"Thu",date:"Jul 17",focus:"Java Setup + Variables + Data Types",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["Install JDK 11, IntelliJ IDEA (Community free edition)","Create first Java project — 'Hello World' → understand class, main method, System.out","Variables & data types: int, String, double, boolean, char — write 10 examples","Type casting — implicit & explicit. String to int, int to String conversions"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Write 10 small programs: swap two numbers, area of circle, temperature converter, even/odd check, simple calculator","Don't copy-paste — type everything manually. Muscle memory matters."]}
+  ]},
+  {day:"Fri",date:"Jul 18",focus:"Operators + Conditionals + Loops",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["Operators: arithmetic, comparison, logical, assignment — write examples for each","If-else, nested if, switch-case — write 5 programs using each","Loops: for, while, do-while — understand when to use which"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Programs: FizzBuzz, print multiplication table, find factorial, check prime number, fibonacci series","These exact programs are asked in interviews — memorize the logic"]}
+  ]},
+  {day:"Sat",date:"Jul 19",focus:"Arrays + Strings + OOPs Part 1",hrs:"7h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["Arrays: declare, initialize, iterate, 2D arrays","Strings: charAt, length, substring, contains, equals, split, trim, replace","StringBuilder vs String — why StringBuilder for concatenation","Classes & Objects — constructor, this keyword, methods, access modifiers"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Reverse a string (without built-in reverse)","Check palindrome, count character occurrences, find duplicates in array","Create Employee class with name, id, salary — write methods"]},
+    {cat:"Job Setup (1 hour)",color:"job",items:["Create/update Naukri profile, upload new resume","Set LinkedIn to 'Open to Work', update headline"]}
+  ]},
+  {day:"Sun",date:"Jul 20",focus:"OOPs — Inheritance, Polymorphism, Interfaces",hrs:"7h",tasks:[
+    {cat:"Full Day Study + Practice",color:"learn",items:["Inheritance — extends keyword, super keyword, method overriding","Abstract class vs Interface — when to use which (interview favorite!)","Polymorphism — method overloading vs overriding","Encapsulation — private fields, getters/setters","Write a complete OOPs example: Shape interface → Circle, Rectangle classes"]},
+    {cat:"Revision",color:"code",items:["Re-write all OOPs examples from scratch without looking at notes","If you can't, re-study that topic"]}
+  ]},
+  {day:"Mon",date:"Jul 21",focus:"Collections Framework",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["ArrayList — add, get, remove, iterate, size. When to use.","HashMap — put, get, containsKey, iterate (entrySet). When to use.","HashSet — add, contains, no duplicates. When to use.","For-each loop and Iterator — how to loop through collections"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Program: Count word frequency in a sentence using HashMap","Program: Remove duplicates from ArrayList using HashSet","Program: Sort a list of employees by salary using Comparator","These are the top 3 collection interview programs"]}
+  ]},
+  {day:"Tue",date:"Jul 22",focus:"Exception Handling + File I/O + Week Review",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["try-catch-finally — checked vs unchecked exceptions","throw vs throws — custom exception class","File reading: BufferedReader, FileReader — read a text file line by line","Basic file writing — write test results to a file"]},
+    {cat:"💻 Practice Block — Week 1 Revision",color:"code",items:["Write a complete program using: OOPs + Collections + Exception handling together","Example: Student management system with ArrayList of Student objects, HashMap for grades, try-catch for invalid input","If you struggle with any topic, mark it and revisit before Selenium starts"]}
+  ]},
+];
+
+const W2 = [
+  {day:"Wed",date:"Jul 16",focus:"Selenium Setup + First Test + Locators",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["Add Selenium & WebDriverManager dependencies in Maven POM.xml","Write first test: open Chrome, navigate to Google, search, close — understand the flow","Locators Part 1: ID, Name, ClassName, TagName — practice on demoqa.com","Understand how to inspect elements in Chrome DevTools"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Automate: Open saucedemo.com → login with given credentials → verify page title","Automate: Open demoqa.com → fill text box form → submit → verify output","Write 5 more locator exercises using ID and Name"]}
+  ]},
+  {day:"Thu",date:"Jul 17",focus:"XPath + CSS Selectors (the big one)",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["XPath: absolute vs relative, // vs /","XPath functions: contains(), text(), starts-with()","XPath axes: parent, child, following-sibling, preceding-sibling, ancestor","CSS selectors: #id, .class, [attr='val'], [attr^='prefix'], [attr*='contains']"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Practice 15 XPath expressions on demoqa.com — find each element using at least 2 different XPath approaches","Practice 10 CSS selector expressions","Write them down in a cheat sheet — you'll reference this in interviews"]}
+  ]},
+  {day:"Fri",date:"Jul 18",focus:"Waits + WebDriver Commands",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["Implicit wait — set once globally (not recommended but know it)","Explicit wait — WebDriverWait + ExpectedConditions (visibilityOf, clickable, titleContains)","Fluent wait — custom polling + ignoring exceptions","WebDriver commands: navigate().to(), back(), forward(), refresh(), manage().window()"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Automate a page with slow-loading elements using explicit waits","Handle a scenario where element appears after 5 seconds — use wait correctly","Write a utility method: waitAndClick(By locator, int timeout)"]}
+  ]},
+  {day:"Sat",date:"Jul 19",focus:"Dropdowns, Alerts, Checkboxes, Radio Buttons",hrs:"6h",tasks:[
+    {cat:"Full Day",color:"learn",items:["Select class for dropdowns — selectByValue, selectByVisibleText, selectByIndex","Handle JavaScript alerts — accept(), dismiss(), getText(), sendKeys()","Checkboxes & Radio buttons — click() + isSelected() to verify","Actions class — mouseHover, dragAndDrop, rightClick, doubleClick","Practice all on the-internet.herokuapp.com — it has pages for each scenario"]},
+    {cat:"Job Search (1 hour)",color:"job",items:["Apply to 5 SDET/QA Automation roles on Naukri & LinkedIn","Set up Instahyre profile if not done"]}
+  ]},
+  {day:"Sun",date:"Jul 20",focus:"Iframes, Windows, File Upload, Screenshots",hrs:"5h",tasks:[
+    {cat:"Full Day",color:"learn",items:["Switch to iframe — switchTo().frame() — practice on demoqa.com iframe page","Multiple windows — getWindowHandle(), getWindowHandles(), switchTo().window()","File upload — sendKeys(filePath) on input[type='file'] element","Screenshots — TakesScreenshot interface, getScreenshotAs(OutputType.FILE)","JavaScript Executor — scrollIntoView, click when normal click fails"]},
+    {cat:"Revision",color:"code",items:["Write a single test that: opens a page → handles dropdown → switches iframe → takes screenshot","This is a classic interview question — 'write a test that does multiple things'"]}
+  ]},
+  {day:"Mon",date:"Jul 21",focus:"TestNG Introduction",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["Add TestNG dependency in Maven, install TestNG plugin in IDE","Annotations: @Test, @BeforeMethod, @AfterMethod, @BeforeClass, @AfterClass","Assertions: assertEquals, assertTrue, assertNotNull — when to use each","Test execution order, priority, enabled/disabled, groups"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Convert all your previous Selenium scripts to TestNG test classes","Add proper assertions to every test — don't just click, VERIFY the result","Run tests using testng.xml — understand suite, test, class structure"]}
+  ]},
+  {day:"Tue",date:"Jul 22",focus:"TestNG Advanced + DataProvider + Week Review",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["@DataProvider — parameterize tests with multiple data sets","Parallel execution in testng.xml — parallel='methods', thread-count","TestNG listeners — ITestListener for screenshot on failure","dependsOnMethods — test dependencies"]},
+    {cat:"💻 Practice Block — Week 2 Revision",color:"code",items:["Write a complete test suite: login test (valid + invalid using DataProvider), product search, checkout flow","Run all tests via testng.xml with 2 parallel threads","Take stock: can you write a Selenium test from scratch without help? If not, revisit weak areas"]}
+  ]},
+];
+
+const W3 = [
+  {day:"Wed",date:"Jul 23",focus:"Page Object Model — the key pattern",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["What is POM and why — separation of test logic from page elements","Create BasePage class: WebDriver, constructor, common wait/click/type methods","Create LoginPage: extends BasePage, page elements as By locators, methods like login(user,pass)","Create HomePage: extends BasePage, methods to verify welcome message, navigate"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Build POM for saucedemo.com: LoginPage, ProductsPage, CartPage","Write 3 test classes that use these page objects","Understand: if an element changes on UI, you only update the page class — tests don't change"]}
+  ]},
+  {day:"Thu",date:"Jul 24",focus:"Framework Structure — Config, Data, Utilities",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["config.properties — store browser, URL, timeout values. Read using Properties class","Test data — create JSON files for test data, read using Jackson/Gson or simple file reader","Utility classes: WaitUtils, ScreenshotUtils, ExcelReader (Apache POI basics)","Project folder structure: src/main (pages, utils), src/test (tests, data), config, reports"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Set up the complete folder structure in your framework project","Make tests read browser & URL from config.properties — no hardcoded values","Make login test read username/password from a JSON file"]}
+  ]},
+  {day:"Fri",date:"Jul 25",focus:"Reporting — ExtentReports",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["Add ExtentReports dependency in Maven","Create ExtentManager utility — initialize report, create tests, log pass/fail/info","Integrate with TestNG listener — auto-log every test result","Attach screenshots to failed test entries in the report"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Run your entire test suite → generate ExtentReport HTML","Open the report — verify it shows pass/fail/skip with screenshots","This report is what you'll demo in interviews — make it look professional"]}
+  ]},
+  {day:"Sat",date:"Jul 26",focus:"Complete Framework — Put It All Together",hrs:"6h",tasks:[
+    {cat:"Full Day Project",color:"code",items:["Your framework should now have: POM pages, config, test data, utilities, reports, testng.xml","Write 8–10 test cases covering: login (valid/invalid), product selection, cart, checkout","Run all tests — every test must pass green","Practice explaining the framework out loud: 'My framework uses POM pattern with Java and Selenium 4...'"," This explanation is your interview answer — rehearse it 5 times"]},
+    {cat:"🚀 JOB APPLICATIONS BEGIN (2 hours)",color:"job",items:["Update Naukri profile to 'Active', upload updated resume","Apply to 10 roles on Naukri — filter: SDET, QA Automation, Bangalore, 5-8 yrs","Target service companies first: Cognizant, Mphasis, LTIMindtree, HCLTech, Capgemini — easier to crack, your insurance domain transfers","Set job alerts on Naukri and LinkedIn for daily notifications"]}
+  ]},
+  {day:"Sun",date:"Jul 27",focus:"GitHub Push + README + More Applications",hrs:"6h",tasks:[
+    {cat:"Morning",color:"code",items:["Create GitHub account if not done. Create repo: 'selenium-automation-framework'","Push your complete framework project to GitHub","Write a proper README: project title, tech stack, architecture (draw a simple diagram), how to run, folder structure"]},
+    {cat:"Afternoon — Framework Prep",color:"learn",items:["Practice the framework explanation 5 more times — time yourself to 3 minutes","Ask yourself: Why POM? Why TestNG over JUnit? Why ExtentReports? Why config.properties? — have answers ready","Record yourself explaining — listen back — fix anything that sounds unclear"]},
+    {cat:"🚀 Job Applications (1 hour)",color:"job",items:["Apply to 10 more roles on LinkedIn Jobs — use 'Easy Apply' where available","Message 3 ex-colleagues at target companies asking for referrals","Post on LinkedIn: 'Exploring new opportunities in QA Automation...' — gets recruiter attention"]}
+  ]},
+  {day:"Mon",date:"Jul 28",focus:"Maven Deep Dive + testng.xml Mastery",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["Maven POM.xml — dependencies, plugins, properties. How Maven downloads jars","Maven lifecycle: clean, compile, test, package — run each from command line","testng.xml — suite, test, groups, includes/excludes, parallel, listeners","Run tests from command line: mvn clean test — this is how CI/CD runs them"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Create 3 different testng.xml files: smoke suite, regression suite, full suite","Run smoke suite from command line using Maven","Add maven-surefire-plugin in POM to point to testng.xml"]},
+    {cat:"🚀 Daily Applications (30 min)",color:"job",items:["Apply to 3 roles before bed. Check Naukri/LinkedIn for recruiter messages. Respond to all within 24 hours."]}
+  ]},
+  {day:"Tue",date:"Jul 29",focus:"Week 3 Review — Framework Perfection",hrs:"5.5h",tasks:[
+    {cat:"💻 Practice Block — Final Review",color:"code",items:["Run your complete framework end-to-end — fix any broken tests","Update GitHub with latest changes, clean up code","Can you explain every file in your framework? Every folder? Every design decision?","If not, practice until you can. This is your most valuable interview asset"]},
+    {cat:"🚀 Job Applications (30 min)",color:"job",items:["Apply to 3 more roles. Follow up on any Naukri/LinkedIn responses. Total applications by end of Week 3: 30+"]}
+  ]},
+];
+
+const W4 = [
+  {day:"Wed",date:"Jul 30",focus:"REST API Basics + Postman",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["What is an API? REST vs SOAP. HTTP methods: GET, POST, PUT, PATCH, DELETE","Request structure: URL, headers, body (JSON), query params, path params","Response structure: status code, headers, body — understand each","Install Postman → hit reqres.in API → try GET users, POST user, PUT user, DELETE"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["In Postman: create a collection with 5 requests (GET, POST, PUT, PATCH, DELETE) against reqres.in","Add assertions in Postman Tests tab: check status code, response body fields","Understand: this is what you'll automate with Rest Assured tomorrow"]}
+  ]},
+  {day:"Thu",date:"Jul 31",focus:"Rest Assured — GET and POST",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["Add Rest Assured dependency in Maven. Understand given().when().then() syntax","Write GET test: hit reqres.in/api/users/2 → validate status 200, name field, email field","Write POST test: send JSON body → validate 201, created fields","Extract values from response using jsonPath(): getString(), getInt()"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Write 5 GET tests — different endpoints, different validations","Write 3 POST tests — with HashMap body and with POJO body","Practice: extract ID from POST response, use in subsequent GET (API chaining)"]}
+  ]},
+  {day:"Fri",date:"Aug 1",focus:"Rest Assured — PUT, DELETE, Auth, Schema",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["PUT test: update a resource → validate 200 and updated fields","DELETE test: delete a resource → validate 204 or 200","Authentication: .auth().basic(user,pass) and .header('Authorization','Bearer '+token)","JSON Schema validation: matchesJsonSchemaInClasspath() — validate response structure"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Write a complete CRUD test: POST → GET (verify) → PUT (update) → GET (verify update) → DELETE → GET (verify 404)","This single test demonstrates API chaining — interviewers love it","Push API test project to GitHub as second repo"]}
+  ]},
+  {day:"Sat",date:"Aug 2",focus:"SQL Revision Day 1 — Basics to Intermediate",hrs:"7h",tasks:[
+    {cat:"Full Day SQL",color:"learn",items:["Revise: SELECT, WHERE, ORDER BY, LIMIT, DISTINCT, LIKE, IN, BETWEEN","JOINs: INNER, LEFT, RIGHT, FULL OUTER — write 5 queries for each type","GROUP BY + HAVING — aggregation queries: COUNT, SUM, AVG, MAX, MIN","Subqueries: in WHERE clause, in SELECT clause, in FROM clause","Solve 15 problems on HackerRank SQL (Easy + Medium)"]},
+    {cat:"🚀 Job Applications (1.5 hours)",color:"job",items:["Apply to 10 more roles — now target mid-size product companies too: Freshworks, Chargebee, Razorpay","Register on Instahyre and Cutshort if not done yet","Respond to any recruiter messages from the past week — speed matters"]}
+  ]},
+  {day:"Sun",date:"Aug 3",focus:"SQL Revision Day 2 — Advanced + ETL Patterns",hrs:"6h",tasks:[
+    {cat:"SQL Deep Dive (4 hours)",color:"learn",items:["Window functions: ROW_NUMBER(), RANK(), DENSE_RANK() with PARTITION BY and ORDER BY","LAG() and LEAD() — compare current row with previous/next","CTEs (WITH clause) — write complex queries in readable steps","Data validation queries you used at Allstate: row count comparison, null checks, duplicate detection, source-to-target reconciliation","Solve 10 more HackerRank problems (Medium difficulty)"]},
+    {cat:"🎯 Interview Prep (1 hour)",color:"job",items:["You should have interview calls coming in by now from Week 3 applications","Prepare for them: review 'Tell me about yourself', 'Why leaving?', 'Framework explanation'","If no calls yet — don't panic. Apply to 10 more roles. It takes 1–2 weeks for first callbacks."]}
+  ]},
+  {day:"Mon",date:"Aug 4",focus:"API Framework Completion + GitHub",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["Organize your API tests into a proper framework: BaseTest, test classes, config","Add response logging and ExtentReports to API tests","Create proper README for API project on GitHub"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Final push: both GitHub repos should be clean, well-documented, and runnable","Practice explaining your API testing approach — tie it to your Allstate ETL validation work"]},
+    {cat:"🚀 Daily Applications (30 min)",color:"job",items:["Apply to 3 roles. Check messages. Total applications by Week 4: 50+"]}
+  ]},
+  {day:"Tue",date:"Aug 5",focus:"Week 4 Review — API + SQL Ready Check",hrs:"5.5h",tasks:[
+    {cat:"💻 Practice Block — Self-Test",color:"code",items:["Can you write a Rest Assured CRUD test from scratch without looking? Try it.","Can you write a JOIN query with GROUP BY and HAVING from scratch? Try it.","Can you explain the difference between REST and SOAP? Status codes? Auth types?","Mark anything you struggle with — revisit it this week"]},
+    {cat:"🚀 Applications + Follow-ups (30 min)",color:"job",items:["Apply to 3 more roles. Follow up on all pending applications. Attend any screening calls that come in — these are practice."]}
+  ]},
+];
+
+const W5 = [
+  {day:"Wed",date:"Aug 6",focus:"Git — From Zero to Confident",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["Git basics: init, clone, add, commit, push, pull — understand what each does","Branching: create branch, switch branch, merge branch — practice locally","GitHub: fork, clone, create PR — understand the workflow teams use","Resolve a merge conflict — create one intentionally and fix it"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Create a branch in your Selenium project, make changes, merge back to main","Practice: feature-branch workflow that companies actually use","Make 5 meaningful commits with proper messages — not 'update' or 'fix'"]}
+  ]},
+  {day:"Thu",date:"Aug 7",focus:"CI/CD — Jenkins or GitHub Actions (pick one)",hrs:"5.5h",tasks:[
+    {cat:"🌅 Morning Study (6–9 AM)",color:"learn",items:["What is CI/CD? Why does it matter for testers? — understand the concept","Option A: GitHub Actions — write a .yml workflow that runs your Maven tests on push","Option B: Jenkins — install locally, create a freestyle job that runs your tests","Either one is fine — you just need to be able to say 'my tests run in CI/CD'"]},
+    {cat:"💻 Practice Block (9:30 AM–12 PM)",color:"code",items:["Push your CI/CD config to GitHub — make sure tests actually run on push","Take a screenshot of the green CI pipeline — add it to your README","This single addition makes your GitHub project 10x more impressive"]}
+  ]},
+  {day:"Fri",date:"Aug 8",focus:"Framework Polish + Interview Prep Begins",hrs:"5.5h",tasks:[
+    {cat:"Morning",color:"code",items:["Final cleanup of both GitHub projects — fix any broken tests, clean code","Add architecture diagram to README (use draw.io or even a hand-drawn photo)","Make sure both projects can be cloned and run by anyone following README instructions"]},
+    {cat:"💻 Late Morning — Interview Prep Starts",color:"learn",items:["Read through the Interview Question Bank tab in this roadmap","Write your 'Tell me about yourself' — 2 minute pitch. Memorize it.","Write your 'Why are you leaving Allstate?' answer. Memorize it."]}
+  ]},
+  {day:"Sat",date:"Aug 9",focus:"Interview Prep — Technical Questions",hrs:"6h",tasks:[
+    {cat:"Full Day",color:"learn",items:["Practice answering Selenium questions aloud (framework, waits, locators, POM)","Practice answering API questions aloud (Rest Assured, status codes, chaining)","Practice SQL queries on paper — no IDE, just pen and paper like in interviews","Practice Java OOPs explanations with real automation examples","Time yourself: each answer should be 2–3 minutes, not 10 minutes"]}
+  ]},
+  {day:"Sun",date:"Aug 10",focus:"Interview Prep — Behavioral + Mock",hrs:"5h",tasks:[
+    {cat:"Morning",color:"learn",items:["Write 5 STAR stories from your Allstate experience: bug caught before release, migration success, team conflict, process improvement, tight deadline delivery","Practice each story until it flows naturally — 2 minutes each"]},
+    {cat:"Afternoon",color:"learn",items:["Do a full mock interview with your husband or a friend — 45 minutes","Ask them to grade you: were answers clear? Too long? Too short? Confident?"]}
+  ]},
+  {day:"Mon",date:"Aug 11",focus:"Interviews + Resume Update with GitHub Links",hrs:"5.5h",tasks:[
+    {cat:"Morning",color:"job",items:["Update resume — add GitHub project links, mention CI/CD integration","Update LinkedIn — add GitHub projects in Featured section","By now you should have 50–60+ applications out and some interview calls coming in"]},
+    {cat:"Evening — Ramp Up Applications",color:"job",items:["Apply to 10 more roles — now include product companies too (Freshworks, Razorpay, BrowserStack)","Message 5 more recruiters on LinkedIn","Study any weak areas that interviews exposed last week"]}
+  ]},
+  {day:"Tue",date:"Aug 12",focus:"Attend Interviews + Apply",hrs:"5.5h",tasks:[
+    {cat:"Evening",color:"job",items:["Apply to 5 more roles","Post-interview review: write down every question asked, study gaps","Continue interview question practice — focus on whatever tripped you up"]}
+  ]},
+  {day:"Wed",date:"Aug 13",focus:"Interviews + Revise",hrs:"5.5h",tasks:[
+    {cat:"Evening",color:"job",items:["Apply to 5 more roles","Revise framework explanation — practice in front of a mirror","Quick SQL revision — solve 5 problems"]}
+  ]},
+  {day:"Thu",date:"Aug 14",focus:"Pre-Independence Day — Full Prep Day",hrs:"6h",tasks:[
+    {cat:"Full Day",color:"learn",items:["Final comprehensive revision — go through the entire Interview Question Bank","Practice explaining your framework project from GitHub — screen share ready","Review all STAR stories","Apply to 10 more roles"]}
+  ]},
+  {day:"Fri",date:"Aug 15",focus:"🏁 AUTOMATION COMPLETE — Independence Day",hrs:"5.5h",tasks:[
+    {cat:"Milestone Day",color:"learn",items:["🎉 Course complete. GitHub portfolio ready. Interview prep done.","Go through the Aug 15 checklist on the Plan tab — tick off everything you've mastered","From tomorrow: 100% focus shifts to interviews and job hunting","Apply to 5 more roles today — total should be 40+ applications by now"]}
+  ]},
+];
+
+function renderWeek(containerId, days) {
+  const container = document.getElementById(containerId);
+  let html = '';
+  days.forEach((d,i) => {
+    html += `<div class="day${i===0?' open':''}">
+      <div class="day-hdr" onclick="this.parentElement.classList.toggle('open')">
+        <span class="d-name">${d.day}</span>
+        <span class="d-date">${d.date}</span>
+        <span class="d-focus">${d.focus}</span>
+        <span class="d-hrs">${d.hrs}</span>
+        <span class="d-arrow">▼</span>
+      </div>
+      <div class="day-body">`;
+    d.tasks.forEach(cat => {
+      html += `<div class="tk-sep" style="color:var(--${cat.color==='learn'?'blue':cat.color==='code'?'purple':cat.color==='job'?'green':'orange'})">${cat.cat}</div>`;
+      cat.items.forEach(item => {
+        const c = cat.color==='learn'?'c-learn':cat.color==='code'?'c-code':cat.color==='job'?'c-job':'c-exit';
+        html += `<div class="tk"><span class="tk-text"><span class="cli" onclick="event.stopPropagation();this.classList.toggle('done')" style="display:inline-flex;cursor:pointer"><span class="cl-box" style="margin-right:8px"></span></span>${item}</span></div>`;
+      });
+    });
+    html += `</div></div>`;
+  });
+  container.innerHTML = html;
+}
+
+renderWeek('w1Days', W1);
+renderWeek('w2Days', W2);
+renderWeek('w3Days', W3);
+renderWeek('w4Days', W4);
+renderWeek('w5Days', W5);
+</script>
+</body>
+</html>
